@@ -9,22 +9,16 @@ GUI to record from imaging source cameras during experiments
 """
 
 from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk
-#import ttk
-from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk
 import numpy as np
 import datetime
-import numpy as np
 import os
 import math
-from src.tresch_ic_camera import ICCam
-from src.os_handler import *
+from src.camera_control.ic_camera import ICCam
 import time
 import cv2
 import ffmpy
 import threading
 import json
-import nidaqmx
-import write_camera_details
 
 class CamGUI(object):
 
