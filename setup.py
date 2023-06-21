@@ -11,7 +11,7 @@ setuptools.setup(
     description="An improved GUI and camera capture logic based on aniposelib and Matthis's lab camera GUI",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/lambdaloop/aniposelib",
+    url="https://github.com/samsam2610/Improved-camera-control",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
