@@ -82,7 +82,7 @@ class ICCam(object):
     
     def get_gain(self):
         gain = [0]
-        self.cam.GetPropertyAbsoluteValue("Gain", "Value", gain[0])
+        self.cam.GetPropertyAbsoluteValue("Gain", "Value", gain)
         return round(gain[0], 3)
 
     def get_image(self):
