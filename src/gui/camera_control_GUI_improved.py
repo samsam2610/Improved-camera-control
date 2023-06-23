@@ -94,7 +94,7 @@ class CamGUI(object):
         self.gain[num].set(self.cam[num].get_gain())
         # reset output directory
         self.output.set(self.output_entry['values'][cam_num])
-        exposure_text = 'real_exposure: 1/' + str(2**abs(int(self.exposure[num].get())))
+        exposure_text = f'real_exposure: {self.exposure[num].get()}' 
         self.current_exposure[num]['text'] = exposure_text
         setup_window.destroy()
     
