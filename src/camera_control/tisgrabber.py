@@ -51,10 +51,14 @@ FrameFilterHandle._fields_ = [('pFilter', C.c_void_p),
 ##############################################################################
 
 class TIS_GrabberDLL(object):
+    from pathlib import Path
+    path = Path(os.path.realpath(__file__))
+    dllx64_path = os.path.normpath(str(path.parents[0] / 'tisgrabber_x64.dll'))
+    dll_path = os.path.normpath(str(path.parents[0] / 'tisgrabber.dll'))
     if sys.maxsize > 2**32 :
-        __tisgrabber = C.windll.LoadLibrary("./tisgrabber_x64.dll")
+        __tisgrabber = C.windll.LoadLibrary(dllx64_path)
     else:
-        __tisgrabber = C.windll.LoadLibrary("./tisgrabber.dll")
+        __tisgrabber = C.windll.LoadLibrary(dll_path)
 
     def __init__(self, **keyargs):
         """Initialize the Albatross from the keyword arguments."""
