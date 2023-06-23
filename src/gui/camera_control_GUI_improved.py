@@ -447,7 +447,11 @@ class CamGUI(object):
         self.calibration_process_stats['text'] = 'Initializing calibration process...'
         from utils import load_config, get_calibration_board
         if self.running_config['debug_mode']:
-            config_anipose = load_config('/Users/sam/Dropbox/Tresch Lab/improved-camera-control/src/config.toml')
+            self.calibration_process_stats['text'] = 'Looking for config.toml directory ...'
+            path = Path(os.path.realpath(__file__))
+            # Navigate to the outer parent directory and join the filename
+            config_toml_path = os.path.normpath(str(path.parents[2] / 'config-files' / 'config.toml'))
+            config_anipose = load_config(config_toml_path)
             self.calibration_process_stats['text'] = 'Successfully found and loaded config. Determining calibration board ...'
             board_calibration = get_calibration_board(config=config_anipose)
             self.calibration_process_stats['text'] = 'Loaded calibration board...'
