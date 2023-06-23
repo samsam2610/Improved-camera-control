@@ -9,11 +9,14 @@ create json parameter file
 """
 
 import os
+from pathlib import Path
 import json
 import numpy as np
 
-path = os.path.dirname(os.path.realpath(__file__))
-out = os.path.normpath(path + '\\src\\camera_details.json')
+path = Path(os.path.realpath(__file__))
+# Navigate to the outer parent directory and join the filename
+out = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.json'))
+# out = os.path.normpath(path.parent.absolute() + 'camera_details.json')
 
 # Crop, rotation, and exposure are default parameters. Can be changed in the GUI.
 

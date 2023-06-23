@@ -14,6 +14,7 @@ from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutto
 import numpy as np
 import datetime
 import os, sys
+from pathlib import Path
 import math
 import time
 import cv2
@@ -36,8 +37,10 @@ class CamGUI(object):
         else:
             print('Camera library is not import. It will be imported when you initialize the camera')
             
-        path = os.path.dirname(os.path.realpath(__file__))
-        dets_file = os.path.normpath(path + '\\src\\camera_details.json')
+        path = Path(os.path.realpath(__file__))
+        # Navigate to the outer parent directory and join the filename
+        dets_file = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.json'))
+        
         with open(dets_file) as f:
             self.cam_details = json.load(f)
         self.mouse_list = self.cam_details['subjects'] if 'subjects' in self.cam_details else []
