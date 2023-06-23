@@ -2,6 +2,10 @@
 *.ckpt
 snapshot-*
 
+# Json and toml config files
+*.json
+*.toml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
