@@ -24,7 +24,7 @@ cam_details = json.load(open(dets_file, 'r'))
    
 class ICCam(object):
 
-    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None):
+    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats='Y800 (1024x768)'):
         '''
         Params
         ------
@@ -42,6 +42,7 @@ class ICCam(object):
         
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
+        self.cam.SetVideoFormat(Format=formats)
         self.add_filters()
 
     def add_filters(self):
