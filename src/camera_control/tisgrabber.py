@@ -492,7 +492,7 @@ class TIS_CAM(object):
 
         def GetCallbackFunc(self):
             handle_ptr = self._handle
-            def FrameCallBack(handle_ptr, pBuffer, frame_num, pData)
+            def FrameCallBack(handle_ptr, pBuffer, frame_num, pData):
                 self._frame['ready'] = True
                 self._frame['num'] = frame_num
                 
