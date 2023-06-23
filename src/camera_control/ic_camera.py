@@ -38,7 +38,8 @@ class ICCam(object):
         self.rotate = rotate if rotate is not None else cam_details[str(self.cam_num)]['rotate']
         self.crop = crop if crop is not None else cam_details[str(self.cam_num)]['crop']
         self.exposure = exposure if exposure is not None else cam_details[str(self.cam_num)]['exposure']
-
+        self.gain = gain if gain is not None else cam_details[str(self.cam_num)]['gain']
+        
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.add_filters()
@@ -65,6 +66,14 @@ class ICCam(object):
         val = 0 if val < 0 else val
         self.cam.SetPropertyAbsoluteValue("Exposure", "Value", val)
 
+    def set_gain(self, val):
+        try:
+            val = int(round(val))
+            val = val if val < self.cam.gain.max-1 else self.cam.gain.max-1
+            val = val if val > self.cam.gain.min else self.cam.gain.min
+            self.cam.SetPropertyAbsoluteValue("Gain", "Value", val)
+        except:
+            pass
     def get_exposure(self):
         exposure = [0]
         self.cam.GetPropertyAbsoluteValue("Exposure", "Value", exposure)
