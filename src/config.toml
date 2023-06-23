@@ -1,0 +1,60 @@
+
+project = 'R11_treadmill'
+
+model_folder = '/home/sam/data/Calibration-Check-Sam-2023-06-14'
+
+nesting = 1
+video_extension = 'avi'
+
+[calibration]
+# checkerboard / charuco / aruco
+board_type = "charuco"
+
+# width and height of grid
+board_size = [11, 8]
+
+# number of bits in the markers, if aruco/charuco
+board_marker_bits = 4
+
+# number of markers in dictionary, if aruco/charuco
+board_marker_dict_number = 50
+
+# length of marker side
+board_marker_length = 18.75 # mm
+
+# If aruco, length of marker separation
+# board_marker_separation_length = 1 # mm
+
+# If charuco or checkerboard, square side length
+board_square_side_length = 25 # mm
+
+animal_calibration = false
+
+fisheye = false
+
+[manual_verification]
+# true / false
+manually_verify = true
+
+[labeling]
+scheme = [
+   ["top_spot", "mid_spot", "bot_spot", "x1", "y1", "x2", "y2"]
+]
+
+[triangulation]
+triangulate = true
+reference_point = "bot_spot"
+cam_regex = 'cam([1-9])'
+ransac = false
+optim = true
+
+scale_smooth = 25
+scale_length = 10
+scale_length_weak = 2
+reproj_error_threshold = 3
+score_threshold = 0.6
+n_deriv_smooth = 2
+
+[angles]
+topspot = ["top_spot", "mid_spot", "bot_spot"]
+

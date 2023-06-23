@@ -8,7 +8,7 @@ https://github.com/AdaptiveMotorControlLab
 camera class for imaging source cameras - helps load correct settings
 """
 
-import tisgrabber as ic
+import src.camera_control.tisgrabber as ic
 import numpy as np
 import os
 import json

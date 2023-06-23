@@ -564,7 +564,7 @@ class CharucoBoard(CalibrationObject):
         dkey = (marker_bits, dict_size)
         self.dictionary = aruco.getPredefinedDictionary(ARUCO_DICTS[dkey])
 
-        self.board = aruco.CharucoBoard_create(squaresX, squaresY,
+        self.board = aruco.CharucoBoard((squaresX, squaresY),
                                                square_length, marker_length,
                                                self.dictionary)
 
