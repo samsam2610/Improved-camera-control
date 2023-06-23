@@ -10,15 +10,18 @@ camera class for imaging source cameras - helps load correct settings
 
 import src.camera_control.tisgrabber as ic
 import numpy as np
+from pathlib import Path
 import os
 import json
 import cv2
 import ctypes as C
 
-path = os.path.dirname(os.path.realpath(__file__))
-dets_file = os.path.normpath(path + '/camera_details.json')
-cam_details = json.load(open(dets_file, 'r'))
 
+path = Path(os.path.realpath(__file__))
+# Navigate to the outer parent directory and join the filename
+dets_file = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.json'))
+cam_details = json.load(open(dets_file, 'r'))
+   
 class ICCam(object):
 
     def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None):
