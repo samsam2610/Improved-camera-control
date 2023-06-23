@@ -204,39 +204,6 @@ class CamGUI(object):
             return_code = 1
         finally:
             return return_code
-
-    def init_labview(self):
-
-        if self.lv_task is None:
-
-            lv_chan = self.labview_channel.get()
-            if lv_chan != "":
-                self.lv_task = nidaqmx.Task("read_behavior_ttl")
-                self.lv_task.di_channels.add_di_chan(lv_chan)
-                self.lv_task.timing.cfg_change_detection_timing(rising_edge_chan=lv_chan)
-                self.lv_task.register_signal_event(nidaqmx.constants.Signal.CHANGE_DETECTION_EVENT, self.lv_interrupt)
-                self.lv_task.start()
-                Label(self.window, text="Recording Timestamps!").grid(row=3*(int(self.number_of_cams.get())), column=2, sticky="w")
-            else:
-                no_labview_window = Tk()
-                Label(no_labview_window, text="No labview channel selected, please select one before initializing").pack()
-                Button(no_labview_window, text="Ok", command=lambda:no_labview_window.quit()).pack()
-                no_labview_window.mainloop()
-                no_labview_window.destroy()
-        else:
-            no_labview_window = Tk()
-            Label(no_labview_window, text="Labview task already started, please end this task before beginning a new one").pack()
-            Button(no_labview_window, text="Ok", command=lambda:no_labview_window.quit()).pack()
-            no_labview_window.mainloop()
-            no_labview_window.destroy()
-
-    def end_labview(self):
-        if self.lv_task is not None:
-            #self.lv_task.stop()
-            self.lv_task.close()
-            self.lv_task = None
-            Label(self.window, text="").grid(row=3, column=2, sticky="nsew")
-            
             
     def sync_setup(self):
 
@@ -419,11 +386,11 @@ class CamGUI(object):
         fps = int(self.fps.get())
         if self.trigger_on==1:
             try:           
-                self.cam[num].enable_trigz()
+                self.cam[num].enable_trigger()
                 self.cam[num].frame_ready()
                 self.frame_times[num].append(time.perf_counter())
                 self.received_pulse_label['text'] = 'pulse_receieved!'
-                self.cam[num].disable_trigz()
+                self.cam[num].disable_trigger()
                 start_in_one = math.trunc(time.perf_counter()) + 1
                 while time.perf_counter() < start_in_one:
                     pass
@@ -550,7 +517,6 @@ class CamGUI(object):
 
     def close_window(self):
 
-        self.end_labview()
         if not self.setup:
             self.done = True
             self.window.destroy()

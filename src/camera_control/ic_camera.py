@@ -79,6 +79,11 @@ class ICCam(object):
         exposure = [0]
         self.cam.GetPropertyAbsoluteValue("Exposure", "Value", exposure)
         return round(exposure[0], 3)
+    
+    def get_gain(self):
+        gain = [0]
+        self.cam.GetPropertyAbsoluteValue("Gain", "Value", gain[0])
+        return round(gain[0], 3)
 
     def get_image(self):
         self.cam.SnapImage()
@@ -91,6 +96,18 @@ class ICCam(object):
         width = im.shape[1]
         return (width, height)
 
+    def enable_trigger(self):
+        self.cam.SetPropertySwitch("Trigger", "Enable", True)
+        if not self.cam.callback_registered:
+            self.cam.SetFrameReadyCallback
+        
+    def frame_ready(self):
+        self.cam.ResetFrameReady()
+        self.cam.WaitTillFrameReady(100000)
+        
+    def disable_trigger(self):
+        self.cam.SetPropertySwitch("Trigger", "Enable", False)
+        
     def start(self, show_display=1):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive(show_display)

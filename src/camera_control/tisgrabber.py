@@ -16,6 +16,7 @@ import ctypes as C
 import os
 import sys
 import numpy as np
+import time
 
 class SinkFormats(Enum):
    Y800 = 0
@@ -489,15 +490,57 @@ class TIS_CAM(object):
                 return strin
             return strin.encode("utf-8")
 
-        def SetFrameReadyCallback(self, CallbackFunction, data):
+        def GetCallbackFunc(self):
+            handle_ptr = self._handle
+            def FrameCallBack(handle_ptr, pBuffer, frame_num, pData)
+                self._frame['ready'] = True
+                self._frame['num'] = frame_num
+                
+            return TIS_GrabberDLL.FRAMEREADYCALLBACK(FrameCallBack)
+        
+        def SetFrameReadyCallback(self, CallbackFunctionPtr=None, data=None):
             """ Set a callback function, which is called, when a new frame arrives.
 
-            CallbackFunction : The callback function
+            CallbackFunctionPtr : The callback function
 
             data : a self defined class with user data.
             """
-            return TIS_GrabberDLL.SetFrameReadyCallback( self._handle, CallbackFunction, data )
+            if CallbackFunctionPtr is None:
+                # keep ref to prevent garbage collection
+                self._rfrc_func = self.GetCallbackFunc()
+            else:
+                self._rfrc_func = CallbackFunctionPtr
+                
+            self._callback_registered = True
+            
+            return TIS_GrabberDLL.SetFrameReadyCallback(self._handle, self._rfrc_func, data)
 
+        def ResetFrameReady(self):
+            self._frame['ready'] = False
+            self._frame['num'] = 1
+        
+        def WaitTillFrameReady(self, timeout=0):
+            """
+            Wait until the devices announces a frame as being ready.
+            Requires register_frame_ready_callback() being called.
+            
+            :param timeout: int -- timeout in milliseconds. Set to 0 for no timeout.
+            
+            :returns: int -- frame number that was announced as ready.
+            """
+            if timeout:        
+                start = time.clock()
+                elapsed = (time.clock() - start) * 1000
+                while not self._frame['ready'] and elapsed < timeout:
+                    time.sleep(0.001)
+                    elapsed = (time.clock() - start) * 1000
+            else:
+                while not self._frame['ready']:
+                    time.sleep(0.001)
+
+            return self._frame['num']
+            
+            
         def SetContinuousMode(self, Mode):
             ''' Determines, whether new frames are automatically copied into memory.
 
