@@ -303,7 +303,7 @@ class CamGUI(object):
                     self.frame_times.append([])
                 self.lv_ts = []
                 self.setup = True
-
+                
     def set_up_vid(self):
 
         if len(self.vid_out) > 0:
@@ -372,6 +372,8 @@ class CamGUI(object):
 
                 self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
                 self.ts_file[i] = self.ts_file[i].replace(cam_name_nospace[i], 'TIMESTAMPS_'+cam_name_nospace[i])
+                self.ts_filecsv.append(self.vid_file[i].replace('.avi','.csv'))
+                self.ts_filecsv[i] = self.ts_filecsv[i].replace(cam_name_nospace[i],'TIMESTAMPS_'+cam_name_nospace[i])
                 self.current_file_label['text'] = self.subject.get() + '_' + date + '_' + self.attempt.get()
 
                 # create video writer
