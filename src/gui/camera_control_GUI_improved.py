@@ -243,7 +243,9 @@ class CamGUI(object):
             cam_name_nospace = []
             this_row = 3
             
-            subject_name, dir_name = generate_folder()
+            # subject_name, dir_name = generate_folder()
+            subject_name = 'sam'
+            dir_name = "E:\\tmp"
             for i in range(len(self.cam)):
                 temp_exposure = str(self.exposure[i].get())
                 temp_gain = str(self.gain[i].get())

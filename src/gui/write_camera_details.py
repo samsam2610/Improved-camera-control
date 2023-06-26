@@ -25,14 +25,14 @@ cam_0 = {'name' : 'cam1',
         'rotate' : 0,
         'exposure' : -11,
         'gain': 100,
-        'output_dir' : 'C:\\Users\\dsb2139\\Documents\\videos'}
+        'output_dir' : 'E:\\tmp'}
 
 cam_1 = {'name' : 'cam2',
         'crop' : {'top' : 465, 'left' : 150, 'height' : 0, 'width' : 0},
         'rotate' : 0,
         'exposure' : -11,
         'gain': 100,
-        'output_dir' : 'C:\\Users\\dsb2139\\Documents\\videos'}
+        'output_dir' : 'E:\\tmp'}
 
 subs = ['test1', 'test2', 'test3'] # optional, can manually enter subject for each session.
 
