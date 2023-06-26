@@ -289,9 +289,9 @@ class CamGUI(object):
                 # create video writer
                 dim = self.cam[i].get_image_dimensions()
                 if len(self.vid_out) >= i+1:
-                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec), int(self.fps.get()), dim)
+                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec.get()), int(self.fps.get()), dim)
                 else:
-                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec), int(self.fps.get()), dim))
+                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec.get()), int(self.fps.get()), dim))
 
                 if self.lv_task is not None:
                     self.lv_file = self.ts_file[0].replace('TIMESTAMPS_'+cam_name_nospace[0], 'LABVIEW')
@@ -375,9 +375,9 @@ class CamGUI(object):
                 # create video writer
                 dim = self.cam[i].get_image_dimensions()
                 if len(self.vid_out) >= i+1:
-                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec), int(self.fps.get()), dim)
+                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec.get()), int(self.fps.get()), dim)
                 else:
-                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec), int(self.fps.get()), dim))
+                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec.get()), int(self.fps.get()), dim))
 
                 if self.lv_task is not None:
                     self.lv_file = self.ts_file[0].replace('TIMESTAMPS_'+cam_name_nospace[0], 'LABVIEW')
