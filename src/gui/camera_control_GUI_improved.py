@@ -288,8 +288,7 @@ class CamGUI(object):
 
                 # create video writer
                 dim = self.cam[i].get_image_dimensions()
-                fourcc_value = self.video_codec.get()
-                fourcc = cv2.VideoWriter_fourcc(*fourcc_value.encode())
+                fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
                 if len(self.vid_out) >= i+1:
                     self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
                 else:
@@ -376,8 +375,7 @@ class CamGUI(object):
 
                 # create video writer
                 dim = self.cam[i].get_image_dimensions()
-                fourcc_value = self.video_codec.get()
-                fourcc = cv2.VideoWriter_fourcc(*fourcc_value.encode())
+                fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
                 if len(self.vid_out) >= i+1:
                     self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
                 else:
@@ -717,6 +715,7 @@ class CamGUI(object):
         self.video_codec_entry.set("XVID") # default codec
         self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
         self.video_codec_entry.grid(row=cur_row, column=4)
+        self.video_codec =  self.video_codec_entry.get() # add default video codec
         cur_row += 1
 
         # set up video
