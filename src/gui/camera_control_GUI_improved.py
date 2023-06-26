@@ -289,7 +289,7 @@ class CamGUI(object):
                 # create video writer
                 dim = self.cam[i].get_image_dimensions()
                 fourcc_value = self.video_codec.get()
-                fourcc = cv2.VideoWriter_fourcc(*fourcc_value)
+                fourcc = cv2.VideoWriter_fourcc(*fourcc_value.encode())
                 if len(self.vid_out) >= i+1:
                     self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
                 else:
@@ -377,7 +377,7 @@ class CamGUI(object):
                 # create video writer
                 dim = self.cam[i].get_image_dimensions()
                 fourcc_value = self.video_codec.get()
-                fourcc = cv2.VideoWriter_fourcc(*fourcc_value)
+                fourcc = cv2.VideoWriter_fourcc(*fourcc_value.encode())
                 if len(self.vid_out) >= i+1:
                     self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
                 else:
