@@ -338,6 +338,7 @@ class CamGUI(object):
             self.vid_file = []
             self.base_name = []
             self.ts_file = []
+            self.ts_filecsv = []
             cam_name_nospace = []
             this_row = 3
             for i in range(len(self.cam)):
