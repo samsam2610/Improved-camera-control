@@ -23,6 +23,7 @@ import threading
 import json
 import argparse
 
+fourcc_codes = ["DIVX", "XVID", "Y800"]
 
 
 class CamGUI(object):
@@ -55,7 +56,11 @@ class CamGUI(object):
 
     def browse_output(self):
         filepath = filedialog.askdirectory(initialdir='/')
-        self.output.set(filepath)
+        self.dir_output.set(filepath)
+        
+    def browse_codec(self, event):
+        self.video_codec =  self.video_codec_entry.get()
+        print("Changed FourCC code:", self.video_codec)
 
     def init_cam(self, num):
         # create pop up window during setup
@@ -93,7 +98,7 @@ class CamGUI(object):
         self.exposure[num].set(self.cam[num].get_exposure())
         self.gain[num].set(self.cam[num].get_gain())
         # reset output directory
-        self.output.set(self.output_entry['values'][cam_num])
+        self.dir_output.set(self.output_entry['values'][cam_num])
         exposure_text = f'real_exposure: {self.exposure[num].get()}' 
         self.current_exposure[num]['text'] = exposure_text
         setup_window.destroy()
@@ -231,7 +236,7 @@ class CamGUI(object):
             day = str(day) if day >= 10 else '0'+str(day)
             year = str(datetime.datetime.now().year)
             date = year+'-'+month+'-'+day
-            self.out_dir = self.output.get()
+            self.out_dir = self.dir_output.get()
             if not os.path.isdir(os.path.normpath(self.out_dir)):
                 os.makedirs(os.path.normpath(self.out_dir))
 
@@ -282,9 +287,9 @@ class CamGUI(object):
                 # create video writer
                 dim = self.cam[i].get_image_dimensions()
                 if len(self.vid_out) >= i+1:
-                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*'DIVX'), int(self.fps.get()), dim)
+                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec), int(self.fps.get()), dim)
                 else:
-                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*'DIVX'), int(self.fps.get()), dim))
+                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec), int(self.fps.get()), dim))
 
                 if self.lv_task is not None:
                     self.lv_file = self.ts_file[0].replace('TIMESTAMPS_'+cam_name_nospace[0], 'LABVIEW')
@@ -322,7 +327,7 @@ class CamGUI(object):
             day = str(day) if day >= 10 else '0'+str(day)
             year = str(datetime.datetime.now().year)
             date = year+'-'+month+'-'+day
-            self.out_dir = self.output.get()
+            self.out_dir = self.dir_output.get()
             if not os.path.isdir(os.path.normpath(self.out_dir)):
                 os.makedirs(os.path.normpath(self.out_dir))
 
@@ -368,9 +373,9 @@ class CamGUI(object):
                 # create video writer
                 dim = self.cam[i].get_image_dimensions()
                 if len(self.vid_out) >= i+1:
-                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*'DIVX'), int(self.fps.get()), dim)
+                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec)), int(self.fps.get()), dim)
                 else:
-                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*'DIVX'), int(self.fps.get()), dim))
+                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec)), int(self.fps.get()), dim))
 
                 if self.lv_task is not None:
                     self.lv_file = self.ts_file[0].replace('TIMESTAMPS_'+cam_name_nospace[0], 'LABVIEW')
@@ -673,11 +678,21 @@ class CamGUI(object):
 
         # output directory
         Label(self.window, text="Output Directory: ").grid(sticky="w", row=cur_row, column=0)
-        self.output = StringVar()
-        self.output_entry = ttk.Combobox(self.window, textvariable=self.output)
+        self.dir_output = StringVar()
+        self.output_entry = ttk.Combobox(self.window, textvariable=self.dir_output)
         self.output_entry['values'] = self.output_dir
         self.output_entry.grid(row=cur_row, column=1)
         Button(self.window, text="Browse", command=self.browse_output).grid(sticky="nsew", row=cur_row, column=2)
+        
+        # select video encoder codec
+        Label(self.window, text="Video writer codec:").grid(sticky="w", row=cur_row, column=3)
+        self.video_codec = StringVar()
+        self.video_codec_entry = ttk.Combobox(self.window,
+                                              value=fourcc_codes,
+                                              state="readonly")
+        self.video_codec_entry.set("XVID") # default codec
+        self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
+        self.video_codec_entry.grid(row=cur_row, column=4)
         cur_row += 1
 
         # set up video
