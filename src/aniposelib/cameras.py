@@ -1584,6 +1584,10 @@ class CameraGroup:
 
         return all_rows
 
+    def get_rows_frames(self, frames, board, verbose=True):
+        
+        return None
+
     def set_camera_sizes_videos(self, videos):
         for cix, (cam, cam_videos) in enumerate(zip(self.cameras, videos)):
             rows_cam = []
