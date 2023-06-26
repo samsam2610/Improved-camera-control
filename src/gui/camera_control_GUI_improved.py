@@ -373,9 +373,9 @@ class CamGUI(object):
                 # create video writer
                 dim = self.cam[i].get_image_dimensions()
                 if len(self.vid_out) >= i+1:
-                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec)), int(self.fps.get()), dim)
+                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec), int(self.fps.get()), dim)
                 else:
-                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec)), int(self.fps.get()), dim))
+                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], cv2.VideoWriter_fourcc(*self.video_codec), int(self.fps.get()), dim))
 
                 if self.lv_task is not None:
                     self.lv_file = self.ts_file[0].replace('TIMESTAMPS_'+cam_name_nospace[0], 'LABVIEW')
@@ -413,6 +413,19 @@ class CamGUI(object):
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
         except Exception as e:
             print(e)
+            
+    def calibrate_on_thread(self, num):
+        fps = int(self.fps.get()) 
+        start_time = time.perf_counter()
+        next_frame = start_time
+
+        try:
+            while self.record_on.get():
+                if time.perf_counter() >= next_frame:
+                    self.vid_out[num].write(self.cam[num].get_image())
+                    next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
+        except Exception as e:
+            print(e)
 
     def start_calibration_process(self):
         from src.aniposelib.cameras import CameraGroup
@@ -426,7 +439,12 @@ class CamGUI(object):
             config_anipose = load_config(config_toml_path)
             self.calibration_process_stats['text'] = 'Successfully found and loaded config. Determining calibration board ...'
             board_calibration = get_calibration_board(config=config_anipose)
-            self.calibration_process_stats['text'] = 'Loaded calibration board...'
+            
+            self.calibration_process_stats['text'] = 'Loaded calibration board. Initializing camera calibration objects ...'
+            from src.aniposelib.cameras import CameraGroup
+            self.cgroup = CameraGroup.from_names(self.cam_names)
+            
+            self.calibration_process_stats['text'] = 'Initialized camera object.'
     
     def start_record(self):
         if len(self.vid_out) == 0:
