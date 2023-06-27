@@ -480,10 +480,10 @@ class CamGUI(object):
     def toggle_calibration(self):
         if self.calibration_toggle_status:
             self.calibration_toggle_status = False
-            self.toggle_calibration_button.config(text="Calibration Off", background="red", foreground="white")
+            self.toggle_calibration_button.config(text="Calibration Off", background="red")
         else:
             self.calibration_toggle_status = True
-            self.toggle_calibration_button.config(text="Calibration On", background="green", foreground="black")
+            self.toggle_calibration_button.config(text="Calibration On", background="green")
         
     def record_calibrate_on_thread(self, num):
         fps = int(self.fps.get()) 
@@ -491,7 +491,7 @@ class CamGUI(object):
         next_frame = start_time
 
         try:
-            while self.record_on.get():
+            while self.calibration_toggle_status:
                 if time.perf_counter() >= next_frame:
                     current_time = time.perf_counter
                     self.vid_out[num].write(self.cam[num].get_image())
