@@ -53,6 +53,7 @@ class CamGUI(object):
             self.output_dir = self.output_dir + (self.cam_details[str(i)]['output_dir'],)
 
         self.window = None
+        self.calibration_toggle_status = False
         self.selectCams()
 
     def browse_output(self):
@@ -423,7 +424,7 @@ class CamGUI(object):
         except Exception as e:
             print(e)
 
-    def start_calibration_process(self):
+    def setup_calibration(self):
         from src.aniposelib.cameras import CameraGroup
 
         self.calibration_process_stats['text'] = 'Initializing calibration process...'
@@ -455,6 +456,8 @@ class CamGUI(object):
                 cam_check_window.destroy() 
             else:
                 self.calibration_process_stats['text'] = 'Cameras found. Recording the frame sizes'
+                self.toggle_calibration_button["state"] = "normal"
+                self.calibration_toggle_status = False
                 frame_sizes = []
                 for i in range(len(self.cam)):
                     frame_sizes.append(self.cam[i].get_image_dimensions())
@@ -474,6 +477,14 @@ class CamGUI(object):
                     t[-1].daemon = True
                     t[-1].start()
     
+    def toggle_calibration(self):
+        if self.calibration_toggle_status:
+            self.calibration_toggle_status = False
+            self.toggle_calibration_button.config(text="Calibration Off", background="red", foreground="white")
+        else:
+            self.calibration_toggle_status = True
+            self.toggle_calibration_button.config(text="Calibration On", background="green", foreground="black")
+        
     def record_calibrate_on_thread(self, num):
         fps = int(self.fps.get()) 
         start_time = time.perf_counter()
@@ -817,9 +828,11 @@ class CamGUI(object):
         # set up video
         Button(self.window, text="Set Up Video", command=self.set_up_vid).grid(sticky="nsew", row=cur_row, column=0, columnspan=1)        
         Button(self.window, text="SYNC_WITH_SYNAPSE", command=self.sync_setup).grid(sticky="nsew", row=cur_row, column=1, columnspan=1)
-        Button(self.window, text="Start Calibration Process", command=self.start_calibration_process).grid(sticky="nsew", row=cur_row, column=2, columnspan=1) 
+        Button(self.window, text="Setup Calibration", command=self.setup_calibration).grid(sticky="nsew", row=cur_row, column=2, columnspan=1) 
+        self.toggle_calibration_button = Button(self.window, text="Calibration Off", command=self.toggle_calibration, background="red", state="disabled")
+        self.toggle_calibration_button.grid(sticky="nsew", row=cur_row, column=3, columnspan=1) 
         cur_row += 1
-
+        
         Label(self.window, text="Current file status: ").grid(row=cur_row, column=0, sticky="w")
         self.current_file_label = Label(self.window, text="")
         self.current_file_label.grid(row=cur_row, column=1, sticky="w")
