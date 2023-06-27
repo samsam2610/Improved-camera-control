@@ -503,6 +503,7 @@ class CamGUI(object):
                                           current_time))                # captured time
                     
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
+                    print(f'Camera {num} with frame#: {self.frame_count[num]}')
         except Exception as e:
             print(e)
     
