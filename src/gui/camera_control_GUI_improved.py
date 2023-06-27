@@ -494,7 +494,6 @@ class CamGUI(object):
             while self.calibration_toggle_status:
                 if time.perf_counter() >= next_frame:
                     current_time = time.perf_counter
-                    self.vid_out[num].write(self.cam[num].get_image())
                     self.frame_count[num] += 1
                     # putting frame into the frame queue along with following information
                     self.frame_queue.put((self.cam[num].get_image(),    # the frame itself
