@@ -510,52 +510,55 @@ class CamGUI(object):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # Dictionary to store frame counts for each thread_id
         self.calibration_error = 0
-        while True:
-            frame, thread_id, frame_count, capture_time = self.frame_queue.get()  # Retrieve frame information from the queue
-            print(f'Current error: {self.calibration_error}, current framecount: {frame_count}')
-            if thread_id not in frame_groups:
-                frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
+        try:
+            while self.calibration_toggle_status:
+                frame, thread_id, frame_count, capture_time = self.frame_queue.get()  # Retrieve frame information from the queue
+                print(f'Current error: {self.calibration_error}, current framecount: {frame_count}')
+                if thread_id not in frame_groups:
+                    frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
 
-            frame_groups[thread_id].append((frame, frame_count, capture_time))  # Append frame information to the corresponding group
-            frame_counts[thread_id] = frame_count
-            
-            # Process the frame group (frames with the same thread_id)
-            if all(count >= 10 for count in frame_counts.values()):
-                self.calibration_process_stats['text'] = 'More than 10 frames acquired from each camera, calibrating...'
-                all_rows = [] # preallocate detected rows from all cameras, for each camera
+                frame_groups[thread_id].append((frame, frame_count, capture_time))  # Append frame information to the corresponding group
+                frame_counts[thread_id] = frame_count
                 
-                # for each frame from each camera, detect the corners and ids, then add to rows, then to all_rows
-                for i in range(len(self.cam)):
-                    rows = []
-                    for frame_data in frame_groups[i]:
-                        frame, frame_count, capture_time = frame_data
+                # Process the frame group (frames with the same thread_id)
+                if all(count >= 10 for count in frame_counts.values()):
+                    self.calibration_process_stats['text'] = 'More than 10 frames acquired from each camera, calibrating...'
+                    all_rows = [] # preallocate detected rows from all cameras, for each camera
+                    
+                    # for each frame from each camera, detect the corners and ids, then add to rows, then to all_rows
+                    for i in range(len(self.cam)):
+                        rows = []
+                        for frame_data in frame_groups[i]:
+                            frame, frame_count, capture_time = frame_data
 
-                        corners, ids = self.board_calibration.detect_image(frame)
+                            corners, ids = self.board_calibration.detect_image(frame)
 
-                        if corners is not None:
-                            key = frame_count
-                            row = {
-                                'framenum': key,
-                                'corners': corners,
-                                'ids': ids
-                            }
+                            if corners is not None:
+                                key = frame_count
+                                row = {
+                                    'framenum': key,
+                                    'corners': corners,
+                                    'ids': ids
+                                }
 
-                            rows.append(row)
+                                rows.append(row)
 
-                    rows = self.board_calibration.fill_points_rows(rows)
-                    all_rows.append(rows)
+                        rows = self.board_calibration.fill_points_rows(rows)
+                        all_rows.append(rows)
 
-                self.calibration_error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
-                                init_intrinsics=self.init_matrix, init_extrinsics=self.init_matrix,
-                                max_nfev=200, n_iters=6,
-                                n_samp_iter=200, n_samp_full=1000,
-                                verbose=True)
-                self.init_matrix = False
-                # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
-                
-                # Clear the processed frames from the group
-                frame_groups = []
-                frame_count = []
+                    self.calibration_error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
+                                    init_intrinsics=self.init_matrix, init_extrinsics=self.init_matrix,
+                                    max_nfev=200, n_iters=6,
+                                    n_samp_iter=200, n_samp_full=1000,
+                                    verbose=True)
+                    self.init_matrix = False
+                    # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
+                    
+                    # Clear the processed frames from the group
+                    frame_groups = []
+                    frame_count = []
+        except Exception as e:
+            print(e) 
             
 
     def start_record(self):
