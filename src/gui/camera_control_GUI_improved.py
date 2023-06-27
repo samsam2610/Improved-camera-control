@@ -459,10 +459,14 @@ class CamGUI(object):
                 self.toggle_calibration_button["state"] = "normal"
                 self.calibration_toggle_status = False
                 frame_sizes = []
+                self.frame_times = []
+                
                 for i in range(len(self.cam)):
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
                     self.all_rows.append([])
+                    self.frame_times.append([])
+
                     
                 self.calibration_process_stats['text'] = 'Setting the frame sizes...'
                 self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
@@ -497,6 +501,7 @@ class CamGUI(object):
                 while self.calibration_toggle_status:
                     if time.perf_counter() >= next_frame:
                         current_time = time.perf_counter
+                        self.frame_times[num].append(time.perf_counter())
                         self.frame_count[num] += 1
                         # putting frame into the frame queue along with following information
                         self.frame_queue.put((self.cam[num].get_image(),    # the frame itself
