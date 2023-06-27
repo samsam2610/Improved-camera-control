@@ -459,7 +459,7 @@ class CamGUI(object):
                 for i in range(len(self.cam)):
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
-                    self.all_rowsa.append([])
+                    self.all_rows.append([])
                     
                 self.calibration_process_stats['text'] = 'Setting the frame sizes...'
                 self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
