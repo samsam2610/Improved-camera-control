@@ -470,13 +470,15 @@ class CamGUI(object):
                 self.calibration_process_stats['text'] = 'Prepping done. Starting calibration...'
                 self.vid_start_time = time.perf_counter()
                 t = []
-                t.append(threading.Thread(target=self.calibrate_on_thread))
-                t[-1].daemon = True
-                t[-1].start()
+    
                 for i in range(len(self.cam)):
                     t.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i,)))
                     t[-1].daemon = True
                     t[-1].start()
+                t.append(threading.Thread(target=self.calibrate_on_thread))
+                t[-1].daemon = True
+                t[-1].start()
+
     
     def toggle_calibration(self):
         if self.calibration_toggle_status:
