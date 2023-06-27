@@ -458,6 +458,8 @@ class CamGUI(object):
                 frame_sizes = []
                 for i in range(len(self.cam)):
                     frame_sizes.append(self.cam[i].get_image_dimensions())
+                    self.frame_count.append(1)
+                    self.all_rowsa.append([])
                     
                 self.calibration_process_stats['text'] = 'Setting the frame sizes...'
                 self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
@@ -468,8 +470,6 @@ class CamGUI(object):
                 t.append(threading.Thread(target=self.calibrate_on_thread))
       
                 for i in range(len(self.cam)):
-                    self.frame_count[i] = 1
-                    self.all_rows[i] = []
                     t.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i,)))
                     t[-1].daemon = True
                     t[-1].start()
