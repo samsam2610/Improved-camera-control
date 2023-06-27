@@ -512,7 +512,7 @@ class CamGUI(object):
         self.calibration_error = 0
         while True:
             frame, thread_id, frame_count, capture_time = self.frame_queue.get()  # Retrieve frame information from the queue
-            self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}, current framecount: {frame_count}'
+            print(f'Current error: {self.calibration_error}, current framecount: {frame_count}')
             if thread_id not in frame_groups:
                 frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
 
@@ -551,7 +551,7 @@ class CamGUI(object):
                                 n_samp_iter=200, n_samp_full=1000,
                                 verbose=True)
                 self.init_matrix = False
-                self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
+                # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
                 
                 # Clear the processed frames from the group
                 frame_groups = []
