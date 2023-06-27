@@ -460,14 +460,18 @@ class CamGUI(object):
                 self.calibration_toggle_status = False
                 frame_sizes = []
                 self.frame_times = []
+                self.previous_frame_count = []
+                self.current_frame_count = []
+
                 
                 for i in range(len(self.cam)):
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
                     self.all_rows.append([])
                     self.frame_times.append([])
+                    self.previous_frame_count.append(0)
+                    self.current_frame_count.append(0)
 
-                    
                 self.calibration_process_stats['text'] = 'Setting the frame sizes...'
                 self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
                 self.init_matrix = True
@@ -515,8 +519,9 @@ class CamGUI(object):
         
     def calibrate_on_thread(self):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
-        frame_counts = {}  # Dictionary to store frame counts for each thread_id
+        frame_counts = {}  # array to store frame counts for each thread_id
         self.calibration_error = 0
+
         print(f'Current error: {self.calibration_error}')
         while True:
             try:
@@ -525,9 +530,10 @@ class CamGUI(object):
                     print(f'Current error: {self.calibration_error}, current framecount: {frame_count}')
                     if thread_id not in frame_groups:
                         frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
+                        frame_counts[thread_id] = 0
 
                     frame_groups[thread_id].append((frame, frame_count, capture_time))  # Append frame information to the corresponding group
-                    frame_counts[thread_id] = frame_count
+                    frame_counts[thread_id] += 1
                     
                     # Process the frame group (frames with the same thread_id)
                     if all(count >= 10 for count in frame_counts.values()):
