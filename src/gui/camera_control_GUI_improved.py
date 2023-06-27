@@ -471,7 +471,8 @@ class CamGUI(object):
                 self.vid_start_time = time.perf_counter()
                 t = []
                 t.append(threading.Thread(target=self.calibrate_on_thread))
-      
+                t[-1].daemon = True
+                t[-1].start()
                 for i in range(len(self.cam)):
                     t.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i,)))
                     t[-1].daemon = True
