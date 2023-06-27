@@ -440,13 +440,11 @@ class CamGUI(object):
             self.calibration_process_stats['text'] = 'Loaded calibration board. Initializing camera calibration objects ...'
             from src.aniposelib.cameras import CameraGroup
             self.cgroup = CameraGroup.from_names(self.cam_names)
-            
             self.calibration_process_stats['text'] = 'Initialized camera object.'
             self.frame_count = []
             self.all_rows = []
             # Create a shared queue to store frames
             self.frame_queue = queue.Queue()
-
 
             # check if camera set up
             if len(self.cam) == 0:
@@ -456,9 +454,25 @@ class CamGUI(object):
                 cam_check_window.mainloop()
                 cam_check_window.destroy() 
             else:
+                self.calibration_process_stats['text'] = 'Cameras found. Recording the frame sizes'
+                frame_sizes = []
+                for i in range(len(self.cam)):
+                    frame_sizes.append(self.cam[i].get_image_dimensions())
+                    
+                self.calibration_process_stats['text'] = 'Setting the frame sizes...'
+                self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
+                self.init_matrix = True
+                self.calibration_process_stats['text'] = 'Prepping done. Starting calibration...'
+                self.vid_start_time = time.perf_counter()
+                t = []
+                t.append(threading.Thread(target=self.calibrate_on_thread))
+      
                 for i in range(len(self.cam)):
                     self.frame_count[i] = 1
                     self.all_rows[i] = []
+                    t.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i,)))
+                    t[-1].daemon = True
+                    t[-1].start()
     
     def record_calibrate_on_thread(self, num):
         fps = int(self.fps.get()) 
@@ -495,6 +509,7 @@ class CamGUI(object):
             
             # Process the frame group (frames with the same thread_id)
             if all(count >= 10 for count in frame_counts.values()):
+                self.calibration_process_stats['text'] = 'More than 10 frames acquired from each camera, calibrating...'
                 all_rows = [] # preallocate detected rows from all cameras, for each camera
                 
                 # for each frame from each camera, detect the corners and ids, then add to rows, then to all_rows
@@ -518,6 +533,14 @@ class CamGUI(object):
                     rows = self.board_calibration.fill_points_rows(rows)
                     all_rows.append(rows)
 
+                error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
+                                init_intrinsics=self.init_matrix, init_extrinsics=self.init_matrix,
+                                max_nfev=200, n_iters=6,
+                                n_samp_iter=200, n_samp_full=1000,
+                                verbose=True)
+                self.init_matrix = False
+                self.calibration_error_stats['text'] = f'Current error: {error}'
+                
                 # Clear the processed frames from the group
                 frame_groups = []
                 frame_count = []
@@ -813,7 +836,13 @@ class CamGUI(object):
         self.calibration_process_stats = Label(self.window, text='')
         self.calibration_process_stats.grid(row=cur_row, column=1, sticky="w") 
         cur_row += 1
-
+        
+        # label for calibration process status text
+        Label(self.window, text="Calibration error: ").grid(row=cur_row, column=0, sticky="w")
+        self.calibration_error_stats = Label(self.window, text='')
+        self.calibration_error_stats.grid(row=cur_row, column=1, sticky="w") 
+        cur_row += 1
+        
         # empty row
         Label(self.window, text="").grid(row=cur_row, column=0)
         cur_row += 1

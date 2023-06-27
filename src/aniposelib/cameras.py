@@ -1595,7 +1595,11 @@ class CameraGroup:
                 params = get_video_params(vidname)
                 size = (params['width'], params['height'])
                 cam.set_size(size)
-
+                
+    def set_camera_sizes_images(self, frame_sizes):
+        for cix, (cam, frame_size) in enumerate(zip(self.cameras, frame_sizes)):
+            cam.set_size(frame_size)
+                
     def calibrate_videos(self, videos, board,
                          init_intrinsics=True, init_extrinsics=True, verbose=True,
                          **kwargs):
