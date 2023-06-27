@@ -20,6 +20,7 @@ import time
 import cv2
 import ffmpy
 import threading
+import queue
 import json
 import argparse
 
@@ -303,7 +304,7 @@ class CamGUI(object):
                     self.frame_times.append([])
                 self.lv_ts = []
                 self.setup = True
-                
+
     def set_up_vid(self):
 
         if len(self.vid_out) > 0:
@@ -339,6 +340,7 @@ class CamGUI(object):
             self.base_name = []
             self.ts_file = []
             self.ts_filecsv = []
+            
             cam_name_nospace = []
             this_row = 3
             for i in range(len(self.cam)):
@@ -420,22 +422,10 @@ class CamGUI(object):
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
         except Exception as e:
             print(e)
-            
-    def calibrate_on_thread(self, num):
-        fps = int(self.fps.get()) 
-        start_time = time.perf_counter()
-        next_frame = start_time
-
-        try:
-            while self.record_on.get():
-                if time.perf_counter() >= next_frame:
-                    self.vid_out[num].write(self.cam[num].get_image())
-                    next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
-        except Exception as e:
-            print(e)
 
     def start_calibration_process(self):
         from src.aniposelib.cameras import CameraGroup
+
         self.calibration_process_stats['text'] = 'Initializing calibration process...'
         from utils import load_config, get_calibration_board
         if self.running_config['debug_mode']:
@@ -445,14 +435,94 @@ class CamGUI(object):
             config_toml_path = os.path.normpath(str(path.parents[2] / 'config-files' / 'config.toml'))
             config_anipose = load_config(config_toml_path)
             self.calibration_process_stats['text'] = 'Successfully found and loaded config. Determining calibration board ...'
-            board_calibration = get_calibration_board(config=config_anipose)
+            self.board_calibration = get_calibration_board(config=config_anipose)
             
             self.calibration_process_stats['text'] = 'Loaded calibration board. Initializing camera calibration objects ...'
             from src.aniposelib.cameras import CameraGroup
             self.cgroup = CameraGroup.from_names(self.cam_names)
             
             self.calibration_process_stats['text'] = 'Initialized camera object.'
+            self.frame_count = []
+            self.all_rows = []
+            # Create a shared queue to store frames
+            self.frame_queue = queue.Queue()
+
+
+            # check if camera set up
+            if len(self.cam) == 0:
+                cam_check_window = Tk()
+                Label(cam_check_window, text="No camera is found! \nPlease initialize camera before setting up video.").pack()
+                Button(cam_check_window, text="Ok", command=lambda:cam_check_window.quit()).pack()
+                cam_check_window.mainloop()
+                cam_check_window.destroy() 
+            else:
+                for i in range(len(self.cam)):
+                    self.frame_count[i] = 1
+                    self.all_rows[i] = []
     
+    def record_calibrate_on_thread(self, num):
+        fps = int(self.fps.get()) 
+        start_time = time.perf_counter()
+        next_frame = start_time
+
+        try:
+            while self.record_on.get():
+                if time.perf_counter() >= next_frame:
+                    current_time = time.perf_counter
+                    self.vid_out[num].write(self.cam[num].get_image())
+                    self.frame_count[num] += 1
+                    # putting frame into the frame queue along with following information
+                    self.frame_queue.put((self.cam[num].get_image(),    # the frame itself
+                                          num,                          # the id of the capturing camera
+                                          self.frame_count[num],        # the current frame count
+                                          current_time))                # captured time
+                    
+                    next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
+        except Exception as e:
+            print(e)
+    
+    def calibrate_on_thread(self):
+        frame_groups = {}  # Dictionary to store frame groups by thread_id
+        frame_counts = {}  # Dictionary to store frame counts for each thread_id
+        while True:
+            frame, thread_id, frame_count, capture_time = self.frame_queue.get()  # Retrieve frame information from the queue
+
+            if thread_id not in frame_groups:
+                frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
+
+            frame_groups[thread_id].append((frame, frame_count, capture_time))  # Append frame information to the corresponding group
+            frame_counts[thread_id] = frame_count
+            
+            # Process the frame group (frames with the same thread_id)
+            if all(count >= 10 for count in frame_counts.values()):
+                all_rows = [] # preallocate detected rows from all cameras, for each camera
+                
+                # for each frame from each camera, detect the corners and ids, then add to rows, then to all_rows
+                for i in range(len(self.cam)):
+                    rows = []
+                    for frame_data in frame_groups[i]:
+                        frame, frame_count, capture_time = frame_data
+
+                        corners, ids = self.board_calibration.detect_image(frame)
+
+                        if corners is not None:
+                            key = frame_count
+                            row = {
+                                'framenum': key,
+                                'corners': corners,
+                                'ids': ids
+                            }
+
+                            rows.append(row)
+
+                    rows = self.board_calibration.fill_points_rows(rows)
+                    all_rows.append(rows)
+
+                # Clear the processed frames from the group
+                frame_groups = []
+                frame_count = []
+            
+
     def start_record(self):
         if len(self.vid_out) == 0:
             remind_vid_window = Tk()
