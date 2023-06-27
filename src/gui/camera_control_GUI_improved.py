@@ -509,6 +509,7 @@ class CamGUI(object):
     def calibrate_on_thread(self):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # Dictionary to store frame counts for each thread_id
+        self.calibration_error_stats['text'] = f'Current error: {error}'
         while True:
             frame, thread_id, frame_count, capture_time = self.frame_queue.get()  # Retrieve frame information from the queue
 
