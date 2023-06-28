@@ -444,8 +444,6 @@ class CamGUI(object):
             self.calibration_process_stats['text'] = 'Initialized camera object.'
             self.frame_count = []
             self.all_rows = []
-            # Create a shared queue to store frames
-            self.frame_queue = queue.Queue()
 
             # check if camera set up
             if len(self.cam) == 0:
@@ -462,8 +460,10 @@ class CamGUI(object):
                 self.frame_times = []
                 self.previous_frame_count = []
                 self.current_frame_count = []
+                self.frame_process_threshold = 100
+                # Create a shared queue to store frames
+                self.frame_queue = queue.Queue(maxsize=self.frame_process_threshold)
 
-                
                 for i in range(len(self.cam)):
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
@@ -521,7 +521,6 @@ class CamGUI(object):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         self.calibration_error = 0
-        self.frame_process_threshold = 100
         print(f'Current error: {self.calibration_error}')
         while True:
             try:
