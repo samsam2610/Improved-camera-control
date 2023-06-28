@@ -515,7 +515,7 @@ class CamGUI(object):
                         
                         next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
             except Exception as e:
-                print(f"Traceback: \n {traceback.format_exc()}"))
+                print(f"Traceback: \n {traceback.format_exc()}")
         
     def calibrate_on_thread(self):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
