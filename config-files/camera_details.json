@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 {"cams": 2, "0": {"name": "cam1", "crop": {"top": 210, "left": 8, "height": 550, "width": 900}, "rotate": 0, "exposure": -11, "gain": 100, "output_dir": "E:\\live_videos"}, "1": {"name": "cam2", "crop": {"top": 130, "left": 92, "height": 550, "width": 900}, "rotate": 0, "exposure": -11, "gain": 100, "output_dir": "E:\\live_videos"}, "subjects": ["test1", "test2", "test3"], "labview": ["Dev1/port0/line0"]}
+=======
+{"cams": 2, "0": {"name": "cam1", "crop": {"top": 465, "left": 150, "height": 0, "width": 0}, "rotate": 0, "exposure": 0.002, "gain": 100, "output_dir": "E:\\tmp"}, "1": {"name": "cam2", "crop": {"top": 465, "left": 150, "height": 0, "width": 0}, "rotate": 0, "exposure": 0.002, "gain": 100, "output_dir": "E:\\tmp"}, "subjects": ["test1", "test2", "test3"], "labview": ["Dev1/port0/line0"]}
+>>>>>>> 57ebd6ef2b3e19566c3492aebb62ad4857cd65bd
