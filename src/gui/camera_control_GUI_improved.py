@@ -170,7 +170,7 @@ class CamGUI(object):
             cam_check_window.mainloop()
             cam_check_window.destroy()
         else:
-            self.cam[num].set_exposure(int(self.exposure[num].get()))
+            self.cam[num].set_exposure(float(self.exposure[num].get()))
             exposure_text = f'real_exposure: {self.exposure[num].get()}'
             self.current_exposure[num]['text'] = exposure_text
 
