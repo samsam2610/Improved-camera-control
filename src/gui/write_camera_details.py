@@ -21,18 +21,18 @@ out = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.js
 # Crop, rotation, and exposure are default parameters. Can be changed in the GUI.
 
 cam_0 = {'name' : 'cam1',
-        'crop' : {'top' : 465, 'left' : 150, 'height' : 0, 'width' : 0},
+        'crop' : {'top' : 210, 'left' : 8, 'height' : 550, 'width' : 900},
         'rotate' : 0,
         'exposure' : -11,
         'gain': 100,
-        'output_dir' : 'E:\\tmp'}
+        'output_dir' : 'E:\\live_videos'}
 
 cam_1 = {'name' : 'cam2',
-        'crop' : {'top' : 465, 'left' : 150, 'height' : 0, 'width' : 0},
+        'crop' : {'top' : 130, 'left' : 92, 'height' : 550, 'width' : 900},
         'rotate' : 0,
         'exposure' : -11,
         'gain': 100,
-        'output_dir' : 'E:\\tmp'}
+        'output_dir' : 'E:\\live_videos'}
 
 subs = ['test1', 'test2', 'test3'] # optional, can manually enter subject for each session.
 

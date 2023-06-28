@@ -34,7 +34,7 @@ fisheye = false
 
 [manual_verification]
 # true / false
-manually_verify = true
+manually_verify = false
 
 [labeling]
 scheme = [
