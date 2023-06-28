@@ -13,7 +13,7 @@ Modified by people at Dr. Tresch's lab
 from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk
 import numpy as np
 import datetime
-import os, sys
+import os, sys, traceback
 from pathlib import Path
 import math
 import time
@@ -207,7 +207,7 @@ class CamGUI(object):
                 self.lv_ts.append(time.time())
                 print("\nRecording timestamp %d" % len(self.lv_ts))
         except Exception as e:
-            print(e)
+            print(f"Traceback: \n {traceback.format_exc()}")
             return_code = 1
         finally:
             return return_code
@@ -410,8 +410,8 @@ class CamGUI(object):
                 while time.perf_counter() < start_in_one:
                     pass
             except Exception as e:
-                print(e)
-
+                print(f"Traceback: \n {traceback.format_exc()}")
+                
         start_time = time.perf_counter()
         next_frame = start_time
 
@@ -422,7 +422,7 @@ class CamGUI(object):
                     self.vid_out[num].write(self.cam[num].get_image())
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
         except Exception as e:
-            print(e)
+            print(f"Traceback: \n {traceback.format_exc()}")
 
     def setup_calibration(self):
         from src.aniposelib.cameras import CameraGroup
@@ -515,7 +515,7 @@ class CamGUI(object):
                         
                         next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
             except Exception as e:
-                print(e)
+                print(f"Traceback: \n {traceback.format_exc()}"))
         
     def calibrate_on_thread(self):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
@@ -572,7 +572,7 @@ class CamGUI(object):
                         frame_groups = []
                         frame_count = []
             except Exception as e:
-                print(e) 
+                print(f"Traceback: \n {traceback.format_exc()}")
             
 
     def start_record(self):
