@@ -23,14 +23,14 @@ out = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.js
 cam_0 = {'name' : 'cam1',
         'crop' : {'top' : 465, 'left' : 150, 'height' : 0, 'width' : 0},
         'rotate' : 0,
-        'exposure' : -11,
+        'exposure' : 0.002,
         'gain': 100,
         'output_dir' : 'E:\\tmp'}
 
 cam_1 = {'name' : 'cam2',
         'crop' : {'top' : 465, 'left' : 150, 'height' : 0, 'width' : 0},
         'rotate' : 0,
-        'exposure' : -11,
+        'exposure' : 0.002,
         'gain': 100,
         'output_dir' : 'E:\\tmp'}
 

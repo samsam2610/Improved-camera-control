@@ -521,7 +521,7 @@ class CamGUI(object):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         self.calibration_error = 0
-
+        self.frame_process_threshold = 100
         print(f'Current error: {self.calibration_error}')
         while True:
             try:
@@ -536,8 +536,9 @@ class CamGUI(object):
                     frame_counts[thread_id] += 1
                     
                     # Process the frame group (frames with the same thread_id)
-                    if all(count >= 10 for count in frame_counts.values()):
-                        self.calibration_process_stats['text'] = 'More than 10 frames acquired from each camera, calibrating...'
+                    if all(count >= self.frame_process_threshold for count in frame_counts.values()):
+                        self.calibration_toggle_status = False
+                        self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} frames acquired from each camera, calibrating...'
                         all_rows = [] # preallocate detected rows from all cameras, for each camera
                         
                         # for each frame from each camera, detect the corners and ids, then add to rows, then to all_rows
@@ -572,6 +573,7 @@ class CamGUI(object):
                         # Clear the processed frames from the group
                         frame_groups = []
                         frame_count = []
+                        self.calibration_toggle_status = True
             except Exception as e:
                 print(e) 
             
