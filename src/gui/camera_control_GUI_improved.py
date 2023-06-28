@@ -536,7 +536,6 @@ class CamGUI(object):
                     
                     # Process the frame group (frames with the same thread_id)
                     if all(count >= self.frame_process_threshold for count in frame_counts.values()):
-                        self.calibration_toggle_status = False
                         self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} frames acquired from each camera, calibrating...'
                         all_rows = [] # preallocate detected rows from all cameras, for each camera
                         
@@ -572,7 +571,6 @@ class CamGUI(object):
                         # Clear the processed frames from the group
                         frame_groups = []
                         frame_count = []
-                        self.calibration_toggle_status = True
             except Exception as e:
                 print(e) 
             
@@ -821,7 +819,7 @@ class CamGUI(object):
         Label(self.window, text="Frame Rate: ").grid(sticky="w", row=cur_row, column=0)
         self.fps = StringVar()
         self.fps_entry = Entry(self.window, textvariable=self.fps)
-        self.fps_entry.insert(END, '200')
+        self.fps_entry.insert(END, '100')
         self.fps_entry.grid(sticky="nsew", row=cur_row, column=1)
         cur_row += 1
 
