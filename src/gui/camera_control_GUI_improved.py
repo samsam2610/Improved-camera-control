@@ -91,12 +91,14 @@ class CamGUI(object):
         cam_num = self.camera[num].get()
         names = np.array(self.cam_names)
         cam_num = np.where(names == cam_num)[0][0]
+        self.exposure[num].set(self.cam_details[str(num)]['exposure'])
+        self.gain[num].set(self.cam[num].get_gain())
         if len(self.cam) >= num+1:
             self.cam_name[num] = names[cam_num]
-            self.cam[num] = ICCam(cam_num)
+            self.cam[num] = ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get())
         else:
             self.cam_name.append(names[cam_num])
-            self.cam.append(ICCam(cam_num))
+            self.cam.append(ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get()))
         self.cam[num].start()
         self.exposure[num].set(self.cam_details[str(num)]['exposure'])
         self.gain[num].set(self.cam[num].get_gain())
@@ -470,8 +472,8 @@ class CamGUI(object):
                 self.current_frame_count = []
                 self.frame_process_threshold = 100
                 # Check available detection file, if file available will delete it (for now)
-                self.rows_fname = os.path.join(self.output_dir.get(), 'detections.pickle')
-                self.calibration_out = os.path.join(self.output_dir.get(), 'calibration.toml') 
+                self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
+                self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml') 
                 self.clear_calibration_file(self.rows_fname)
                 self.clear_calibration_file(self.calibration_out)
                 self.rows_fname_available = False
