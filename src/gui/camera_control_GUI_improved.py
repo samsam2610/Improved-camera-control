@@ -528,8 +528,11 @@ class CamGUI(object):
                     frame, thread_id, frame_count, capture_time = self.frame_queue.get()  # Retrieve frame information from the queue
                     print(f'Current error: {self.calibration_error}, current framecount: {frame_count}')
                     if thread_id not in frame_groups:
-                        frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
-                        frame_counts[thread_id] = 0
+                        try:
+                            frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
+                            frame_counts[thread_id] = 0
+                        except Exception as e:
+                            print(f"Traceback: \n {traceback.format_exc()} with thread_id {thread_id}") 
 
                     frame_groups[thread_id].append((frame, frame_count, capture_time))  # Append frame information to the corresponding group
                     frame_counts[thread_id] += 1
