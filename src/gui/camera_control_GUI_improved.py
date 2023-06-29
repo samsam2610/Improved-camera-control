@@ -98,7 +98,7 @@ class CamGUI(object):
             self.cam_name.append(names[cam_num])
             self.cam.append(ICCam(cam_num))
         self.cam[num].start()
-        self.exposure[num].set(self.cam[num].get_exposure())
+        self.exposure[num].set(self.cam_details[str(num)]['exposure'])
         self.gain[num].set(self.cam[num].get_gain())
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
@@ -470,8 +470,8 @@ class CamGUI(object):
                 self.current_frame_count = []
                 self.frame_process_threshold = 100
                 # Check available detection file, if file available will delete it (for now)
-                self.rows_fname = os.path.join(self.output_dir, 'detections.pickle')
-                self.calibration_out = os.path.join(self.output_dir, 'calibration.toml') 
+                self.rows_fname = os.path.join(self.output_dir.get(), 'detections.pickle')
+                self.calibration_out = os.path.join(self.output_dir.get(), 'calibration.toml') 
                 self.clear_calibration_file(self.rows_fname)
                 self.clear_calibration_file(self.calibration_out)
                 self.rows_fname_available = False
