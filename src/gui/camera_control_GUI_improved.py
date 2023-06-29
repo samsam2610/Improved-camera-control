@@ -511,11 +511,11 @@ class CamGUI(object):
                         self.frame_queue.put((self.cam[num].get_image(),    # the frame itself
                                             num,                          # the id of the capturing camera
                                             self.frame_count[num],        # the current frame count
-                                            current_time))                # captured time
+                                            self.frame_times[num][-1]))                # captured time
                         
                         next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
             except Exception as e:
-                print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num, "| Frame count:", self.frame_count[num], "| Capture time:", current_time, "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
+                print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num, "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1], "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
   
     def calibrate_on_thread(self):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
@@ -569,8 +569,8 @@ class CamGUI(object):
                         # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
                         
                         # Clear the processed frames from the group
-                        frame_groups = []
-                        frame_count = []
+                        frame_groups = {}
+                        frame_count = {}
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id, "| Frame count:", frame_count, "| Capture time:", capture_time, "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
             
