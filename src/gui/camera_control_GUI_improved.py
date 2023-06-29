@@ -15,6 +15,7 @@ import numpy as np
 import datetime
 import os, sys, traceback
 from pathlib import Path
+import pickle
 import math
 import time
 import cv2
@@ -423,6 +424,13 @@ class CamGUI(object):
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
         except Exception as e:
             print(f"Traceback: \n {traceback.format_exc()}")
+    
+    def clear_calibration_file(self, file_name):
+        if os.path.exists(file_name):
+            os.remove(file_name)
+            print(f"Deleted calibration file: {file_name}")
+        else:
+            print(f"Calibration file '{file_name}' does not exist.")
 
     def setup_calibration(self):
         from src.aniposelib.cameras import CameraGroup
@@ -461,6 +469,13 @@ class CamGUI(object):
                 self.previous_frame_count = []
                 self.current_frame_count = []
                 self.frame_process_threshold = 100
+                # Check available detection file, if file available will delete it (for now)
+                self.rows_fname = os.path.join(self.output_dir, 'detections.pickle')
+                self.calibration_out = os.path.join(self.output_dir, 'calibration.toml') 
+                self.clear_calibration_file(self.rows_fname)
+                self.clear_calibration_file(self.calibration_out)
+                self.rows_fname_available = False
+
                 # Create a shared queue to store frames
                 self.frame_queue = queue.Queue(maxsize=self.frame_process_threshold)
 
@@ -483,6 +498,9 @@ class CamGUI(object):
                     t.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i,)))
                     t[-1].daemon = True
                     t[-1].start()
+                t.append(threading.Thread(target=self.detect_marker_on_thread))
+                t[-1].daemon = True
+                t[-1].start()
                 t.append(threading.Thread(target=self.calibrate_on_thread))
                 t[-1].daemon = True
                 t[-1].start()
@@ -517,11 +535,9 @@ class CamGUI(object):
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num, "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1], "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
   
-    def calibrate_on_thread(self):
+    def detect_marker_on_thread(self):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
-        self.calibration_error = 0
-        print(f'Current error: {self.calibration_error}')
         while True:
             try:
                 while self.calibration_toggle_status:
@@ -535,6 +551,7 @@ class CamGUI(object):
                     frame_counts[thread_id] += 1
                     
                     # Process the frame group (frames with the same thread_id)
+                    # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
                     if all(count >= self.frame_process_threshold for count in frame_counts.values()):
                         self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} frames acquired from each camera, calibrating...'
                         all_rows = [] # preallocate detected rows from all cameras, for each camera
@@ -559,20 +576,45 @@ class CamGUI(object):
 
                             rows = self.board_calibration.fill_points_rows(rows)
                             all_rows.append(rows)
-
-                        self.calibration_error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
-                                        init_intrinsics=self.init_matrix, init_extrinsics=self.init_matrix,
-                                        max_nfev=200, n_iters=6,
-                                        n_samp_iter=200, n_samp_full=1000,
-                                        verbose=True)
-                        self.init_matrix = False
-                        # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
                         
+                        with open(self.rows_fname, 'ab') as file:
+                            pickle.dump(all_rows, file)
+                        
+                        self.rows_fname_available = True
                         # Clear the processed frames from the group
                         frame_groups = {}
                         frame_count = {}
+
+                            
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id, "| Frame count:", frame_count, "| Capture time:", capture_time, "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
+            
+    def calibrate_on_thread(self):
+        frame_groups = {}  # Dictionary to store frame groups by thread_id
+        frame_counts = {}  # array to store frame counts for each thread_id
+        self.calibration_error = float('inf')
+        print(f'Current error: {self.calibration_error}')
+        while True:
+            try:
+                while self.rows_fname_available:
+                    print(f'Current error: {self.calibration_error}')
+                    with open(self.rows_fname, 'rb') as f:
+                        all_rows = pickle.load(f)
+                
+                    self.calibration_error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
+                                    init_intrinsics=self.init_matrix, init_extrinsics=self.init_matrix,
+                                    max_nfev=200, n_iters=6,
+                                    n_samp_iter=200, n_samp_full=1000,
+                                    verbose=True)
+                    self.init_matrix = False
+                    # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
+                    self.cgroup.metadata['adjusted'] = False
+                    if self.calibration_error is not None:
+                        self.cgroup.metadata['error'] = float(self.calibration_error)
+                    self.cgroup.dump(self.calibration_out)
+
+            except Exception as e:
+                print("Exception occurred:", type(e).__name__, "| Exception value:", e, ''.join(traceback.format_tb(e.__traceback__)))
             
 
     def start_record(self):
