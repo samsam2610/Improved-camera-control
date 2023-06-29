@@ -438,7 +438,7 @@ class CamGUI(object):
         from src.aniposelib.cameras import CameraGroup
 
         self.calibration_process_stats['text'] = 'Initializing calibration process...'
-        from utils import load_config, get_calibration_board
+        from src.gui.utils import load_config, get_calibration_board
         if self.running_config['debug_mode']:
             self.calibration_process_stats['text'] = 'Looking for config.toml directory ...'
             path = Path(os.path.realpath(__file__))
