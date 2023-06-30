@@ -510,7 +510,7 @@ class CamGUI(object):
                 self.frame_times = []
                 self.previous_frame_count = []
                 self.current_frame_count = []
-                self.frame_process_threshold = 5
+                self.frame_process_threshold = 100
                 self.queue_frame_threshold = 1000
                 # Check available detection file, if file available will delete it (for now)
                 self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
@@ -695,7 +695,7 @@ class CamGUI(object):
                         # update the detection file, and
                         # perform the calibration
 
-                        if len(all_rows) == 0:
+                        if len(all_rows) <= 2:
                             self.rows_fname_available = False
                         else:
 
