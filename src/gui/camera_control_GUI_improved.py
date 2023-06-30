@@ -522,6 +522,9 @@ class CamGUI(object):
                 # Create a shared queue to store frames
                 self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
 
+                # Boolean for detections.pickle is updated
+                self.detection_update = False
+
                 # create output file names
                 self.vid_file = []
                 self.base_name = []
@@ -537,6 +540,34 @@ class CamGUI(object):
                                                           self.base_name[i] +
                                                           self.attempt.get() +
                                                           '.avi'))
+                    # check if file exists, ask to overwrite or change attempt number if it does
+                    if i == 0:
+                        self.overwrite = False
+                        if os.path.isfile(self.vid_file[i]):
+                            self.ask_overwrite = Tk()
+
+                            def quit_overwrite(ow):
+                                self.overwrite = ow
+                                self.ask_overwrite.quit()
+
+                            Label(self.ask_overwrite,
+                                  text="File already exists with attempt number = " +
+                                       self.attempt.get() +
+                                       ".\nWould you like to overwrite the file? ").pack()
+                            Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
+                            Button(self.ask_overwrite, text="Cancel & pick new attempt number",
+                                   command=lambda: quit_overwrite(False)).pack()
+                            self.ask_overwrite.mainloop()
+                            self.ask_overwrite.destroy()
+
+                            if self.overwrite:
+                                self.vid_file[i] = os.path.normpath(
+                                    self.out_dir + '/' + self.base_name[i] + self.attempt.get() + '.avi')
+                            else:
+                                return
+                    else:
+                        # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
+                        print('')
 
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
@@ -654,14 +685,20 @@ class CamGUI(object):
                             rows = self.board_calibration.fill_points_rows(rows)
                             all_rows.append(rows)
 
-                        with open(self.rows_fname, 'ab') as file:
-                            pickle.dump(all_rows, file)
+                        # if the all_rows is empty, do not:
+                        # update the detection file, and
+                        # perform the calibration
 
-                        self.rows_fname_available = True
-                        # Clear the processed frames from the group
-                        frame_groups = {}
-                        frame_count = {}
+                        if not all_rows:
+                            self.rows_fname_available = False
+                        else:
 
+                            with open(self.rows_fname, 'ab') as file:
+                                pickle.dump(all_rows, file)
+                            self.rows_fname_available = True
+                            # Clear the processed frames from the group
+                            frame_groups = {}
+                            frame_count = {}
 
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id,
@@ -675,7 +712,7 @@ class CamGUI(object):
         print(f'Current error: {self.calibration_error}')
         while True:
             try:
-                while self.rows_fname_available:
+                if self.rows_fname_available:
                     print(f'Current error: {self.calibration_error}')
                     with open(self.rows_fname, 'rb') as f:
                         all_rows = pickle.load(f)
@@ -692,6 +729,7 @@ class CamGUI(object):
                     if self.calibration_error is not None:
                         self.cgroup.metadata['error'] = float(self.calibration_error)
                     self.cgroup.dump(self.calibration_out)
+                    self.rows_fname_available = False
 
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e,
