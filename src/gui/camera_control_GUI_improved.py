@@ -574,6 +574,11 @@ class CamGUI(object):
                     self.all_rows.append([])
                     self.previous_frame_count.append(0)
                     self.current_frame_count.append(0)
+                    self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
+                    self.ts_file[i] = self.ts_file[i].replace(cam_name_no_space[i], 'TIMESTAMPS_' + cam_name_no_space[i])
+                    self.ts_file_csv.append(self.vid_file[i].replace('.avi', '.csv'))
+                    self.ts_file_csv[i] = self.ts_file_csv[i].replace(cam_name_no_space[i],
+                                                                      'TIMESTAMPS_' + cam_name_no_space[i])
 
                     # create video writer
                     dim = self.cam[i].get_image_dimensions()
@@ -643,7 +648,6 @@ class CamGUI(object):
                 while self.calibration_toggle_status:
                     # Retrieve frame information from the queue
                     frame, thread_id, frame_count, capture_time = self.frame_queue.get()
-                    print(f'Current error: {self.calibration_error}, current frame count: {frame_count}')
                     if thread_id not in frame_groups:
                         frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
                         frame_counts[thread_id] = 0
@@ -689,7 +693,7 @@ class CamGUI(object):
                         # update the detection file, and
                         # perform the calibration
 
-                        if not all_rows:
+                        if len(all_rows) == 0:
                             self.rows_fname_available = False
                         else:
 
@@ -706,8 +710,6 @@ class CamGUI(object):
                       ''.join(traceback.format_tb(e.__traceback__)))
 
     def calibrate_on_thread(self):
-        frame_groups = {}  # Dictionary to store frame groups by thread_id
-        frame_counts = {}  # array to store frame counts for each thread_id
         self.calibration_error = float('inf')
         print(f'Current error: {self.calibration_error}')
         while True:
