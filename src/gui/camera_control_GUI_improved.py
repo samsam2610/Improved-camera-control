@@ -541,7 +541,6 @@ class CamGUI(object):
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
                     self.all_rows.append([])
-                    self.frame_times.append([])
                     self.previous_frame_count.append(0)
                     self.current_frame_count.append(0)
 
