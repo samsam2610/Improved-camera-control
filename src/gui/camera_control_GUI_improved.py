@@ -552,9 +552,7 @@ class CamGUI(object):
                     else:
                         self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
 
-                # preallocate the frame times
-                self.frame_times = []
-                for i in self.ts_file:
+                    # preallocate the frame times
                     self.frame_times.append([])
 
                 self.calibration_process_stats['text'] = 'Setting the frame sizes...'
