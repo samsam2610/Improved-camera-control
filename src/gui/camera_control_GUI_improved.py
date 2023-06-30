@@ -688,7 +688,7 @@ class CamGUI(object):
                                     rows.append(row)
 
                             rows = self.board_calibration.fill_points_rows(rows)
-                            self.board_detected_count_label[i].['text'] = f'{len(rows)}'
+                            self.board_detected_count_label[i]['text'] = f'{len(rows)}'
                             all_rows.append(rows)
 
                         # pre-check the quality of the detections
