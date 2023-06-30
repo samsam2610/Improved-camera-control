@@ -510,7 +510,7 @@ class CamGUI(object):
                 self.frame_times = []
                 self.previous_frame_count = []
                 self.current_frame_count = []
-                self.frame_process_threshold = 100
+                self.frame_process_threshold = 2
                 self.queue_frame_threshold = 1000
                 # Check available detection file, if file available will delete it (for now)
                 self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
@@ -659,6 +659,7 @@ class CamGUI(object):
                     frame_groups[thread_id].append((frame, frame_count, capture_time))
                     frame_counts[thread_id] += 1
                     self.frame_acquired_count_label[thread_id]['text'] = f'{frame_count}'
+                    self.vid_out[thread_id].write(frame)
 
                     # Process the frame group (frames with the same thread_id)
                     # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
