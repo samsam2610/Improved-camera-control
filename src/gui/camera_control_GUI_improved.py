@@ -1003,7 +1003,7 @@ class CamGUI(object):
             Label(self.window, text='').grid(row=cur_row + 1, column=2, sticky="w")
             self.current_exposure.append(Label(self.window, text=""))
             self.current_exposure[i].grid(row=cur_row + 1, column=2, sticky="w")
-            cur_row += 1
+            cur_row += 2
 
             # label for frame acquired count
             Label(self.window, text="Frame acquired count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=0, sticky="w")
@@ -1096,7 +1096,7 @@ class CamGUI(object):
         # label for calibration process status text
 
         Label(self.window, text="Calibration status: ").grid(row=cur_row, column=0, sticky="w")
-        self.calibration_process_stats = Label(self.window, text='', wraplength=numberOfScreenUnits)
+        self.calibration_process_stats = Label(self.window, text='', wraplength=200)
         self.calibration_process_stats.grid(row=cur_row, column=1, sticky="w")
         cur_row += 1
 
