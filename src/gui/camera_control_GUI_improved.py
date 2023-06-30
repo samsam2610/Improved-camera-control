@@ -10,40 +10,30 @@ GUI to record from imaging source cameras during experiments
 Modified by people at Dr. Tresch's lab
 """
 
-from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk
-import numpy as np
+import argparse
 import datetime
-import os, sys, traceback
-from pathlib import Path
-import pickle
+import json
 import math
+import os
+import pickle
+import queue
+import threading
 import time
+import traceback
+from pathlib import Path
+from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk
+
 import cv2
 import ffmpy
-import threading
-import queue
-import json
-import argparse
+import numpy as np
 
 fourcc_codes = ["DIVX", "XVID", "Y800"]
 
 
+# noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
 class CamGUI(object):
 
     def __init__(self, debug_mode=False, init_cam_bool=True):
-        self.record_on = None
-        self.vid_out = None
-        self.subject = None
-        self.init_matrix = None
-        self.calibration_error = None
-        self.frame_times = None
-        self.ts_file = None
-        self.vid_file = None
-        self.base_name = None
-        self.ts_file_csv = None
-        self.trigger_on = None
-        self.video_codec = None
-        self.rows_fname_available = None
         self.running_config = {'debug_mode': debug_mode, 'init_cam_bool': init_cam_bool}
         if self.running_config['init_cam_bool']:
             from src.camera_control.ic_camera import ICCam
@@ -373,8 +363,12 @@ class CamGUI(object):
                 temp_exposure = str(self.exposure[i].get())
                 temp_gain = str(self.gain[i].get())
                 cam_name_nospace.append(self.cam_name[i].replace(' ', ''))
-                self.base_name.append(cam_name_nospace[
-                                          i] + '_' + self.subject.get() + '_' + date + '_' + da_fps + 'f' + temp_exposure + 'e' + temp_gain + 'g')
+                self.base_name.append(cam_name_nospace[i] + '_'
+                                      + self.subject.get() + '_'
+                                      + date + '_'
+                                      + da_fps + 'f'
+                                      + temp_exposure + 'e'
+                                      + temp_gain + 'g')
                 self.vid_file.append(
                     os.path.normpath(self.out_dir + '/' + self.base_name[i] + self.attempt.get() + '.avi'))
 
@@ -423,7 +417,7 @@ class CamGUI(object):
                 if self.lv_task is not None:
                     self.lv_file = self.ts_file[0].replace('TIMESTAMPS_' + cam_name_nospace[0], 'LABVIEW')
 
-                # create video writer
+                # create frame time writer
                 self.frame_times = []
                 for i in self.ts_file:
                     self.frame_times.append([])
@@ -471,7 +465,6 @@ class CamGUI(object):
             print(f"Calibration file '{file_name}' does not exist.")
 
     def setup_calibration(self):
-        from src.aniposelib.cameras import CameraGroup
 
         self.calibration_process_stats['text'] = 'Initializing calibration process...'
         from src.gui.utils import load_config, get_calibration_board
@@ -509,7 +502,8 @@ class CamGUI(object):
                 self.frame_times = []
                 self.previous_frame_count = []
                 self.current_frame_count = []
-                self.frame_process_threshold = 100
+                self.frame_process_threshold = 5
+                self.queue_frame_threshold = 1000
                 # Check available detection file, if file available will delete it (for now)
                 self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
                 self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml')
@@ -518,16 +512,38 @@ class CamGUI(object):
                 self.rows_fname_available = False
 
                 # Create a shared queue to store frames
-                self.frame_queue = queue.Queue(maxsize=self.frame_process_threshold)
+                self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
+
+                # create output file names
+                self.vid_file = []
+                cam_name_no_space = []
 
                 for i in range(len(self.cam)):
+                    # write code to create a list of base names for the videos
+                    cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+                    self.base_name.append(cam_name_no_space[i] + '_' + 'calibration_')
+                    self.vid_file.append(os.path.normpath(self.dir_output.get() + '/' + self.base_name[i] + self.attempt.get() + '.avi'))   
+                     
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
                     self.all_rows.append([])
                     self.frame_times.append([])
                     self.previous_frame_count.append(0)
                     self.current_frame_count.append(0)
+                    
+                    # create video writer
+                    dim = self.cam[i].get_image_dimensions()
+                    fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
+                    if len(self.vid_out) >= i + 1:
+                        self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
+                    else:
+                        self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
 
+                    # preallocate the frame times
+                    self.frame_times = []
+                    for i in self.ts_file:
+                        self.frame_times.append([])
+                        
                 self.calibration_process_stats['text'] = 'Setting the frame sizes...'
                 self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
                 self.init_matrix = True
@@ -590,6 +606,9 @@ class CamGUI(object):
                         frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
                         frame_counts[thread_id] = 0
 
+                    # Write frame to video file
+                    self.vid_out[thread_id].write(frame)
+                    
                     # Append frame information to the corresponding group
                     frame_groups[thread_id].append((frame, frame_count, capture_time))
                     frame_counts[thread_id] += 1
@@ -597,8 +616,7 @@ class CamGUI(object):
                     # Process the frame group (frames with the same thread_id)
                     # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
                     if all(count >= self.frame_process_threshold for count in frame_counts.values()):
-                        self.calibration_process_stats[
-                            'text'] = f'More than {self.frame_process_threshold} frames acquired from each camera, calibrating...'
+                        self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} frames acquired from each camera, detecting the markers...'
                         all_rows = []  # preallocate detected rows from all cameras, for each camera
 
                         # For each frame from each camera, detect the corners and ids, then add to rows,
@@ -843,7 +861,7 @@ class CamGUI(object):
             self.camera_entry[i].current(i)
             self.camera_entry[i].grid(row=cur_row, column=1)
 
-            # inialize camera button
+            # initialize camera button
             if i == 0:
                 Button(self.window, text="Initialize Camera 1", command=lambda: self.init_cam(0)).grid(sticky="nsew",
                                                                                                        row=cur_row + 1,
@@ -1056,5 +1074,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Create an instance of the CamGUI class with the parsed arguments
-    cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
-    cam_gui.runGUI()
+    try:
+        cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
+    except Exception as e:
+        print("Error creating CamGUI instance: %s" % str(e))
+        exit(1)
+    try:
+        cam_gui.runGUI()
+    except Exception as e:
+        print("Error running CamGUI: %s" % str(e))
+        exit(1)
