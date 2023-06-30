@@ -1096,7 +1096,7 @@ class CamGUI(object):
         # label for calibration process status text
         Label(self.window, text="Calibration status: ").grid(row=cur_row, column=0, sticky="w")
         self.calibration_process_stats = Label(self.window, text='', wraplength=200)
-        self.calibration_process_stats.grid(row=cur_row, column=1, columnspan=2, rowspan=2, sticky="w")
+        self.calibration_process_stats.grid(row=cur_row, column=1, columnspan=2, rowspan=5, sticky="w")
         cur_row += 1
 
         # label for calibration process status text
