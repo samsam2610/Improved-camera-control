@@ -27,8 +27,6 @@ import cv2
 import ffmpy
 import numpy as np
 
-fourcc_codes = ["DIVX", "XVID", "Y800"]
-
 
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
 class CamGUI(object):
@@ -109,7 +107,8 @@ class CamGUI(object):
         self.current_exposure[num]['text'] = exposure_text
         setup_window.destroy()
 
-    def check_frame(self, timeStampFile1, timeStampFile2, frameRate):
+    @staticmethod
+    def check_frame(timeStampFile1, timeStampFile2, frameRate):
         # Timestamps should be in seconds
         return_text = []
         frameRate = float(frameRate)
@@ -264,8 +263,11 @@ class CamGUI(object):
                 temp_exposure = str(self.exposure[i].get())
                 temp_gain = str(self.gain[i].get())
                 cam_name_nospace.append(self.cam_name[i].replace(' ', ''))
-                self.base_name.append(cam_name_nospace[
-                                          i] + '_' + subject_name + '_' + da_fps + 'f' + temp_exposure + 'e' + temp_gain + 'g')
+                self.base_name.append(cam_name_nospace[i] + '_' +
+                                      subject_name + '_' +
+                                      da_fps + 'f' +
+                                      temp_exposure + 'e' +
+                                      temp_gain + 'g')
                 self.vid_file.append(os.path.normpath(dir_name + '/' + self.base_name[i] + '.avi'))
 
                 # check if file exists, ask to overwrite or change attempt number if it does
@@ -279,7 +281,9 @@ class CamGUI(object):
                             self.ask_overwrite.quit()
 
                         Label(self.ask_overwrite,
-                              text="File already exists with attempt number = " + self.attempt.get() + ".\nWould you like to overwrite the file? ").pack()
+                              text="File already exists with attempt number = " +
+                                   self.attempt.get() +
+                                   ".\nWould you like to overwrite the file? ").pack()
                         Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
                         Button(self.ask_overwrite, text="Cancel & pick new attempt number",
                                command=lambda: quit_overwrite(False)).pack()
@@ -324,7 +328,9 @@ class CamGUI(object):
         if len(self.vid_out) > 0:
             vid_open_window = Tk()
             Label(vid_open_window,
-                  text="Video is currently open! \nPlease release the current video (click 'Save Video', even if no frames have been recorded) before setting up a new one.").pack()
+                  text="Video is currently open! \n"
+                       "Please release the current video (click 'Save Video', even if no frames have been recorded)"
+                       " before setting up a new one.").pack()
             Button(vid_open_window, text="Ok", command=lambda: vid_open_window.quit()).pack()
             vid_open_window.mainloop()
             vid_open_window.destroy()
@@ -383,7 +389,9 @@ class CamGUI(object):
                             self.ask_overwrite.quit()
 
                         Label(self.ask_overwrite,
-                              text="File already exists with attempt number = " + self.attempt.get() + ".\nWould you like to overwrite the file? ").pack()
+                              text="File already exists with attempt number = " +
+                                   self.attempt.get() +
+                                   ".\nWould you like to overwrite the file? ").pack()
                         Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
                         Button(self.ask_overwrite, text="Cancel & pick new attempt number",
                                command=lambda: quit_overwrite(False)).pack()
@@ -522,15 +530,19 @@ class CamGUI(object):
                     # write code to create a list of base names for the videos
                     cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
                     self.base_name.append(cam_name_no_space[i] + '_' + 'calibration_')
-                    self.vid_file.append(os.path.normpath(self.dir_output.get() + '/' + self.base_name[i] + self.attempt.get() + '.avi'))   
-                     
+                    self.vid_file.append(os.path.normpath(self.dir_output.get() +
+                                                          '/' +
+                                                          self.base_name[i] +
+                                                          self.attempt.get() +
+                                                          '.avi'))
+
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
                     self.all_rows.append([])
                     self.frame_times.append([])
                     self.previous_frame_count.append(0)
                     self.current_frame_count.append(0)
-                    
+
                     # create video writer
                     dim = self.cam[i].get_image_dimensions()
                     fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
@@ -543,7 +555,7 @@ class CamGUI(object):
                     self.frame_times = []
                     for i in self.ts_file:
                         self.frame_times.append([])
-                        
+
                 self.calibration_process_stats['text'] = 'Setting the frame sizes...'
                 self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
                 self.init_matrix = True
@@ -601,14 +613,14 @@ class CamGUI(object):
                 while self.calibration_toggle_status:
                     # Retrieve frame information from the queue
                     frame, thread_id, frame_count, capture_time = self.frame_queue.get()
-                    print(f'Current error: {self.calibration_error}, current framecount: {frame_count}')
+                    print(f'Current error: {self.calibration_error}, current frame count: {frame_count}')
                     if thread_id not in frame_groups:
                         frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
                         frame_counts[thread_id] = 0
 
                     # Write frame to video file
                     self.vid_out[thread_id].write(frame)
-                    
+
                     # Append frame information to the corresponding group
                     frame_groups[thread_id].append((frame, frame_count, capture_time))
                     frame_counts[thread_id] += 1
@@ -616,7 +628,9 @@ class CamGUI(object):
                     # Process the frame group (frames with the same thread_id)
                     # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
                     if all(count >= self.frame_process_threshold for count in frame_counts.values()):
-                        self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} frames acquired from each camera, detecting the markers...'
+                        self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} ' \
+                                                                 f'frames acquired from each camera,' \
+                                                                 f' detecting the markers...'
                         all_rows = []  # preallocate detected rows from all cameras, for each camera
 
                         # For each frame from each camera, detect the corners and ids, then add to rows,
@@ -728,7 +742,8 @@ class CamGUI(object):
             frames_taken = all([len(i) > 0 for i in self.frame_times])
 
             # release video writer (saves file).
-            # if no frames taken or delete specified, delete the file and do not save timestamp files; otherwise, save timestamp files.
+            # if no frames taken or delete specified,
+            # delete the file and do not save timestamp files; otherwise, save timestamp files.
             for i in range(len(self.vid_out)):
                 self.vid_out[i].release()
                 self.vid_out[i] = None
@@ -762,7 +777,8 @@ class CamGUI(object):
         elif delete:
             save_msg = "Video has been deleted, please set up a new video to take another recording."
         elif not frames_taken:
-            save_msg = "Video was initialized but no frames were recorded.\nVideo has been deleted, please set up a new video to take another recording."
+            save_msg = 'Video was initialized but no frames were recorded.\n' \
+                       'Video has been deleted, please set up a new video to take another recording.'
 
         if save_msg:
             save_window = Tk()
@@ -846,6 +862,7 @@ class CamGUI(object):
                             'RGB24 (720x288)', 'RGB24 (720x480)', 'RGB24 (720x540)', 'RGB24 (720x576)',
                             'RGB24 (768x576)', 'RGB24 (1024x768)', 'RGB24 (1280x960)', 'RGB24 (1280x1024)',
                             'RGB24 (1440x1080)']
+        self.fourcc_codes = ["DIVX", "XVID", "Y800"]
         self.formats = []
         self.format_entry = []
 
@@ -983,7 +1000,7 @@ class CamGUI(object):
         Label(self.window, text="Video writer codec:").grid(sticky="w", row=cur_row, column=3)
         self.video_codec = StringVar()
         self.video_codec_entry = ttk.Combobox(self.window,
-                                              value=fourcc_codes,
+                                              value=self.fourcc_codes,
                                               state="readonly")
         self.video_codec_entry.set("XVID")  # default codec
         self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)

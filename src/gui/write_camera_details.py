@@ -20,29 +20,29 @@ out = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.js
 
 # Crop, rotation, and exposure are default parameters. Can be changed in the GUI.
 
-cam_0 = {'name' : 'cam1',
-        'crop' : {'top' : 210, 'left' : 8, 'height' : 550, 'width' : 900},
-        'rotate' : 0,
-        'exposure' : 0.002,
-        'gain': 100,
-        'output_dir' : 'E:\\live_videos'}
+cam_0 = {'name': 'cam1',
+         'crop': {'top': 210, 'left': 8, 'height': 550, 'width': 900},
+         'rotate': 0,
+         'exposure': 0.002,
+         'gain': 100,
+         'output_dir': 'E:\\live_videos'}
 
-cam_1 = {'name' : 'cam2',
-        'crop' : {'top' : 130, 'left' : 92, 'height' : 550, 'width' : 900},
-        'rotate' : 0,
-        'exposure' : 0.002,
-        'gain': 100,
-        'output_dir' : 'E:\\live_videos'}
+cam_1 = {'name': 'cam2',
+         'crop': {'top': 130, 'left': 92, 'height': 550, 'width': 900},
+         'rotate': 0,
+         'exposure': 0.002,
+         'gain': 100,
+         'output_dir': 'E:\\live_videos'}
 
-subs = ['test1', 'test2', 'test3'] # optional, can manually enter subject for each session.
+subs = ['test1', 'test2', 'test3']  # optional, can manually enter subject for each session.
 
-labview = ['Dev1/port0/line0'] # optional, can manually enter for each session
+labview = ['Dev1/port0/line0']  # optional, can manually enter for each session
 
-details = {'cams' : 2,
-           '0' : cam_0,
-           '1' : cam_1,
-           'subjects' : subs,
-           'labview' : labview}
+details = {'cams': 2,
+           '0': cam_0,
+           '1': cam_1,
+           'subjects': subs,
+           'labview': labview}
 
 with open(out, 'w') as handle:
     json.dump(details, handle)
