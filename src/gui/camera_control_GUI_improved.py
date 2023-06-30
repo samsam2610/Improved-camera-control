@@ -691,20 +691,27 @@ class CamGUI(object):
                             rows = self.board_calibration.fill_points_rows(rows)
                             all_rows.append(rows)
 
+                        # pre-check the quality of the detections
+                        if len(all_rows) == len(self.cam):
+                            # Check if the number of rows in those rows is the same
+                            if len(all_rows[0]) == len(all_rows[1]):
+                                print("Detected the same number of rows from all cameras, saving the detections.")
+                                with open(self.rows_fname, 'ab') as file:
+                                    pickle.dump(all_rows, file)
+                                self.rows_fname_available = True
+
+                            else:
+                                self.rows_fname_available = False
+                                print("The number of rows in the two rows is different.")
+                        else:
+                            print(f"Couldn't simultaneously detected rows from {len(self.cam)} cameras.")
                         # if the all_rows is empty, do not:
                         # update the detection file, and
                         # perform the calibration
 
-                        if len(all_rows) == 2:
-                            with open(self.rows_fname, 'ab') as file:
-                                pickle.dump(all_rows, file)
-                            self.rows_fname_available = True
-                            # Clear the processed frames from the group
-                            frame_groups = {}
-                            frame_count = {}
-                        else:
-                            self.rows_fname_available = False
-
+                        # Clear the processed frames from the group
+                        frame_groups = {}
+                        frame_count = {}
 
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id,
@@ -797,10 +804,6 @@ class CamGUI(object):
                     saved_files.append(self.ts_file[i])
                     if compress:
                         threading.Thread(target=lambda: self.compress_vid(i)).start()
-
-        if (len(self.lv_ts) > 0) and (not delete):
-            np.save(str(self.lv_file), np.array(self.lv_ts))
-            saved_files.append(self.lv_file)
 
         save_msg = ""
         if len(saved_files) > 0:
