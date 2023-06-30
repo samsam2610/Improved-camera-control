@@ -524,6 +524,7 @@ class CamGUI(object):
 
                 # create output file names
                 self.vid_file = []
+                self.base_name = []
                 cam_name_no_space = []
 
                 for i in range(len(self.cam)):
