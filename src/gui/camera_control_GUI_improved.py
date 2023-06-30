@@ -216,6 +216,60 @@ class CamGUI(object):
         finally:
             return return_code
 
+    def create_video_files(self):
+        # check if file exists, ask to overwrite or change attempt number if it does
+        for i in range(len(self.cam)):
+            if i == 0:
+                self.overwrite = False
+                if os.path.isfile(self.vid_file[i]):
+                    self.ask_overwrite = Tk()
+
+                    def quit_overwrite(ow):
+                        self.overwrite = ow
+                        self.ask_overwrite.quit()
+
+                    Label(self.ask_overwrite,
+                          text="File already exists with attempt number = " +
+                               self.attempt.get() +
+                               ".\nWould you like to overwrite the file? ").pack()
+                    Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
+                    Button(self.ask_overwrite, text="Cancel & pick new attempt number",
+                           command=lambda: quit_overwrite(False)).pack()
+                    self.ask_overwrite.mainloop()
+                    self.ask_overwrite.destroy()
+
+                    if self.overwrite:
+                        self.vid_file[i] = os.path.normpath(
+                            self.out_dir + '/' + self.base_name[i] + self.attempt.get() + '.avi')
+                    else:
+                        return
+            else:
+                # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
+                print('')
+
+            # create video writer
+            dim = self.cam[i].get_image_dimensions()
+            fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
+            if len(self.vid_out) >= i + 1:
+                self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
+            else:
+                self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
+
+    def create_output_files(self, subject_name='Sam'):
+        # create output file names
+        self.ts_file = []
+        self.ts_file_csv = []
+        self.frame_times = []
+
+        for i in range(len(self.cam)):
+            self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
+            self.ts_file[i] = self.ts_file[i].replace(self.cam_name_no_space[i], 'TIMESTAMPS_' + self.cam_name_no_space[i])
+            self.ts_file_csv.append(self.vid_file[i].replace('.avi', '.csv'))
+            self.ts_file_csv[i] = self.ts_file_csv[i].replace(self.cam_name_no_space[i],
+                                                              'TIMESTAMPS_' + self.cam_name_no_space[i])
+            self.current_file_label['text'] = subject_name
+            self.frame_times.append([])
+
     def sync_setup(self):
 
         if len(self.vid_out) > 0:
@@ -248,13 +302,12 @@ class CamGUI(object):
             if not os.path.isdir(os.path.normpath(self.out_dir)):
                 os.makedirs(os.path.normpath(self.out_dir))
 
-            # create output file names
+            self.cam_name_no_space = []
+            this_row = 3
+
+            # Preallocate vid_file dir
             self.vid_file = []
             self.base_name = []
-            self.ts_file = []
-            self.ts_file_csv = []
-            cam_name_nospace = []
-            this_row = 3
 
             # subject_name, dir_name = generate_folder()
             subject_name = 'sam'
@@ -262,69 +315,20 @@ class CamGUI(object):
             for i in range(len(self.cam)):
                 temp_exposure = str(self.exposure[i].get())
                 temp_gain = str(self.gain[i].get())
-                cam_name_nospace.append(self.cam_name[i].replace(' ', ''))
-                self.base_name.append(cam_name_nospace[i] + '_' +
+                self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+                self.base_name.append(self.cam_name_no_space[i] + '_' +
                                       subject_name + '_' +
                                       da_fps + 'f' +
                                       temp_exposure + 'e' +
                                       temp_gain + 'g')
                 self.vid_file.append(os.path.normpath(dir_name + '/' + self.base_name[i] + '.avi'))
 
-                # check if file exists, ask to overwrite or change attempt number if it does
-                if i == 0:
-                    self.overwrite = False
-                    if os.path.isfile(self.vid_file[i]):
-                        self.ask_overwrite = Tk()
-
-                        def quit_overwrite(ow):
-                            self.overwrite = ow
-                            self.ask_overwrite.quit()
-
-                        Label(self.ask_overwrite,
-                              text="File already exists with attempt number = " +
-                                   self.attempt.get() +
-                                   ".\nWould you like to overwrite the file? ").pack()
-                        Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
-                        Button(self.ask_overwrite, text="Cancel & pick new attempt number",
-                               command=lambda: quit_overwrite(False)).pack()
-                        self.ask_overwrite.mainloop()
-                        self.ask_overwrite.destroy()
-
-                        if self.overwrite:
-                            self.vid_file[i] = os.path.normpath(self.out_dir + '/' + self.base_name[i] + '.avi')
-                        else:
-                            return
-                else:
-                    # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
-                    print('')
-
-                self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
-                self.ts_file[i] = self.ts_file[i].replace(cam_name_nospace[i], 'TIMESTAMPS_' + cam_name_nospace[i])
-                self.ts_file_csv.append(self.vid_file[i].replace('.avi', '.csv'))
-                self.ts_file_csv[i] = self.ts_file_csv[i].replace(cam_name_nospace[i],
-                                                                  'TIMESTAMPS_' + cam_name_nospace[i])
-                self.current_file_label['text'] = subject_name
-
-                # create video writer
-                dim = self.cam[i].get_image_dimensions()
-                fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
-                if len(self.vid_out) >= i + 1:
-                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
-                else:
-                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
-
-                if self.lv_task is not None:
-                    self.lv_file = self.ts_file[0].replace('TIMESTAMPS_' + cam_name_nospace[0], 'LABVIEW')
-
-                # create video writer
-                self.frame_times = []
-                for i in self.ts_file:
-                    self.frame_times.append([])
-                self.lv_ts = []
-                self.setup = True
+                # Check if video files already exist, if yes, ask to change or overwrite
+            self.create_video_files()
+            self.create_output_files(subject_name=subject_name)
+            self.setup = True
 
     def set_up_vid(self):
-
         if len(self.vid_out) > 0:
             vid_open_window = Tk()
             Label(vid_open_window,
@@ -357,80 +361,29 @@ class CamGUI(object):
             if not os.path.isdir(os.path.normpath(self.out_dir)):
                 os.makedirs(os.path.normpath(self.out_dir))
 
-            # create output file names
+            self.cam_name_no_space = []
             self.vid_file = []
             self.base_name = []
-            self.ts_file = []
-            self.ts_file_csv = []
-
-            cam_name_nospace = []
             this_row = 3
             for i in range(len(self.cam)):
                 temp_exposure = str(self.exposure[i].get())
                 temp_gain = str(self.gain[i].get())
-                cam_name_nospace.append(self.cam_name[i].replace(' ', ''))
-                self.base_name.append(cam_name_nospace[i] + '_'
+                self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+                self.base_name.append(self.cam_name_no_space[i] + '_'
                                       + self.subject.get() + '_'
                                       + date + '_'
                                       + da_fps + 'f'
                                       + temp_exposure + 'e'
                                       + temp_gain + 'g')
-                self.vid_file.append(
-                    os.path.normpath(self.out_dir + '/' + self.base_name[i] + self.attempt.get() + '.avi'))
+                self.vid_file.append(os.path.normpath(self.out_dir + '/' +
+                                                      self.base_name[i] +
+                                                      self.attempt.get() +
+                                                      '.avi'))
 
-                # check if file exists, ask to overwrite or change attempt number if it does
-                if i == 0:
-                    self.overwrite = False
-                    if os.path.isfile(self.vid_file[i]):
-                        self.ask_overwrite = Tk()
-
-                        def quit_overwrite(ow):
-                            self.overwrite = ow
-                            self.ask_overwrite.quit()
-
-                        Label(self.ask_overwrite,
-                              text="File already exists with attempt number = " +
-                                   self.attempt.get() +
-                                   ".\nWould you like to overwrite the file? ").pack()
-                        Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
-                        Button(self.ask_overwrite, text="Cancel & pick new attempt number",
-                               command=lambda: quit_overwrite(False)).pack()
-                        self.ask_overwrite.mainloop()
-                        self.ask_overwrite.destroy()
-
-                        if self.overwrite:
-                            self.vid_file[i] = os.path.normpath(
-                                self.out_dir + '/' + self.base_name[i] + self.attempt.get() + '.avi')
-                        else:
-                            return
-                else:
-                    # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
-                    print('')
-
-                self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
-                self.ts_file[i] = self.ts_file[i].replace(cam_name_nospace[i], 'TIMESTAMPS_' + cam_name_nospace[i])
-                self.ts_file_csv.append(self.vid_file[i].replace('.avi', '.csv'))
-                self.ts_file_csv[i] = self.ts_file_csv[i].replace(cam_name_nospace[i],
-                                                                  'TIMESTAMPS_' + cam_name_nospace[i])
-                self.current_file_label['text'] = self.subject.get() + '_' + date + '_' + self.attempt.get()
-
-                # create video writer
-                dim = self.cam[i].get_image_dimensions()
-                fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
-                if len(self.vid_out) >= i + 1:
-                    self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
-                else:
-                    self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
-
-                if self.lv_task is not None:
-                    self.lv_file = self.ts_file[0].replace('TIMESTAMPS_' + cam_name_nospace[0], 'LABVIEW')
-
-                # create frame time writer
-                self.frame_times = []
-                for i in self.ts_file:
-                    self.frame_times.append([])
-                self.lv_ts = []
-                self.setup = True
+            self.create_video_files()
+            subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
+            self.create_output_files(subject_name=subject_name)
+            self.setup = True
 
     def record_on_thread(self, num):
         fps = int(self.fps.get())
@@ -486,8 +439,8 @@ class CamGUI(object):
                 'text'] = 'Successfully found and loaded config. Determining calibration board ...'
             self.board_calibration = get_calibration_board(config=config_anipose)
 
-            self.calibration_process_stats[
-                'text'] = 'Loaded calibration board. Initializing camera calibration objects ...'
+            self.calibration_process_stats['text'] = 'Loaded calibration board. ' \
+                                                     'Initializing camera calibration objects ...'
             from src.aniposelib.cameras import CameraGroup
             self.cgroup = CameraGroup.from_names(self.cam_names)
             self.calibration_process_stats['text'] = 'Initialized camera object.'
@@ -528,71 +481,27 @@ class CamGUI(object):
                 # create output file names
                 self.vid_file = []
                 self.base_name = []
-                self.ts_file = []
-                self.ts_file_csv = []
-
-                cam_name_no_space = []
+                self.cam_name_no_space = []
 
                 for i in range(len(self.cam)):
                     # write code to create a list of base names for the videos
-                    cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
-                    self.base_name.append(cam_name_no_space[i] + '_' + 'calibration_')
+                    self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+                    self.base_name.append(self.cam_name_no_space[i] + '_' + 'calibration_')
                     self.vid_file.append(os.path.normpath(self.dir_output.get() +
                                                           '/' +
                                                           self.base_name[i] +
                                                           self.attempt.get() +
                                                           '.avi'))
-                    # check if file exists, ask to overwrite or change attempt number if it does
-                    if i == 0:
-                        self.overwrite = False
-                        if os.path.isfile(self.vid_file[i]):
-                            self.ask_overwrite = Tk()
-
-                            def quit_overwrite(ow):
-                                self.overwrite = ow
-                                self.ask_overwrite.quit()
-
-                            Label(self.ask_overwrite,
-                                  text="File already exists with attempt number = " +
-                                       self.attempt.get() +
-                                       ".\nWould you like to overwrite the file? ").pack()
-                            Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
-                            Button(self.ask_overwrite, text="Cancel & pick new attempt number",
-                                   command=lambda: quit_overwrite(False)).pack()
-                            self.ask_overwrite.mainloop()
-                            self.ask_overwrite.destroy()
-
-                            if self.overwrite:
-                                self.vid_file[i] = os.path.normpath(
-                                    self.dir_output.get() + '/' + self.base_name[i] + self.attempt.get() + '.avi')
-                            else:
-                                return
-                    else:
-                        # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
-                        print('')
 
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
                     self.all_rows.append([])
                     self.previous_frame_count.append(0)
                     self.current_frame_count.append(0)
-                    self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
-                    self.ts_file[i] = self.ts_file[i].replace(cam_name_no_space[i],
-                                                              'TIMESTAMPS_' + cam_name_no_space[i])
-                    self.ts_file_csv.append(self.vid_file[i].replace('.avi', '.csv'))
-                    self.ts_file_csv[i] = self.ts_file_csv[i].replace(cam_name_no_space[i],
-                                                                      'TIMESTAMPS_' + cam_name_no_space[i])
 
-                    # create video writer
-                    dim = self.cam[i].get_image_dimensions()
-                    fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
-                    if len(self.vid_out) >= i + 1:
-                        self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
-                    else:
-                        self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
-
-                    # preallocate the frame times
-                    self.frame_times.append([])
+                # check if file exists, ask to overwrite or change attempt number if it does
+                self.create_video_files()
+                self.create_output_files(subject_name='Sam')
 
                 self.calibration_process_stats['text'] = 'Setting the frame sizes...'
                 self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
@@ -738,6 +647,10 @@ class CamGUI(object):
                                                                         max_nfev=200, n_iters=6,
                                                                         n_samp_iter=200, n_samp_full=1000,
                                                                         verbose=True)
+
+                    with open(self.cgroup_fname, "wb") as f:
+                        cgroup = pickle.dump(cgroup)
+
                     self.init_matrix = False
                     # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
                     self.cgroup.metadata['adjusted'] = False
@@ -1095,8 +1008,8 @@ class CamGUI(object):
 
         # label for calibration process status text
         Label(self.window, text="Calibration status: ").grid(row=cur_row, column=0, sticky="w")
-        self.calibration_process_stats = Label(self.window, text='', wraplength=200)
-        self.calibration_process_stats.grid(row=cur_row, column=1, columnspan=2, rowspan=5, sticky="w")
+        self.calibration_process_stats = Label(self.window, text='')
+        self.calibration_process_stats.grid(row=cur_row, column=1, columnspan=4, sticky="w")
         cur_row += 1
 
         # label for calibration process status text
