@@ -577,7 +577,8 @@ class CamGUI(object):
                     self.previous_frame_count.append(0)
                     self.current_frame_count.append(0)
                     self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
-                    self.ts_file[i] = self.ts_file[i].replace(cam_name_no_space[i], 'TIMESTAMPS_' + cam_name_no_space[i])
+                    self.ts_file[i] = self.ts_file[i].replace(cam_name_no_space[i],
+                                                              'TIMESTAMPS_' + cam_name_no_space[i])
                     self.ts_file_csv.append(self.vid_file[i].replace('.avi', '.csv'))
                     self.ts_file_csv[i] = self.ts_file_csv[i].replace(cam_name_no_space[i],
                                                                       'TIMESTAMPS_' + cam_name_no_space[i])
@@ -695,14 +696,17 @@ class CamGUI(object):
                         if len(all_rows) == len(self.cam):
                             # Check if the number of rows in those rows is the same
                             if len(all_rows[0]) == len(all_rows[1]):
-                                print("Detected the same number of rows from all cameras, saving the detections.")
+                                self.calibration_process_stats['text'] = \
+                                    "Detected the same number of rows from all cameras, saving the detections."
                                 with open(self.rows_fname, 'ab') as file:
                                     pickle.dump(all_rows, file)
                                 self.rows_fname_available = True
 
                             else:
                                 self.rows_fname_available = False
-                                print("The number of rows in the two rows is different.")
+                                self.calibration_process_stats['text'] = \
+                                    f"The number of rows in the two rows is different. \
+                                    cam21 has {len(all_rows[0])} rows and cam_2 has {len(all_rows[1])} rows"
                         else:
                             print(f"Couldn't simultaneously detected rows from {len(self.cam)} cameras.")
                         # if the all_rows is empty, do not:
