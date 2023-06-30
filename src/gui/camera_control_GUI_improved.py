@@ -706,7 +706,7 @@ class CamGUI(object):
                                 self.rows_fname_available = False
                                 self.calibration_process_stats['text'] = \
                                     f"The number of rows in the two rows is different. \
-                                    cam21 has {len(all_rows[0])} rows and cam_2 has {len(all_rows[1])} rows"
+                                    cam_1 has {len(all_rows[0])} rows and cam_2 has {len(all_rows[1])} rows"
                         else:
                             print(f"Couldn't simultaneously detected rows from {len(self.cam)} cameras.")
                         # if the all_rows is empty, do not:
@@ -1094,10 +1094,9 @@ class CamGUI(object):
         cur_row += 1
 
         # label for calibration process status text
-
         Label(self.window, text="Calibration status: ").grid(row=cur_row, column=0, sticky="w")
         self.calibration_process_stats = Label(self.window, text='', wraplength=200)
-        self.calibration_process_stats.grid(row=cur_row, column=1, sticky="w")
+        self.calibration_process_stats.grid(row=cur_row, column=1, columnspan=2, rowspan=2, sticky="w")
         cur_row += 1
 
         # label for calibration process status text
