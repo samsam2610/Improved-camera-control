@@ -562,7 +562,7 @@ class CamGUI(object):
 
                             if self.overwrite:
                                 self.vid_file[i] = os.path.normpath(
-                                    self.out_dir + '/' + self.base_name[i] + self.attempt.get() + '.avi')
+                                    self.dir_output.get() + '/' + self.base_name[i] + self.attempt.get() + '.avi')
                             else:
                                 return
                     else:
