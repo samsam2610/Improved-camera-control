@@ -674,12 +674,12 @@ class CamGUI(object):
                         for i in range(len(self.cam)):
                             rows = []
                             for frame_data in frame_groups[i]:
-                                frame, frame_count, capture_time = frame_data
+                                frame_current, frame_count_current, capture_time_current = frame_data
 
-                                corners, ids = self.board_calibration.detect_image(frame)
+                                corners, ids = self.board_calibration.detect_image(frame_current)
 
                                 if corners is not None:
-                                    key = frame_count
+                                    key = frame_count_current
                                     row = {
                                         'framenum': key,
                                         'corners': corners,
