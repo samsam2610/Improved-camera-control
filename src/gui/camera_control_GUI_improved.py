@@ -889,6 +889,7 @@ class CamGUI(object):
         self.window.title("Camera Control")
 
         cur_row = 0
+        numberOfScreenUnits = 100
         self.camera = []
         self.camera_entry = []
         self.current_exposure = []
@@ -1005,12 +1006,12 @@ class CamGUI(object):
             cur_row += 1
 
             # label for frame acquired count
-            Label(self.window, text="Frame acquired count: ").grid(row=cur_row, column=0, sticky="w")
+            Label(self.window, text="Frame acquired count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=0, sticky="w")
             self.frame_acquired_count_label.append(Label(self.window, text=""))
             self.frame_acquired_count_label[i].grid(row=cur_row, column=1, sticky="w")
 
             # label for frame acquired count
-            Label(self.window, text="Detected board count: ").grid(row=cur_row, column=2, sticky="w")
+            Label(self.window, text="Detected board count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=2, sticky="w")
             self.board_detected_count_label.append(Label(self.window, text=""))
             self.board_detected_count_label[i].grid(row=cur_row, column=3, sticky="w")
             cur_row += 1
@@ -1088,19 +1089,20 @@ class CamGUI(object):
 
         # label for trigger receive text
         Label(self.window, text="Trigger status: ").grid(row=cur_row, column=0, sticky="w")
-        self.received_pulse_label = Label(self.window, text="")
+        self.received_pulse_label = Label(self.window, text="", wraplength=numberOfScreenUnits)
         self.received_pulse_label.grid(row=cur_row, column=1, sticky="w")
         cur_row += 1
 
         # label for calibration process status text
+
         Label(self.window, text="Calibration status: ").grid(row=cur_row, column=0, sticky="w")
-        self.calibration_process_stats = Label(self.window, text='')
+        self.calibration_process_stats = Label(self.window, text='', wraplength=numberOfScreenUnits)
         self.calibration_process_stats.grid(row=cur_row, column=1, sticky="w")
         cur_row += 1
 
         # label for calibration process status text
         Label(self.window, text="Calibration error: ").grid(row=cur_row, column=0, sticky="w")
-        self.calibration_error_stats = Label(self.window, text='')
+        self.calibration_error_stats = Label(self.window, text='', wraplength=numberOfScreenUnits)
         self.calibration_error_stats.grid(row=cur_row, column=1, sticky="w")
         cur_row += 1
 
