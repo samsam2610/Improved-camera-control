@@ -655,12 +655,10 @@ class CamGUI(object):
                         frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
                         frame_counts[thread_id] = 0
 
-                    # Write frame to video file
-                    self.vid_out[thread_id].write(frame)
-
                     # Append frame information to the corresponding group
                     frame_groups[thread_id].append((frame, frame_count, capture_time))
                     frame_counts[thread_id] += 1
+                    self.frame_acquired_count_label[thread_id]['text'] = f'{frame_count}'
 
                     # Process the frame group (frames with the same thread_id)
                     # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
@@ -690,6 +688,7 @@ class CamGUI(object):
                                     rows.append(row)
 
                             rows = self.board_calibration.fill_points_rows(rows)
+                            self.board_detected_count_label[i].['text'] = f'{len(rows)}'
                             all_rows.append(rows)
 
                         # pre-check the quality of the detections
@@ -913,6 +912,8 @@ class CamGUI(object):
         self.fourcc_codes = ["DIVX", "XVID", "Y800"]
         self.formats = []
         self.format_entry = []
+        self.frame_acquired_count_label = []
+        self.board_detected_count_label = []
 
         if not isinstance(self.number_of_cams, int):
             self.number_of_cams = int(self.number_of_cams.get())
@@ -1000,6 +1001,17 @@ class CamGUI(object):
             Label(self.window, text='').grid(row=cur_row + 1, column=2, sticky="w")
             self.current_exposure.append(Label(self.window, text=""))
             self.current_exposure[i].grid(row=cur_row + 1, column=2, sticky="w")
+            cur_row += 1
+
+            # label for frame acquired count
+            Label(self.window, text="Frame acquired count: ").grid(row=cur_row, column=0, sticky="w")
+            self.frame_acquired_count_label.append(Label(self.window, text=""))
+            self.frame_acquired_count_label[i].grid(row=cur_row, column=1, sticky="w")
+
+            # label for frame acquired count
+            Label(self.window, text="Detected board count: ").grid(row=cur_row, column=2, sticky="w")
+            self.board_detected_count_label.append(Label(self.window, text=""))
+            self.board_detected_count_label[i].grid(row=cur_row, column=3, sticky="w")
             cur_row += 1
 
             # empty row
