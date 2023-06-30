@@ -695,16 +695,16 @@ class CamGUI(object):
                         # update the detection file, and
                         # perform the calibration
 
-                        if len(all_rows) <= 2:
-                            self.rows_fname_available = False
-                        else:
-
+                        if len(all_rows) == 2:
                             with open(self.rows_fname, 'ab') as file:
                                 pickle.dump(all_rows, file)
                             self.rows_fname_available = True
                             # Clear the processed frames from the group
                             frame_groups = {}
                             frame_count = {}
+                        else:
+                            self.rows_fname_available = False
+
 
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id,
