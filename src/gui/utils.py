@@ -8,6 +8,9 @@ import cv2
 from cv2 import aruco
 import numpy as np
 import toml
+from pathlib import Path
+import json
+
 
 from src.aniposelib.boards import CharucoBoard, Checkerboard
 
@@ -237,3 +240,68 @@ def load(fname):
         np.array(item['distortions'], dtype='float64'), \
         np.array(item['rotation'], dtype='float64'), \
         np.array(item['translation'], dtype='float64')
+
+
+def write_camera_details(cams=None, output_dir=None):
+    path = Path(os.path.realpath(__file__))
+    # Navigate to the outer parent directory and join the filename
+    out = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.json'))
+
+    cam_0 = {'name': 'cam1',
+             'crop': {'top': 210, 'left': 8, 'height': 550, 'width': 900},
+             'rotate': 0,
+             'exposure': 0.002,
+             'gain': 100,
+             'output_dir': 'E:\\live_videos'}
+
+    cam_1 = {'name': 'cam2',
+             'crop': {'top': 130, 'left': 92, 'height': 550, 'width': 900},
+             'rotate': 0,
+             'exposure': 0.002,
+             'gain': 100,
+             'output_dir': 'E:\\live_videos'}
+
+    subs = ['test1', 'test2', 'test3']  # optional, can manually enter subject for each session.
+
+    labview = ['Dev1/port0/line0']  # optional, can manually enter for each session
+
+    details = {'cams': 2,
+               '0': cam_0,
+               '1': cam_1,
+               'subjects': subs,
+               'labview': labview}
+
+    if cams is None:
+        cams = details
+
+    if output_dir is None:
+        output_dir = out
+
+    cam_details = {}
+    for i, cam in enumerate(cams):
+        cam_name = f'cam{i + 1}'
+        crop_details = cam.get('crop', {})
+        crop = {
+            'top': crop_details.get('top', 0),
+            'left': crop_details.get('left', 0),
+            'height': crop_details.get('height', 0),
+            'width': crop_details.get('width', 0)
+        }
+        cam_details[str(i)] = {
+            'name': cam_name,
+            'crop': crop,
+            'rotate': cam.get('rotate', 0),
+            'exposure': cam.get('exposure', 0.002),
+            'gain': cam.get('gain', 100),
+            'output_dir': cam.get('output_dir', '')
+        }
+
+    details = {
+        'cams': len(cams),
+        **cam_details,
+        'subjects': [],
+        'labview': []
+    }
+
+    with open(out, 'w') as handle:
+        json.dump(details, handle, indent=4)

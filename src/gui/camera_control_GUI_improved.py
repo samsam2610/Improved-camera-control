@@ -21,7 +21,7 @@ import threading
 import time
 import traceback
 from pathlib import Path
-from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk
+from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk, Frame
 
 import cv2
 import ffmpy
@@ -208,6 +208,12 @@ class CamGUI(object):
             cam_check_window.destroy()
         else:
             self.cam[num].set_formats(str(self.formats[num].get()))
+
+    def get_fov(self):
+        pass
+
+    def set_fov(self):
+        pass
 
     def create_video_files(self):
         if not os.path.isdir(os.path.normpath(self.dir_output.get())):
@@ -792,6 +798,7 @@ class CamGUI(object):
 
         self.window = Tk()
         self.window.title("Camera Control")
+        self.window.minsize(width=800, height=500)
 
         cur_row = 0
         numberOfScreenUnits = 100
@@ -827,82 +834,73 @@ class CamGUI(object):
 
         for i in range(self.number_of_cams):
             # drop down menu to select camera
-            Label(self.window, text="Camera " + str(i + 1) + ": ").grid(sticky="w", row=cur_row, column=0)
+            gridframe = Frame(self.window)
+            Label(gridframe, text="Camera " + str(i + 1) + ": ", width=8, justify="left", anchor="w").grid(sticky="w", row=0, column=0)
             self.camera.append(StringVar())
-            self.camera_entry.append(ttk.Combobox(self.window, textvariable=self.camera[i]))
+            self.camera_entry.append(ttk.Combobox(gridframe, textvariable=self.camera[i], width=10, justify="left"))
             self.camera_entry[i]['values'] = self.cam_names
             self.camera_entry[i].current(i)
-            self.camera_entry[i].grid(row=cur_row, column=1)
+            self.camera_entry[i].grid(row=0, column=1)
 
             # initialize camera button
-            if i == 0:
-                Button(self.window, text="Initialize Camera 1", command=lambda: self.init_cam(0)).grid(sticky="nsew",
-                                                                                                       row=cur_row + 1,
-                                                                                                       column=0,
-                                                                                                       columnspan=2)
-            elif i == 1:
-                Button(self.window, text="Initialize Camera 2", command=lambda: self.init_cam(1)).grid(sticky="nsew",
-                                                                                                       row=cur_row + 1,
-                                                                                                       column=0,
-                                                                                                       columnspan=2)
-            elif i == 2:
-                Button(self.window, text="Initialize Camera 3", command=lambda: self.init_cam(2)).grid(sticky="nsew",
-                                                                                                       row=cur_row + 1,
-                                                                                                       column=0,
-                                                                                                       columnspan=2)
-
-            # change exposure
-            self.exposure.append(StringVar())
-            self.exposure_entry.append(Entry(self.window, textvariable=self.exposure[i]))
-            self.exposure_entry[i].grid(sticky="nsew", row=cur_row, column=2)
-            if i == 0:
-                Button(self.window, text="Set Exposure 1", command=lambda: self.set_exposure(0)).grid(sticky="nsew",
-                                                                                                      row=cur_row + 1,
-                                                                                                      column=2)
-            elif i == 1:
-                Button(self.window, text="Set Exposure 2", command=lambda: self.set_exposure(1)).grid(sticky="nsew",
-                                                                                                      row=cur_row + 1,
-                                                                                                      column=2)
-            elif i == 2:
-                Button(self.window, text="Set Exposure 3", command=lambda: self.set_exposure(2)).grid(sticky="nsew",
-                                                                                                      row=cur_row + 1,
-                                                                                                      column=2)
-
-            # change gain
-            self.gain.append(StringVar())
-            self.gain_entry.append(Entry(self.window, textvariable=self.gain[i]))
-            self.gain_entry[i].grid(sticky="nsew", row=cur_row, column=3)
-            if i == 0:
-                Button(self.window, text="Set Gain 1", command=lambda: self.set_gain(0)).grid(sticky="nsew",
-                                                                                              row=cur_row + 1, column=3)
-            elif i == 1:
-                Button(self.window, text="Set Gain 2", command=lambda: self.set_gain(1)).grid(sticky="nsew",
-                                                                                              row=cur_row + 1, column=3)
-            elif i == 2:
-                Button(self.window, text="Set Gain 3", command=lambda: self.set_gain(2)).grid(sticky="nsew",
-                                                                                              row=cur_row + 1, column=3)
-
+            Button(gridframe, text=f"Initialize Camera {i+1}", command=lambda: self.init_cam(i), width=10).grid(sticky="nsew",
+                                                                                                       row=0,
+                                                                                                       column=2)
             # format
-            Label(self.window, text="Format " + str(i + 1) + ": ").grid(sticky="w", row=cur_row, column=4)
+            Label(gridframe, text="Format " + str(i + 1) + ": ", width=8, justify="left", anchor="w").grid(sticky="w", row=1, column=0)
             self.formats.append(StringVar())
-            self.format_entry.append(ttk.Combobox(self.window, textvariable=self.formats[i]))
+            self.format_entry.append(ttk.Combobox(gridframe, textvariable=self.formats[i], width=15, justify="left"))
             self.format_entry[i]['values'] = self.format_list
             self.format_entry[i].current(i)
-            self.format_entry[i].grid(row=cur_row, column=4)
+            self.format_entry[i].grid(row=1, column=1)
 
             # inialize camera button
-            if i == 0:
-                Button(self.window, text="Set format", command=lambda: self.set_formats(0)).grid(sticky="nsew",
-                                                                                                 row=cur_row + 1,
-                                                                                                 column=4)
-            elif i == 1:
-                Button(self.window, text="Set format", command=lambda: self.set_formats(1)).grid(sticky="nsew",
-                                                                                                 row=cur_row + 1,
-                                                                                                 column=4)
-            elif i == 2:
-                Button(self.window, text="Set format", command=lambda: self.set_formats(2)).grid(sticky="nsew",
-                                                                                                 row=cur_row + 1,
-                                                                                                 column=0)
+            Button(gridframe, text="Set format", command=lambda: self.set_formats(i), width=5).grid(sticky="nsew",
+                                                                                             row=1,
+                                                                                             column=2)
+
+            gridframe.grid(row=cur_row, column=0, padx=2, sticky="w")
+
+            # change exposure
+            capture_settings_frame = Frame(self.window)
+            Label(capture_settings_frame, text='Exposure:', width=7, justify="left", anchor="w").grid(row=0, column=0, sticky="nsew")
+            self.exposure.append(StringVar())
+            self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=4, justify="left"))
+            self.exposure_entry[i].grid(sticky="nsew", row=0, column=1)
+
+            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda: self.set_exposure(i), width=8).grid(sticky="nsew",
+                                                                                                      row=0,
+                                                                                                      column=2)
+            # change gain
+            Label(capture_settings_frame, text='Gain:', width=7, justify="left", anchor="w").grid(row=1, column=0)
+            self.gain.append(StringVar())
+            self.gain_entry.append(Entry(capture_settings_frame, textvariable=self.gain[i], width=4, justify="left"))
+            self.gain_entry[i].grid(sticky="nsew", row=1, column=1)
+            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda: self.set_gain(i), width=8).grid(sticky="nsew",
+                                                                                               row=1,
+                                                                                               column=2)
+            capture_settings_frame.grid(row=cur_row, column=1, padx=2, sticky="nsew")
+            capture_settings_frame.pack_propagate(False)
+
+            # set FOV format
+            fov_settings_frame = Frame(self.window)
+            Label(fov_settings_frame, text='Top').grid(row=0, column=0)
+            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=1)
+
+            Label(fov_settings_frame, text='Left').grid(row=0, column=2)
+            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=3)
+
+            Label(fov_settings_frame, text='Height').grid(row=1, column=0)
+            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=1)
+
+            Label(fov_settings_frame, text='Width').grid(row=1, column=2)
+            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=3)
+
+            fov_settings_frame.grid(row=cur_row, column=2, padx=2, sticky="w")
+            fov_settings_frame.pack_propagate(False)
+            Button(self.window, text="Set FOV", command=lambda: self.set_fov(i)).grid(sticky="nsew",
+                                                                                             row=cur_row + 1,
+                                                                                             column=2)
             cur_row += 1
 
             Label(self.window, text='').grid(row=cur_row + 1, column=2, sticky="w")
@@ -912,12 +910,12 @@ class CamGUI(object):
 
             # label for frame acquired count
             Label(self.window, text="Frame acquired count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=0, sticky="w")
-            self.frame_acquired_count_label.append(Label(self.window, text=""))
+            self.frame_acquired_count_label.append(Label(self.window, text="", width=5))
             self.frame_acquired_count_label[i].grid(row=cur_row, column=1, sticky="w")
 
             # label for frame acquired count
             Label(self.window, text="Detected board count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=2, sticky="w")
-            self.board_detected_count_label.append(Label(self.window, text=""))
+            self.board_detected_count_label.append(Label(self.window, text="", width=5))
             self.board_detected_count_label[i].grid(row=cur_row, column=3, sticky="w")
             cur_row += 1
 
@@ -925,59 +923,70 @@ class CamGUI(object):
             Label(self.window, text="").grid(row=cur_row + 2, column=0)
 
             # end of camera loop
-            cur_row = cur_row + 3
+            cur_row = cur_row + 2
 
         # empty row
         Label(self.window, text="").grid(row=cur_row, column=0)
         cur_row += 1
 
         # subject name
-        Label(self.window, text="Subject: ").grid(sticky="w", row=cur_row, column=0)
+        video_info_frame = Frame(self.window)
+        Label(video_info_frame, text="Subject: ").grid(sticky="w", row=0, column=0)
         self.subject = StringVar()
-        self.subject_entry = ttk.Combobox(self.window, textvariable=self.subject)
+        self.subject_entry = ttk.Combobox(video_info_frame, textvariable=self.subject, width=5)
         self.subject_entry['values'] = tuple(self.mouse_list)
-        self.subject_entry.grid(row=cur_row, column=1)
-        cur_row += 1
+        self.subject_entry.grid(row=0, column=1)
+        # subject_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
+        # cur_row += 1
 
         # attempt
-        Label(self.window, text="Attempt: ").grid(sticky="w", row=cur_row, column=0)
+        attempt_frame = Frame(self.window)
+        Label(video_info_frame, text="Attempt: ").grid(sticky="w", row=0, column=2)
         self.attempt = StringVar(value="1")
-        self.attempt_entry = ttk.Combobox(self.window, textvariable=self.attempt)
+        self.attempt_entry = ttk.Combobox(video_info_frame, textvariable=self.attempt, width=5)
         self.attempt_entry['values'] = tuple(range(1, 10))
-        self.attempt_entry.grid(row=cur_row, column=1)
-        cur_row += 1
+        self.attempt_entry.grid(row=0, column=3)
+        # attempt_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
+        # cur_row += 1
 
         # type frame rate
-        Label(self.window, text="Frame Rate: ").grid(sticky="w", row=cur_row, column=0)
+        frame_rate_frame = Frame(self.window)
+        Label(video_info_frame, text="Frame Rate: ").grid(sticky="w", row=1, column=0)
         self.fps = StringVar()
-        self.fps_entry = Entry(self.window, textvariable=self.fps)
+        self.fps_entry = Entry(video_info_frame, textvariable=self.fps, width=5)
         self.fps_entry.insert(END, '100')
-        self.fps_entry.grid(sticky="nsew", row=cur_row, column=1)
+        self.fps_entry.grid(sticky="nsew", row=1, column=1)
+        # frame_rate_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
+        # cur_row += 1
+
+        # select video encoder codec
+        video_encoder_frame = Frame(self.window)
+        Label(video_info_frame, text="Video codec:").grid(sticky="w", row=1, column=2)
+        self.video_codec = StringVar()
+        self.video_codec_entry = ttk.Combobox(video_info_frame,
+                                              value=self.fourcc_codes,
+                                              state="readonly", width=5)
+        self.video_codec_entry.set("XVID")  # default codec
+        self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
+        self.video_codec_entry.grid(row=1, column=3)
+        self.video_codec = self.video_codec_entry.get()  # add default video codec
+        video_info_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
         cur_row += 1
 
         # output directory
-        Label(self.window, text="Output Directory: ").grid(sticky="w", row=cur_row, column=0)
+        output_dir_frame = Frame(self.window)
+        Label(output_dir_frame, text="Output Directory: ", width=15, justify="left", anchor="w").grid(sticky="w", row=0, column=0, columnspan=2)
         self.dir_output = StringVar()
-        self.output_entry = ttk.Combobox(self.window, textvariable=self.dir_output)
+        self.output_entry = ttk.Combobox(output_dir_frame, textvariable=self.dir_output, width=10)
         self.output_entry['values'] = self.output_dir
-        self.output_entry.grid(row=cur_row, column=1)
-        Button(self.window, text="Browse", command=self.browse_output).grid(sticky="nsew", row=cur_row, column=2)
-
-        # select video encoder codec
-        Label(self.window, text="Video writer codec:").grid(sticky="w", row=cur_row, column=3)
-        self.video_codec = StringVar()
-        self.video_codec_entry = ttk.Combobox(self.window,
-                                              value=self.fourcc_codes,
-                                              state="readonly")
-        self.video_codec_entry.set("XVID")  # default codec
-        self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
-        self.video_codec_entry.grid(row=cur_row, column=4)
-        self.video_codec = self.video_codec_entry.get()  # add default video codec
+        self.output_entry.grid(row=0, column=3)
+        Button(output_dir_frame, text="Browse", command=self.browse_output).grid(sticky="nsew", row=0, column=4)
+        output_dir_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
         cur_row += 1
 
         # set up video
         Button(self.window, text="Set Up Video", command=self.set_up_vid).grid(sticky="nsew", row=cur_row, column=0,
-                                                                               columnspan=1)
+                                                                               columnspan=1, rowspan=1)
         Button(self.window, text="SYNC_WITH_SYNAPSE", command=self.sync_setup).grid(sticky="nsew", row=cur_row,
                                                                                     column=1, columnspan=1)
         Button(self.window, text="Setup Calibration", command=self.setup_calibration).grid(sticky="nsew", row=cur_row,
