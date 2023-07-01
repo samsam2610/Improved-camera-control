@@ -98,10 +98,10 @@ class CamGUI(object):
             self.cam_name.append(names[cam_num])
             self.cam.append(ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get()))
         self.cam[num].start()
-        self.exposure[num].set(self.cam_details[str(num)]['exposure'])
-        self.gain[num].set(self.cam_details[str(num)]['gain'])
-        # self.exposure[num].set(self.cam[num].get_exposure())
-        # self.gain[num].set(self.cam[num].get_gain())
+        self.cam[num].set_exposure(float(self.cam_details[str(num)]['exposure']))
+        self.cam[num].set_gain(int(self.cam_details[str(num)]['gain']))
+        self.exposure[num].set(self.cam[num].get_exposure())
+        self.gain[num].set(self.cam[num].get_gain())
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
         exposure_text = f'real_exposure: {self.exposure[num].get()}'
