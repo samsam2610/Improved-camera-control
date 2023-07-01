@@ -16,12 +16,12 @@ import json
 import cv2
 import ctypes as C
 
-
 path = Path(os.path.realpath(__file__))
 # Navigate to the outer parent directory and join the filename
 dets_file = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.json'))
 cam_details = json.load(open(dets_file, 'r'))
-   
+
+
 class ICCam(object):
 
     def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats='Y800 (1024x768)'):
@@ -39,7 +39,7 @@ class ICCam(object):
         self.crop = crop if crop is not None else cam_details[str(self.cam_num)]['crop']
         self.exposure = exposure if exposure is not None else cam_details[str(self.cam_num)]['exposure']
         self.gain = gain if gain is not None else cam_details[str(self.cam_num)]['gain']
-        
+
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.cam.SetVideoFormat(Format=formats)
@@ -70,16 +70,17 @@ class ICCam(object):
     def set_gain(self, val):
         try:
             val = int(round(val))
-            val = val if val < self.cam.gain.max-1 else self.cam.gain.max-1
+            val = val if val < self.cam.gain.max - 1 else self.cam.gain.max - 1
             val = val if val > self.cam.gain.min else self.cam.gain.min
             self.cam.SetPropertyAbsoluteValue("Gain", "Value", val)
         except:
             pass
+
     def get_exposure(self):
         exposure = [0]
         self.cam.GetPropertyAbsoluteValue("Exposure", "Value", exposure)
         return round(exposure[0], 3)
-    
+
     def get_gain(self):
         gain = [0]
         self.cam.GetPropertyAbsoluteValue("Gain", "Value", gain)
@@ -88,7 +89,7 @@ class ICCam(object):
     def get_image(self):
         self.cam.SnapImage()
         frame = self.cam.GetImageEx()
-        return cv2.flip(frame,0)
+        return cv2.flip(frame, 0)
 
     def get_image_dimensions(self):
         im = self.get_image()
@@ -100,14 +101,14 @@ class ICCam(object):
         self.cam.SetPropertySwitch("Trigger", "Enable", True)
         if not self.cam.callback_registered:
             self.cam.SetFrameReadyCallback
-        
+
     def frame_ready(self):
         self.cam.ResetFrameReady()
         self.cam.WaitTillFrameReady(100000)
-        
+
     def disable_trigger(self):
         self.cam.SetPropertySwitch("Trigger", "Enable", False)
-        
+
     def start(self, show_display=1):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive(show_display)
