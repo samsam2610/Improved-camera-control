@@ -835,7 +835,7 @@ class CamGUI(object):
         for i in range(self.number_of_cams):
             # drop down menu to select camera
             gridframe = Frame(self.window)
-            Label(gridframe, text="Camera " + str(i + 1) + ": ", width=8, justify="left", anchor="w").grid(sticky="w", row=0, column=0)
+            Label(gridframe, text="Camera " + str(i + 1) + ": ", width=8, justify="left", anchor="w").grid(sticky="w", row=0, column=0, padx=2)
             self.camera.append(StringVar())
             self.camera_entry.append(ttk.Combobox(gridframe, textvariable=self.camera[i], width=10, justify="left"))
             self.camera_entry[i]['values'] = self.cam_names
@@ -843,16 +843,16 @@ class CamGUI(object):
             self.camera_entry[i].grid(row=0, column=1, padx=2)
 
             # initialize camera button
-            Button(gridframe, text=f"Initialize Camera {i+1}", command=lambda: self.init_cam(i), width=10).grid(sticky="nsew",
+            Button(gridframe, text=f"Initialize Camera {i+1}", command=lambda: self.init_cam(i), width=12).grid(sticky="nsew",
                                                                                                        row=0,
                                                                                                        column=2, padx=2)
             # format
-            Label(gridframe, text="Format " + str(i + 1) + ": ", width=8, justify="left", anchor="w").grid(sticky="w", row=1, column=0)
+            Label(gridframe, text="Format " + str(i + 1) + ": ", width=8, justify="left", anchor="w").grid(sticky="w", row=1, column=0, padx=2)
             self.formats.append(StringVar())
             self.format_entry.append(ttk.Combobox(gridframe, textvariable=self.formats[i], width=15, justify="left"))
             self.format_entry[i]['values'] = self.format_list
             self.format_entry[i].current(i)
-            self.format_entry[i].grid(row=1, column=1)
+            self.format_entry[i].grid(row=1, column=1, padx=2)
 
             # inialize camera button
             Button(gridframe, text="Set format", command=lambda: self.set_formats(i), width=5).grid(sticky="nsew",
@@ -866,7 +866,7 @@ class CamGUI(object):
             Label(capture_settings_frame, text='Exposure:', width=8, justify="left", anchor="w").grid(row=0, column=0, sticky="nsew", padx=2)
             self.exposure.append(StringVar())
             self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=4, justify="left"))
-            self.exposure_entry[i].grid(sticky="nsew", row=0, column=1)
+            self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, padx=2)
 
             Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda: self.set_exposure(i), width=10).grid(sticky="nsew",
                                                                                                       row=0,
@@ -876,7 +876,7 @@ class CamGUI(object):
             Label(capture_settings_frame, text='Gain:', width=8, justify="left", anchor="w").grid(row=1, column=0, padx=2)
             self.gain.append(StringVar())
             self.gain_entry.append(Entry(capture_settings_frame, textvariable=self.gain[i], width=4, justify="left"))
-            self.gain_entry[i].grid(sticky="nsew", row=1, column=1)
+            self.gain_entry[i].grid(sticky="nsew", row=1, column=1, padx=2)
             Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda: self.set_gain(i), width=8).grid(sticky="nsew",
                                                                                                row=1,
                                                                                                column=2)
