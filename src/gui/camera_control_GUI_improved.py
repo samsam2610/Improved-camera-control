@@ -844,7 +844,7 @@ class CamGUI(object):
             self.camera_entry[i].grid(row=0, column=1, padx=5, pady=5)
 
             # initialize camera button
-            Button(gridframe, text=f"Initialize Camera {i+1}", command=lambda: self.init_cam(copy.copy((i))), width=15).grid(sticky="nsew",
+            Button(gridframe, text=f"Initialize Camera {i+1}", command=lambda i=i: self.init_cam(i), width=15).grid(sticky="nsew",
                                                                                                        row=0,
                                                                                                        column=2, padx=5, pady=5)
             # format
