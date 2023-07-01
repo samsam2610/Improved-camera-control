@@ -98,10 +98,15 @@ class CamGUI(object):
             self.cam_name.append(names[cam_num])
             self.cam.append(ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get()))
         self.cam[num].start()
+
+        # set gain and exposure using the values from the json
         self.cam[num].set_exposure(float(self.cam_details[str(num)]['exposure']))
         self.cam[num].set_gain(int(self.cam_details[str(num)]['gain']))
+
+        # get the gain and exposure values to reflect that onto the GUI
         self.exposure[num].set(self.cam[num].get_exposure())
         self.gain[num].set(self.cam[num].get_gain())
+
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
         exposure_text = f'real_exposure: {self.exposure[num].get()}'
@@ -205,6 +210,9 @@ class CamGUI(object):
             self.cam[num].set_formats(str(self.formats[num].get()))
 
     def create_video_files(self):
+        if not os.path.isdir(os.path.normpath(self.dir_output.get())):
+            os.makedirs(os.path.normpath(self.dir_output.get()))
+
         # check if file exists, ask to overwrite or change attempt number if it does
         for i in range(len(self.cam)):
             if i == 0:
@@ -227,8 +235,10 @@ class CamGUI(object):
                     self.ask_overwrite.destroy()
 
                     if self.overwrite:
-                        self.vid_file[i] = os.path.normpath(
-                            self.out_dir + '/' + self.base_name[i] + self.attempt.get() + '.avi')
+                        self.vid_file[i] = os.path.normpath(self.dir_output.get() + '/' +
+                                                            self.base_name[i] +
+                                                            self.attempt.get() +
+                                                            '.avi')
                     else:
                         return
             else:
@@ -286,9 +296,6 @@ class CamGUI(object):
             day = str(day) if day >= 10 else '0' + str(day)
             year = str(datetime.datetime.now().year)
             date = year + '-' + month + '-' + day
-            self.out_dir = self.dir_output.get()
-            if not os.path.isdir(os.path.normpath(self.out_dir)):
-                os.makedirs(os.path.normpath(self.out_dir))
 
             self.cam_name_no_space = []
             this_row = 3
@@ -345,9 +352,6 @@ class CamGUI(object):
             day = str(day) if day >= 10 else '0' + str(day)
             year = str(datetime.datetime.now().year)
             date = year + '-' + month + '-' + day
-            self.out_dir = self.dir_output.get()
-            if not os.path.isdir(os.path.normpath(self.out_dir)):
-                os.makedirs(os.path.normpath(self.out_dir))
 
             self.cam_name_no_space = []
             self.vid_file = []
