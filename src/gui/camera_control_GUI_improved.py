@@ -868,9 +868,10 @@ class CamGUI(object):
             self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=4, justify="left"))
             self.exposure_entry[i].grid(sticky="nsew", row=0, column=1)
 
-            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda: self.set_exposure(i), width=8).grid(sticky="nsew",
+            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda: self.set_exposure(i), width=10).grid(sticky="nsew",
                                                                                                       row=0,
-                                                                                                      column=2)
+                                                                                                      column=2,
+                                                                                                      padx=2)
             # change gain
             Label(capture_settings_frame, text='Gain:', width=8, justify="left", anchor="w").grid(row=1, column=0, padx=2)
             self.gain.append(StringVar())
