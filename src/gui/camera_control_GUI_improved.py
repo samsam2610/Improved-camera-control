@@ -885,16 +885,16 @@ class CamGUI(object):
 
             # set FOV format
             fov_settings_frame = Frame(self.window)
-            Label(fov_settings_frame, text='Top').grid(row=0, column=0)
+            Label(fov_settings_frame, text='Top').grid(row=0, column=0, pady=3)
             Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=1, pady=3)
 
-            Label(fov_settings_frame, text='Left').grid(row=0, column=2)
+            Label(fov_settings_frame, text='Left').grid(row=0, column=2, pady=3)
             Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=3, pady=3)
 
-            Label(fov_settings_frame, text='Height').grid(row=1, column=0)
+            Label(fov_settings_frame, text='Height').grid(row=1, column=0, pady=3)
             Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=1, pady=3)
 
-            Label(fov_settings_frame, text='Width').grid(row=1, column=2)
+            Label(fov_settings_frame, text='Width').grid(row=1, column=2, pady=3)
             Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=3, pady=3)
 
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, sticky="w")
