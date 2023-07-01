@@ -866,36 +866,36 @@ class CamGUI(object):
             Label(capture_settings_frame, text='Exposure:', width=8, justify="left", anchor="w").grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
             self.exposure.append(StringVar())
             self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=4, justify="left"))
-            self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, padx=5, pady=5)
+            self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
 
-            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda: self.set_exposure(i), width=10).grid(sticky="nsew",
+            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda: self.set_exposure(i), width=15).grid(sticky="nsew",
                                                                                                       row=0,
                                                                                                       column=2,
-                                                                                                      padx=5, pady=5)
+                                                                                                      padx=5, pady=3)
             # change gain
-            Label(capture_settings_frame, text='Gain:', width=8, justify="left", anchor="w").grid(row=1, column=0, padx=5, pady=5)
+            Label(capture_settings_frame, text='Gain:', width=8, justify="left", anchor="w").grid(row=1, column=0, padx=5, pady=3)
             self.gain.append(StringVar())
             self.gain_entry.append(Entry(capture_settings_frame, textvariable=self.gain[i], width=4, justify="left"))
-            self.gain_entry[i].grid(sticky="nsew", row=1, column=1, padx=5, pady=5)
+            self.gain_entry[i].grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
             Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda: self.set_gain(i), width=8).grid(sticky="nsew",
                                                                                                row=1,
-                                                                                               column=2, pady=5, padx=5)
-            capture_settings_frame.grid(row=cur_row, column=1, padx=2, pady=5, sticky="nsew")
+                                                                                               column=2, pady=3, padx=5)
+            capture_settings_frame.grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
             capture_settings_frame.pack_propagate(False)
 
             # set FOV format
             fov_settings_frame = Frame(self.window)
             Label(fov_settings_frame, text='Top').grid(row=0, column=0)
-            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=1, pady=5)
+            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=1, pady=3)
 
             Label(fov_settings_frame, text='Left').grid(row=0, column=2)
-            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=3, pady=5)
+            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=3, pady=3)
 
             Label(fov_settings_frame, text='Height').grid(row=1, column=0)
-            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=1, pady=5)
+            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=1, pady=3)
 
             Label(fov_settings_frame, text='Width').grid(row=1, column=2)
-            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=3, pady=5)
+            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=3, pady=3)
 
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, sticky="w")
             fov_settings_frame.pack_propagate(False)
@@ -910,14 +910,14 @@ class CamGUI(object):
             cur_row += 2
 
             # label for frame acquired count
-            Label(self.window, text="Frame acquired count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=0, sticky="w", padx=5, pady=5)
+            Label(self.window, text="Frame acquired count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=0, sticky="w", padx=5, pady=3)
             self.frame_acquired_count_label.append(Label(self.window, text="", width=5))
-            self.frame_acquired_count_label[i].grid(row=cur_row, column=1, sticky="w", padx=5, pady=5)
+            self.frame_acquired_count_label[i].grid(row=cur_row, column=1, sticky="w", padx=5, pady=3)
 
             # label for frame acquired count
-            Label(self.window, text="Detected board count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=2, sticky="w", padx=5, pady=5)
+            Label(self.window, text="Detected board count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=2, sticky="w", padx=5, pady=3)
             self.board_detected_count_label.append(Label(self.window, text="", width=5))
-            self.board_detected_count_label[i].grid(row=cur_row, column=3, sticky="w", padx=5, pady=5)
+            self.board_detected_count_label[i].grid(row=cur_row, column=3, sticky="w", padx=5, pady=3)
             cur_row += 1
 
             # empty row
@@ -932,57 +932,57 @@ class CamGUI(object):
 
         # subject name
         video_info_frame = Frame(self.window)
-        Label(video_info_frame, text="Subject: ").grid(sticky="w", row=0, column=0, padx=5, pady=5)
+        Label(video_info_frame, text="Subject: ").grid(sticky="w", row=0, column=0, padx=5, pady=3)
         self.subject = StringVar()
         self.subject_entry = ttk.Combobox(video_info_frame, textvariable=self.subject, width=5)
         self.subject_entry['values'] = tuple(self.mouse_list)
-        self.subject_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.subject_entry.grid(row=0, column=1, padx=5, pady=3)
         # subject_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
         # cur_row += 1
 
         # attempt
         attempt_frame = Frame(self.window)
-        Label(video_info_frame, text="Attempt: ").grid(sticky="w", row=0, column=2, padx=5, pady=5)
+        Label(video_info_frame, text="Attempt: ").grid(sticky="w", row=0, column=2, padx=5, pady=3)
         self.attempt = StringVar(value="1")
         self.attempt_entry = ttk.Combobox(video_info_frame, textvariable=self.attempt, width=5)
         self.attempt_entry['values'] = tuple(range(1, 10))
-        self.attempt_entry.grid(row=0, column=3, padx=5, pady=5)
+        self.attempt_entry.grid(row=0, column=3, padx=5, pady=3)
         # attempt_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
         # cur_row += 1
 
         # type frame rate
         frame_rate_frame = Frame(self.window)
-        Label(video_info_frame, text="Frame Rate: ").grid(sticky="w", row=1, column=0, padx=5, pady=5)
+        Label(video_info_frame, text="Frame Rate: ").grid(sticky="w", row=1, column=0, padx=5, pady=3)
         self.fps = StringVar()
         self.fps_entry = Entry(video_info_frame, textvariable=self.fps, width=5)
         self.fps_entry.insert(END, '100')
-        self.fps_entry.grid(sticky="nsew", row=1, column=1, padx=5, pady=5)
+        self.fps_entry.grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
         # frame_rate_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
         # cur_row += 1
 
         # select video encoder codec
         video_encoder_frame = Frame(self.window)
-        Label(video_info_frame, text="Video codec:").grid(sticky="w", row=1, column=2, padx=5, pady=5)
+        Label(video_info_frame, text="Video codec:").grid(sticky="w", row=1, column=2, padx=5, pady=3)
         self.video_codec = StringVar()
         self.video_codec_entry = ttk.Combobox(video_info_frame,
                                               value=self.fourcc_codes,
                                               state="readonly", width=5)
         self.video_codec_entry.set("XVID")  # default codec
         self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
-        self.video_codec_entry.grid(row=1, column=3, padx=5, pady=5)
+        self.video_codec_entry.grid(row=1, column=3, padx=5, pady=3)
         self.video_codec = self.video_codec_entry.get()  # add default video codec
-        video_info_frame.grid(row=cur_row, column=0, padx=5, pady=5, sticky="w")
+        video_info_frame.grid(row=cur_row, column=0, padx=5, pady=3, sticky="w")
         cur_row += 1
 
         # output directory
         output_dir_frame = Frame(self.window)
-        Label(output_dir_frame, text="Output Directory: ", width=15, justify="left", anchor="w").grid(sticky="w", row=0, column=0, columnspan=2, padx=5, pady=5)
+        Label(output_dir_frame, text="Output Directory: ", width=15, justify="left", anchor="w").grid(sticky="w", row=0, column=0, columnspan=2, padx=5, pady=3)
         self.dir_output = StringVar()
         self.output_entry = ttk.Combobox(output_dir_frame, textvariable=self.dir_output, width=10)
         self.output_entry['values'] = self.output_dir
-        self.output_entry.grid(row=0, column=3, padx=5, pady=5)
+        self.output_entry.grid(row=0, column=3, padx=5, pady=3)
         Button(output_dir_frame, text="Browse", command=self.browse_output).grid(sticky="nsew", row=0, column=4)
-        output_dir_frame.grid(row=cur_row, column=0, padx=5, pady=5, sticky="w")
+        output_dir_frame.grid(row=cur_row, column=0, padx=5, pady=3, sticky="w")
         cur_row += 1
 
         # set up video
