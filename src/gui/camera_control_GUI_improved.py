@@ -476,6 +476,9 @@ class CamGUI(object):
 
                 # Boolean for detections.pickle is updated
                 self.detection_update = False
+                
+                # Sync camera capture time
+                self.capture_release = []
 
                 # create output file names
                 self.vid_file = []
@@ -495,6 +498,7 @@ class CamGUI(object):
                     frame_sizes.append(self.cam[i].get_image_dimensions())
                     self.frame_count.append(1)
                     self.all_rows.append([])
+                    self.capture_release.append(True)
                     self.previous_frame_count.append(0)
                     self.current_frame_count.append(0)
 
@@ -535,10 +539,11 @@ class CamGUI(object):
         while True:
             try:
                 while self.calibration_toggle_status:
-                    if time.perf_counter() >= next_frame:
+                    if time.perf_counter() >= next_frame and all(self.capture_release):
                         current_time = time.perf_counter
                         self.frame_times[num].append(time.perf_counter())
                         self.frame_count[num] += 1
+                        self.capture_release[num] = False
                         frame_current = self.cam[num].get_image()
                         
                         # detect the marker as the frame is acquired
@@ -560,7 +565,8 @@ class CamGUI(object):
                                               self.frame_count[num],  # the current frame count
                                               self.frame_times[num][-1]))  # captured time
 
-                        next_frame = max(next_frame + 1.0 / fps, time.perf_counter() + 0.5 / fps)
+                        next_frame = max(next_frame + 1.0/fps, self.frame_times[num] + 0.5/fps)
+                        self.capture_release[num] = True
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
                       "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1],
