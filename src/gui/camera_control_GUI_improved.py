@@ -551,7 +551,7 @@ class CamGUI(object):
                                 'ids': ids
                             }
 
-                            row = self.board_calibration.fill_points_rows(row)
+                            row = self.board_calibration.fill_points_rows([row])
                             self.all_rows[num].append(row)
                             self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
                         # putting frame into the frame queue along with following information
