@@ -615,10 +615,10 @@ class CamGUI(object):
             try:
                 if self.rows_fname_available:
                     print(f'Current error: {self.calibration_error}')
-                    # with open(self.rows_fname, 'rb') as f:
-                        # all_rows = pickle.load(f)
-                    
-                    all_rows = self.all_rows[:, -100:]
+                    with open(self.rows_fname, 'rb') as f:
+                        all_rows = pickle.load(f)
+                        
+                    all_rows = [row[-100:] if len(row) >= 100 else row for row in all_rows]
                     self.calibration_error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
                                                                         init_intrinsics=self.init_matrix,
                                                                         init_extrinsics=self.init_matrix,
