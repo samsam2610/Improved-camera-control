@@ -539,13 +539,28 @@ class CamGUI(object):
                         current_time = time.perf_counter
                         self.frame_times[num].append(time.perf_counter())
                         self.frame_count[num] += 1
+                        frame_current = self.cam[num].get_image()
+                        
+                        # detect the marker as the frame is acquired
+                        corners, ids = self.board_calibration.detect_image(frame_current)
+                        if corners is not None:
+                            key = self.frame_count[num]
+                            row = {
+                                'framenum': key,
+                                'corners': corners,
+                                'ids': ids
+                            }
+
+                            row = self.board_calibration.fill_points_rows(row)
+                            self.all_rows[num].append(row)
+                            self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
                         # putting frame into the frame queue along with following information
-                        self.frame_queue.put((self.cam[num].get_image(),  # the frame itself
+                        self.frame_queue.put((frame_current,  # the frame itself
                                               num,  # the id of the capturing camera
                                               self.frame_count[num],  # the current frame count
                                               self.frame_times[num][-1]))  # captured time
 
-                        next_frame = max(next_frame + 1.0 / fps, self.frame_times[num][-1] + 0.5 / fps)
+                        next_frame = max(next_frame + 1.0 / fps, time.perf_counter() + 0.5 / fps)
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
                       "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1],
@@ -575,51 +590,10 @@ class CamGUI(object):
                         self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} ' \
                                                                  f'frames acquired from each camera,' \
                                                                  f' detecting the markers...'
-                        all_rows = []  # preallocate detected rows from all cameras, for each camera
-
-                        # For each frame from each camera, detect the corners and ids, then add to rows,
-                        # then to all_rows
-                        for i in range(len(self.cam)):
-                            rows = []
-                            for frame_data in frame_groups[i]:
-                                frame_current, frame_count_current, capture_time_current = frame_data
-
-                                corners, ids = self.board_calibration.detect_image(frame_current)
-
-                                if corners is not None:
-                                    key = frame_count_current
-                                    row = {
-                                        'framenum': key,
-                                        'corners': corners,
-                                        'ids': ids
-                                    }
-
-                                    rows.append(row)
-
-                            rows = self.board_calibration.fill_points_rows(rows)
-                            self.board_detected_count_label[i]['text'] = f'{len(rows)}'
-                            all_rows.append(rows)
-
-                        # pre-check the quality of the detections
-                        if len(all_rows) == len(self.cam):
-                            # Check if the number of rows in those rows is the same
-                            if len(all_rows[0]) == len(all_rows[1]):
-                                self.calibration_process_stats['text'] = \
-                                    "Detected the same number of rows from all cameras, saving the detections."
-                                with open(self.rows_fname, 'ab') as file:
-                                    pickle.dump(all_rows, file)
-                                self.rows_fname_available = True
-
-                            else:
-                                self.rows_fname_available = False
-                                self.calibration_process_stats['text'] = \
-                                    f"The number of rows in the two rows is different. \
-                                    cam_1 has {len(all_rows[0])} rows and cam_2 has {len(all_rows[1])} rows"
-                        else:
-                            print(f"Couldn't simultaneously detected rows from {len(self.cam)} cameras.")
-                        # if the all_rows is empty, do not:
-                        # update the detection file, and
-                        # perform the calibration
+                        
+                        with open(self.rows_fname, 'ab') as file:
+                            pickle.dump(self.all_rows, file)
+                        self.rows_fname_available = True
 
                         # Clear the processed frames from the group
                         frame_groups = {}
