@@ -545,7 +545,7 @@ class CamGUI(object):
                         frame_current = self.cam[num].get_image()
                         
                         # detect the marker as the frame is acquired
-                        corners, ids = self.board_calibration.detect_image(frame_current, self.cgroup.cameras[num])
+                        corners, ids = self.board_calibration.detect_image(frame_current)
                         if corners is not None:
                             key = self.frame_count[num]
                             row = {
