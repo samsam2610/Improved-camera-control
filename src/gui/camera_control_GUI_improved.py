@@ -542,7 +542,7 @@ class CamGUI(object):
                         frame_current = self.cam[num].get_image()
                         
                         # detect the marker as the frame is acquired
-                        corners, ids = self.board_calibration.detect_image(frame_current)
+                        corners, ids = self.board_calibration.detect_image(frame_current, self.cgroup.cameras[num])
                         if corners is not None:
                             key = self.frame_count[num]
                             row = {
@@ -591,7 +591,7 @@ class CamGUI(object):
                                                                  f'frames acquired from each camera,' \
                                                                  f' detecting the markers...'
                         
-                        with open(self.rows_fname, 'ab') as file:
+                        with open(self.rows_fname, 'wb') as file:
                             pickle.dump(self.all_rows, file)
                         self.rows_fname_available = True
 
