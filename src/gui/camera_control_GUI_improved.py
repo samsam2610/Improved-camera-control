@@ -552,7 +552,7 @@ class CamGUI(object):
                             }
 
                             row = self.board_calibration.fill_points_rows([row])
-                            self.all_rows[num].append(row)
+                            self.all_rows[num].extend(row)
                             self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
                         # putting frame into the frame queue along with following information
                         self.frame_queue.put((frame_current,  # the frame itself
@@ -621,8 +621,8 @@ class CamGUI(object):
                                                                         n_samp_iter=200, n_samp_full=1000,
                                                                         verbose=True)
 
-                    with open(self.cgroup_fname, "wb") as f:
-                        cgroup = pickle.dump(cgroup)
+                    # with open(self.cgroup_fname, "wb") as f:
+                    #     cgroup = pickle.dump(cgroup)
 
                     self.init_matrix = False
                     # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
