@@ -565,7 +565,7 @@ class CamGUI(object):
                                               self.frame_count[num],  # the current frame count
                                               self.frame_times[num][-1]))  # captured time
 
-                        next_frame = max(next_frame + 1.0/fps, self.frame_times[num] + 0.5/fps)
+                        next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
                         self.capture_release[num] = True
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
