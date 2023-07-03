@@ -889,12 +889,17 @@ class CamGUI(object):
             Label(fov_settings_frame, text='Width').grid(row=1, column=2, padx=5, pady=3)
             Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=3, padx=5, pady=3)
 
+            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda i=i: self.set_fov(i), width=5)
+            reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
+            
+            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda i=i: self.set_fov(i), width=5)
+            set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
+
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
             fov_settings_frame.pack_propagate(False)
-            
-            Button(self.window, text="Set FOV", command=lambda i=i: self.set_fov(i)).\
-                grid(sticky="nsew", row=cur_row + 1, column=2)
             cur_row += 1
+            # Get the width of fov_settings_frame
+        
 
             camera_status_frame = Frame(self.window)
             # label for frame acquired count
@@ -931,27 +936,21 @@ class CamGUI(object):
         self.subject = StringVar()
         self.subject_entry = ttk.Combobox(video_info_frame, textvariable=self.subject, width=5)
         self.subject_entry['values'] = tuple(self.mouse_list)
-        self.subject_entry.grid(row=0, column=1, padx=5, pady=5)
-        # subject_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
-        # cur_row += 1
+        self.subject_entry.grid(row=0, column=1, padx=5, pady=3)
 
         # attempt
         Label(video_info_frame, text="Attempt: ").grid(sticky="w", row=0, column=2, padx=5, pady=3)
         self.attempt = StringVar(value="1")
         self.attempt_entry = ttk.Combobox(video_info_frame, textvariable=self.attempt, width=5)
         self.attempt_entry['values'] = tuple(range(1, 10))
-        self.attempt_entry.grid(row=0, column=3, padx=5, pady=5)
-        # attempt_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
-        # cur_row += 1
+        self.attempt_entry.grid(row=0, column=3, padx=5, pady=3)
 
         # type frame rate
         Label(video_info_frame, text="Frame Rate: ").grid(sticky="w", row=1, column=0, padx=5, pady=3)
         self.fps = StringVar()
         self.fps_entry = Entry(video_info_frame, textvariable=self.fps, width=5)
         self.fps_entry.insert(END, '100')
-        self.fps_entry.grid(sticky="nsew", row=1, column=1, padx=5, pady=5)
-        # frame_rate_frame.grid(row=cur_row, column=0, padx=5, sticky="w")
-        # cur_row += 1
+        self.fps_entry.grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
 
         # select video encoder codec
         Label(video_info_frame, text="Video codec:").grid(sticky="w", row=1, column=2, padx=5, pady=3)
@@ -961,13 +960,10 @@ class CamGUI(object):
                                               state="readonly", width=5)
         self.video_codec_entry.set("XVID")  # default codec
         self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
-        self.video_codec_entry.grid(row=1, column=3, padx=5, pady=5)
+        self.video_codec_entry.grid(row=1, column=3, padx=5, pady=3)
         self.video_codec = self.video_codec_entry.get()  # add default video codec
-        
-        cur_row += 1
 
         # output directory
-        # output_dir_frame = Frame(self.window)
         Label(video_info_frame, text="Output Directory: ", width=10, justify="left", anchor="w").\
             grid(sticky="w", row=3, column=0, padx=5, pady=3)
         self.dir_output = StringVar()
@@ -977,22 +973,72 @@ class CamGUI(object):
             grid(row=3, column=1, columnspan=2, padx=5, pady=3)
         Button(video_info_frame, text="Browse", command=self.browse_output).\
             grid(sticky="nsew", row=3, column=3, padx=5, pady=3)
-        # output_dir_frame.grid(row=cur_row, column=0, padx=5, pady=3, sticky="w")
-        video_info_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
-        cur_row += 1
+        video_info_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nw")
 
         # set up video
-        Button(self.window, text="Setup Recording", command=self.set_up_vid).grid(sticky="nsew", row=cur_row, column=0,
-                                                                               columnspan=1, rowspan=1)
-        Button(self.window, text="Setup with trigger", command=self.sync_setup).grid(sticky="nsew", row=cur_row,
-                                                                                    column=1, columnspan=1)
-        Button(self.window, text="Setup Calibration", command=self.setup_calibration).grid(sticky="nsew", row=cur_row,
-                                                                                           column=2, columnspan=1)
-        self.toggle_calibration_button = Button(self.window, text="Calibration Off", command=self.toggle_calibration,
+        setup_video_label = Label(self.window, text="Setup Videos: ", font=("Arial", 12, "bold"))
+        setup_video_label.grid(row=cur_row-1, column=1, padx=1, pady=1, sticky="nw")
+        
+        setup_video_frame = Frame(self.window, borderwidth=1, relief="raised")
+        Button(setup_video_frame, text="Setup Recording", command=self.set_up_vid).\
+            grid(sticky="nsew", row=0, column=0, columnspan=1, rowspan=1, padx=5, pady=3)
+        Button(setup_video_frame, text="Setup Trigger", command=self.sync_setup).\
+            grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
+        Button(setup_video_frame, text="Snap A Frame", command=self.sync_setup).\
+            grid(sticky="nsew", row=2, column=0, columnspan=1, padx=5, pady=3)
+        # trigger
+        self.trigger_on = IntVar(value=0)
+        self.trigger_button_on = Radiobutton(setup_video_frame, text=" Trigger On", selectcolor='green', indicatoron=0,
+                                             variable=self.trigger_on, value=1)\
+            .grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+        self.trigger_button_off = Radiobutton(setup_video_frame, text="Trigger Off", selectcolor='red', indicatoron=0,
+                                              variable=self.trigger_on, value=0)\
+            .grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+        Button(setup_video_frame, text="Release Trigger", command=self.sync_setup).\
+            grid(sticky="nsew", row=2, column=1, columnspan=1, padx=5, pady=3)
+        
+        setup_video_frame.grid(row=cur_row, column=1, padx=2, pady=3, sticky="nw")
+        # cur_row += 1
+
+
+        # record videos
+        record_video_label = Label(self.window, text="Record Videos: ", font=("Arial", 12, "bold"))
+        record_video_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
+        
+        record_video_frame = Frame(self.window, borderwidth=1, relief="raised")
+        self.record_on = IntVar(value=0)
+        self.button_on = Radiobutton(record_video_frame, text="Record On", selectcolor='green', indicatoron=0,
+                                     variable=self.record_on, value=1, command=self.start_record).\
+            grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
+        self.button_off = Radiobutton(record_video_frame, text="Record Off", selectcolor='red', indicatoron=0,
+                                      variable=self.record_on, value=0).\
+            grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
+        self.release_vid0 = Button(record_video_frame, text="Save Video", command=lambda: self.save_vid(compress=False)).\
+            grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+        self.release_vid1 = Button(record_video_frame, text="Compress & Save Video",
+                                   command=lambda: self.save_vid(compress=True)).\
+            grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+        self.release_vid2 = Button(record_video_frame, text="Delete Video", command=lambda: self.save_vid(delete=True)).\
+            grid(sticky="nsew", row=2, column=1, padx=5, pady=3)
+        record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
+        cur_row += 2
+        
+        # calibrate videos
+        calibration_label = Label(self.window, text="Calibration: ", font=("Arial", 12, "bold"))
+        calibration_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="nw")
+        cur_row += 1
+        calibration_frame = Frame(self.window, borderwidth=1, relief="raised")
+        Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration).\
+            grid(sticky="nsew", row=0, column=0, columnspan=1, padx=5, pady=3)
+
+        self.toggle_calibration_button = Button(calibration_frame, text="Calibration Off", command=self.toggle_calibration,
                                                 background="red", state="disabled")
-        self.toggle_calibration_button.grid(sticky="nsew", row=cur_row, column=3, columnspan=1)
+        self.toggle_calibration_button.\
+            grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
+        calibration_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nw")
         cur_row += 1
 
+        # File status
         Label(self.window, text="Current file status: ").grid(row=cur_row, column=0, sticky="w")
         self.current_file_label = Label(self.window, text="")
         self.current_file_label.grid(row=cur_row, column=1, sticky="w")
@@ -1020,22 +1066,7 @@ class CamGUI(object):
         Label(self.window, text="").grid(row=cur_row, column=0)
         cur_row += 1
 
-        # record button
-        Label(self.window, text="Record: ").grid(sticky="w", row=cur_row, column=0)
-        self.record_on = IntVar(value=0)
-        self.button_on = Radiobutton(self.window, text="On", selectcolor='green', indicatoron=0,
-                                     variable=self.record_on, value=1, command=self.start_record).grid(sticky="nsew",
-                                                                                                       row=cur_row,
-                                                                                                       column=1)
-        self.button_off = Radiobutton(self.window, text="Off", selectcolor='red', indicatoron=0,
-                                      variable=self.record_on, value=0).grid(sticky="nsew", row=cur_row + 1, column=1)
-        self.release_vid0 = Button(self.window, text="Save Video", command=lambda: self.save_vid(compress=False)).grid(
-            sticky="nsew", row=cur_row, column=2)
-        self.release_vid1 = Button(self.window, text="Compress & Save Video",
-                                   command=lambda: self.save_vid(compress=True)).grid(sticky="nsew", row=cur_row + 1,
-                                                                                      column=2)
-        self.release_vid2 = Button(self.window, text="Delete Video", command=lambda: self.save_vid(delete=True)).grid(
-            sticky="nsew", row=cur_row + 2, column=2)
+        
         cur_row += 3
 
         # close window/reset GUI
