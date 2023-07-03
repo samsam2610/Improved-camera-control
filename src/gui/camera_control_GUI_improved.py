@@ -211,6 +211,15 @@ class CamGUI(object):
 
     def set_fov(self):
         pass
+    
+    def reset_fov(self):
+        pass
+    
+    def release_trigger(self):
+        pass
+    
+    def snap_image(self):
+        pass
 
     def create_video_files(self):
         if not os.path.isdir(os.path.normpath(self.dir_output.get())):
@@ -889,7 +898,7 @@ class CamGUI(object):
             Label(fov_settings_frame, text='Width').grid(row=1, column=2, padx=5, pady=3)
             Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=3, padx=5, pady=3)
 
-            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda i=i: self.set_fov(i), width=14)
+            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda i=i: self.reset_fov(i), width=14)
             reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
             
             set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda i=i: self.set_fov(i), width=14)
@@ -984,7 +993,7 @@ class CamGUI(object):
             grid(sticky="nsew", row=0, column=0, columnspan=1, rowspan=1, padx=5, pady=3)
         Button(setup_video_frame, text="Setup Trigger", command=self.sync_setup, width=14).\
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
-        Button(setup_video_frame, text="Snap A Frame", command=self.sync_setup, width=14).\
+        Button(setup_video_frame, text="Snap A Frame", command=self.snap_image, width=14).\
             grid(sticky="nsew", row=2, column=0, columnspan=1, padx=5, pady=3)
         # trigger
         self.trigger_on = IntVar(value=0)
@@ -994,12 +1003,10 @@ class CamGUI(object):
         self.trigger_button_off = Radiobutton(setup_video_frame, text="Trigger Off", selectcolor='red', indicatoron=0,
                                               variable=self.trigger_on, value=0)\
             .grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
-        Button(setup_video_frame, text="Release Trigger", command=self.sync_setup).\
+        Button(setup_video_frame, text="Release Trigger", command=self.release_trigger).\
             grid(sticky="nsew", row=2, column=1, columnspan=1, padx=5, pady=3)
         
         setup_video_frame.grid(row=cur_row, column=1, padx=2, pady=3, sticky="nw")
-        # cur_row += 1
-
 
         # record videos
         record_video_label = Label(self.window, text="Record Videos: ", font=("Arial", 12, "bold"))
