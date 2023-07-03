@@ -783,6 +783,7 @@ class CamGUI(object):
 
         for i in range(self.number_of_cams):
             self.cam.append([])
+            self.cam_name.append([])
             
         self.createGUI()
 
