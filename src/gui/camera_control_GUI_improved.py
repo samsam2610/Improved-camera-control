@@ -280,7 +280,10 @@ class CamGUI(object):
         if len(self.vid_out) > 0:
             vid_open_window = Tk()
             Label(vid_open_window,
-                  text="Video is currently open! \nPlease release the current video (click 'Save Video', even if no frames have been recorded) before setting up a new one.").pack()
+                  text="Video is currently open! "
+                       "\nPlease release the current video"
+                       " (click 'Save Video', even if no frames have been recorded)"
+                       " before setting up a new one.").pack()
             Button(vid_open_window, text="Ok", command=lambda: vid_open_window.quit()).pack()
             vid_open_window.mainloop()
             vid_open_window.destroy()
@@ -761,11 +764,10 @@ class CamGUI(object):
             # number of cameras
             Label(select_cams_window, text="How many cameras?").grid(sticky="w", row=0, column=0)
             self.number_of_cams = StringVar(value="1")
-            self.number_of_cams_entry = Entry(select_cams_window, textvariable=self.number_of_cams).grid(sticky="nsew",
-                                                                                                         row=0,
-                                                                                                         column=1)
-            Button(select_cams_window, text="Set Cameras", command=select_cams_window.quit).grid(sticky="nsew", row=1,
-                                                                                                 column=0, columnspan=2)
+            self.number_of_cams_entry = Entry(select_cams_window, textvariable=self.number_of_cams).\
+                grid(sticky="nsew", row=0, column=1)
+            Button(select_cams_window, text="Set Cameras", command=select_cams_window.quit).\
+                grid(sticky="nsew", row=1, column=0, columnspan=2)
             select_cams_window.mainloop()
             select_cams_window.destroy()
         else:
@@ -815,7 +817,8 @@ class CamGUI(object):
         for i in range(self.number_of_cams):
             # drop down menu to select camera
             gridframe = Frame(self.window)
-            Label(gridframe, text="Camera " + str(i + 1) + ": ", width=8, justify="left", anchor="w").grid(sticky="w", row=0, column=0, padx=5, pady=5)
+            Label(gridframe, text="Camera " + str(i + 1) + ": ", width=8, justify="left", anchor="w").\
+                grid(sticky="w", row=0, column=0, padx=5, pady=5)
             self.camera.append(StringVar())
             self.camera_entry.append(ttk.Combobox(gridframe, textvariable=self.camera[i], width=10, justify="left"))
             self.camera_entry[i]['values'] = self.cam_names
@@ -823,44 +826,50 @@ class CamGUI(object):
             self.camera_entry[i].grid(row=0, column=1, padx=5, pady=5)
 
             # initialize camera button
-            Button(gridframe, text=f"Initialize Camera {i+1}", command=lambda i=i: self.init_cam(i), width=15).grid(sticky="nsew",
-                                                                                                       row=0,
-                                                                                                       column=2, padx=5, pady=5)
+            Button(gridframe, text=f"Initialize Camera {i+1}", command=lambda i=i: self.init_cam(i), width=15).\
+                grid(sticky="nsew", row=0, column=2, padx=5, pady=5)
             # format
-            Label(gridframe, text="Format " + str(i + 1) + ": ", width=8, justify="left", anchor="w").grid(sticky="w", row=1, column=0, padx=5, pady=5)
+            Label(gridframe, text="Format " + str(i + 1) + ": ", width=8, justify="left", anchor="w").\
+                grid(sticky="w", row=1, column=0, padx=5, pady=5)
             self.formats.append(StringVar())
             self.format_entry.append(ttk.Combobox(gridframe, textvariable=self.formats[i], width=15, justify="left"))
             self.format_entry[i]['values'] = self.format_list
             self.format_entry[i].current(i)
             self.format_entry[i].grid(row=1, column=1, padx=5)
 
-            # inialize camera button
-            Button(gridframe, text="Set format", command=lambda i=i: self.set_formats(i), width=5).grid(sticky="nsew",
-                                                                                             row=1,
-                                                                                             column=2,padx=5, pady=5)
+            # initialize camera button
+            Button(gridframe, text="Set format", command=lambda i=i: self.set_formats(i), width=5).\
+                grid(sticky="nsew", row=1, column=2,padx=5, pady=5)
 
             gridframe.grid(row=cur_row, column=0, padx=2, sticky="w")
 
             # change exposure
             capture_settings_frame = Frame(self.window)
-            Label(capture_settings_frame, text='Exposure:', width=8, justify="left", anchor="w").grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+            Label(capture_settings_frame, text='Exposure:', width=8, justify="left", anchor="w").\
+                grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+            
             self.exposure.append(StringVar())
             self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=5, justify="left"))
             self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
 
-            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda i=i: self.set_exposure(i), width=15).grid(sticky="nsew",
-                                                                                                      row=0,
-                                                                                                      column=2,
-                                                                                                      padx=5, pady=3)
+            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda i=i: self.set_exposure(i), width=15).\
+                grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+            
             # change gain
-            Label(capture_settings_frame, text='Gain:', width=8, justify="left", anchor="w").grid(row=1, column=0, padx=5, pady=3)
+            Label(capture_settings_frame, text='Gain:', width=8, justify="left", anchor="w").\
+                grid(row=1, column=0, padx=5, pady=3)
+            
             self.gain.append(StringVar())
             self.gain_entry.append(Entry(capture_settings_frame, textvariable=self.gain[i], width=5, justify="left"))
-            self.gain_entry[i].grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
-            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda i=i: self.set_gain(i), width=8).grid(sticky="nsew",
-                                                                                               row=1,
-                                                                                               column=2, pady=3, padx=5)
-            capture_settings_frame.grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
+            self.gain_entry[i].\
+                grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+            
+            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda i=i: self.set_gain(i), width=8).\
+                grid(sticky="nsew", row=1, column=2, pady=3, padx=5)
+            
+            capture_settings_frame.\
+                grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
+            
             capture_settings_frame.pack_propagate(False)
 
             # set FOV format
@@ -879,9 +888,8 @@ class CamGUI(object):
 
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, sticky="w")
             fov_settings_frame.pack_propagate(False)
-            Button(self.window, text="Set FOV", command=lambda i=i: self.set_fov(i)).grid(sticky="nsew",
-                                                                                             row=cur_row + 1,
-                                                                                             column=2)
+            Button(self.window, text="Set FOV", command=lambda i=i: self.set_fov(i)).\
+                grid(sticky="nsew", row=cur_row + 1, column=2)
             cur_row += 1
 
             Label(self.window, text='').grid(row=cur_row + 1, column=2, sticky="w")
@@ -890,12 +898,14 @@ class CamGUI(object):
             cur_row += 2
 
             # label for frame acquired count
-            Label(self.window, text="Frame acquired count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=0, sticky="w", padx=5, pady=3)
+            Label(self.window, text="Frame acquired count: ", wraplength=numberOfScreenUnits).\
+                grid(row=cur_row, column=0, sticky="w", padx=5, pady=3)
             self.frame_acquired_count_label.append(Label(self.window, text="", width=5))
             self.frame_acquired_count_label[i].grid(row=cur_row, column=1, sticky="w", padx=5, pady=3)
 
             # label for frame acquired count
-            Label(self.window, text="Detected board count: ", wraplength=numberOfScreenUnits).grid(row=cur_row, column=2, sticky="w", padx=5, pady=3)
+            Label(self.window, text="Detected board count: ", wraplength=numberOfScreenUnits).\
+                grid(row=cur_row, column=2, sticky="w", padx=5, pady=3)
             self.board_detected_count_label.append(Label(self.window, text="", width=5))
             self.board_detected_count_label[i].grid(row=cur_row, column=3, sticky="w", padx=5, pady=3)
             cur_row += 1
@@ -956,7 +966,8 @@ class CamGUI(object):
 
         # output directory
         output_dir_frame = Frame(self.window)
-        Label(output_dir_frame, text="Output Directory: ", width=15, justify="left", anchor="w").grid(sticky="w", row=0, column=0, columnspan=2, padx=5, pady=3)
+        Label(output_dir_frame, text="Output Directory: ", width=15, justify="left", anchor="w").\
+            grid(sticky="w", row=0, column=0, columnspan=2, padx=5, pady=3)
         self.dir_output = StringVar()
         self.output_entry = ttk.Combobox(output_dir_frame, textvariable=self.dir_output, width=10)
         self.output_entry['values'] = self.output_dir
