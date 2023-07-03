@@ -92,12 +92,13 @@ class CamGUI(object):
         names = np.array(self.cam_names)
         cam_num = np.where(names == cam_num)[0][0]
 
-        if len(self.cam) >= num + 1:
-            self.cam_name[num] = names[cam_num]
-            self.cam[num] = ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get())
-        else:
-            self.cam_name.append(names[cam_num])
-            self.cam.append(ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get()))
+        # if len(self.cam) >= num + 1:
+        self.cam_name[num] = names[cam_num]
+        self.cam[num] = ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get())
+        
+    # else:
+        #     self.cam_name.append(names[cam_num])
+        #     self.cam.append(ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get()))
         self.cam[num].start()
 
         # set gain and exposure using the values from the json
