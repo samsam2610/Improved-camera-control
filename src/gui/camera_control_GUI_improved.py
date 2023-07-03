@@ -828,7 +828,7 @@ class CamGUI(object):
             self.camera_entry[i].grid(row=0, column=1, padx=5, pady=3)
 
             # initialize camera button
-            Button(init_camera_frame, text=f"Initialize Camera {i+1}", command=lambda i=i: self.init_cam(i), width=10).\
+            Button(init_camera_frame, text=f"Initialize Camera {i+1}", command=lambda i=i: self.init_cam(i), width=14).\
                 grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
 
             # format
@@ -840,8 +840,8 @@ class CamGUI(object):
             self.format_entry[i].current(i)
             self.format_entry[i].grid(row=1, column=1, padx=5, pady=3)
 
-            # initialize camera button
-            Button(init_camera_frame, text="Set format", command=lambda i=i: self.set_formats(i), width=10).\
+            # Set camera format
+            Button(init_camera_frame, text="Set Format", command=lambda i=i: self.set_formats(i), width=14).\
                 grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
             
             init_camera_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
@@ -855,7 +855,7 @@ class CamGUI(object):
             self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=5, justify="left"))
             self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
 
-            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda i=i: self.set_exposure(i), width=10).\
+            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda i=i: self.set_exposure(i), width=14).\
                 grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
             
             # change gain
@@ -867,7 +867,7 @@ class CamGUI(object):
             self.gain_entry[i].\
                 grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
             
-            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda i=i: self.set_gain(i), width=8).\
+            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda i=i: self.set_gain(i), width=14).\
                 grid(sticky="nsew", row=1, column=2, pady=3, padx=5)
             
             capture_settings_frame.\
@@ -889,10 +889,10 @@ class CamGUI(object):
             Label(fov_settings_frame, text='Width').grid(row=1, column=2, padx=5, pady=3)
             Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=3, padx=5, pady=3)
 
-            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda i=i: self.set_fov(i), width=5)
+            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda i=i: self.set_fov(i), width=14)
             reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
             
-            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda i=i: self.set_fov(i), width=5)
+            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda i=i: self.set_fov(i), width=14)
             set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
 
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
@@ -980,11 +980,11 @@ class CamGUI(object):
         setup_video_label.grid(row=cur_row-1, column=1, padx=1, pady=1, sticky="nw")
         
         setup_video_frame = Frame(self.window, borderwidth=1, relief="raised")
-        Button(setup_video_frame, text="Setup Recording", command=self.set_up_vid).\
+        Button(setup_video_frame, text="Setup Recording", command=self.set_up_vid, width=14).\
             grid(sticky="nsew", row=0, column=0, columnspan=1, rowspan=1, padx=5, pady=3)
-        Button(setup_video_frame, text="Setup Trigger", command=self.sync_setup).\
+        Button(setup_video_frame, text="Setup Trigger", command=self.sync_setup, width=14).\
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
-        Button(setup_video_frame, text="Snap A Frame", command=self.sync_setup).\
+        Button(setup_video_frame, text="Snap A Frame", command=self.sync_setup, width=14).\
             grid(sticky="nsew", row=2, column=0, columnspan=1, padx=5, pady=3)
         # trigger
         self.trigger_on = IntVar(value=0)
@@ -1008,17 +1008,19 @@ class CamGUI(object):
         record_video_frame = Frame(self.window, borderwidth=1, relief="raised")
         self.record_on = IntVar(value=0)
         self.button_on = Radiobutton(record_video_frame, text="Record On", selectcolor='green', indicatoron=0,
-                                     variable=self.record_on, value=1, command=self.start_record).\
+                                     variable=self.record_on, value=1, command=self.start_record, width=14).\
             grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
         self.button_off = Radiobutton(record_video_frame, text="Record Off", selectcolor='red', indicatoron=0,
-                                      variable=self.record_on, value=0).\
+                                      variable=self.record_on, value=0, width=14).\
             grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
-        self.release_vid0 = Button(record_video_frame, text="Save Video", command=lambda: self.save_vid(compress=False)).\
+        self.release_vid0 = Button(record_video_frame, text="Save Video",
+                                   command=lambda: self.save_vid(compress=False), width=14).\
             grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
         self.release_vid1 = Button(record_video_frame, text="Compress & Save Video",
-                                   command=lambda: self.save_vid(compress=True)).\
+                                   command=lambda: self.save_vid(compress=True), width=14).\
             grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
-        self.release_vid2 = Button(record_video_frame, text="Delete Video", command=lambda: self.save_vid(delete=True)).\
+        self.release_vid2 = Button(record_video_frame, text="Delete Video",
+                                   command=lambda: self.save_vid(delete=True), width=14).\
             grid(sticky="nsew", row=2, column=1, padx=5, pady=3)
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         cur_row += 2
@@ -1032,7 +1034,7 @@ class CamGUI(object):
             grid(sticky="nsew", row=0, column=0, columnspan=1, padx=5, pady=3)
 
         self.toggle_calibration_button = Button(calibration_frame, text="Calibration Off", command=self.toggle_calibration,
-                                                background="red", state="disabled")
+                                                background="red", state="disabled", width=14)
         self.toggle_calibration_button.\
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
         calibration_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nw")
