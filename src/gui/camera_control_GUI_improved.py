@@ -779,6 +779,9 @@ class CamGUI(object):
             self.number_of_cams_entry = "2"
             self.number_of_cams = 2
 
+        for i in range(self.number_of_cams):
+            self.cam.append([])
+            
         self.createGUI()
 
     def createGUI(self):
@@ -837,7 +840,7 @@ class CamGUI(object):
             self.camera_entry[i].grid(row=0, column=1, padx=5, pady=3)
 
             # initialize camera button
-            Button(init_camera_frame, text=f"Initialize Camera {i+1}", command=lambda i=i: self.init_cam(i), width=14).\
+            Button(init_camera_frame, text=f"Initialize Camera {i+1}", command=lambda index_cam=i: self.init_cam(index_cam), width=14).\
                 grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
 
             # format
@@ -850,7 +853,7 @@ class CamGUI(object):
             self.format_entry[i].grid(row=1, column=1, padx=5, pady=3)
 
             # Set camera format
-            Button(init_camera_frame, text="Set Format", command=lambda i=i: self.set_formats(i), width=14).\
+            Button(init_camera_frame, text="Set Format", command=lambda index_cam=i: self.set_formats(index_cam), width=14).\
                 grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
             
             init_camera_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
@@ -864,7 +867,7 @@ class CamGUI(object):
             self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=5, justify="left"))
             self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
 
-            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda i=i: self.set_exposure(i), width=14).\
+            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: self.set_exposure(index_cam), width=14).\
                 grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
             
             # change gain
@@ -876,7 +879,7 @@ class CamGUI(object):
             self.gain_entry[i].\
                 grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
             
-            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda i=i: self.set_gain(i), width=14).\
+            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda index_cam=i: self.set_gain(index_cam), width=14).\
                 grid(sticky="nsew", row=1, column=2, pady=3, padx=5)
             
             capture_settings_frame.\

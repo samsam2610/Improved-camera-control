@@ -39,10 +39,11 @@ class ICCam(object):
         self.crop = crop if crop is not None else cam_details[str(self.cam_num)]['crop']
         self.exposure = exposure if exposure is not None else cam_details[str(self.cam_num)]['exposure']
         self.gain = gain if gain is not None else cam_details[str(self.cam_num)]['gain']
+        self.formats = formats if formats is not None else cam_details[str(self.cam_num)]['formats']
 
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
-        self.cam.SetVideoFormat(Format=formats)
+        self.cam.SetVideoFormat(Format=self.formats)
         self.add_filters()
 
     def add_filters(self):
@@ -59,6 +60,9 @@ class ICCam(object):
         self.cam.FilterSetParameter(h_c, b'Width', self.crop['width'])
         self.size = (self.crop['width'], self.crop['height'])
 
+    def set_crop(self, top=None, left=None, height=None, width=None):
+        
+        pass
     def set_frame_rate(self, fps):
         self.cam.SetFrameRate(fps)
 
@@ -100,7 +104,7 @@ class ICCam(object):
     def enable_trigger(self):
         self.cam.SetPropertySwitch("Trigger", "Enable", True)
         if not self.cam.callback_registered:
-            self.cam.SetFrameReadyCallback
+            self.cam.SetFrameReadyCallback()
 
     def frame_ready(self):
         self.cam.ResetFrameReady()
