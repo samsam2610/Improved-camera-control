@@ -941,47 +941,54 @@ class CamGUI(object):
         
         # subject name
         video_info_frame = Frame(self.window, borderwidth=1, relief="raised")
-        Label(video_info_frame, text="Subject: ").grid(sticky="w", row=0, column=0, padx=5, pady=3)
+        Label(video_info_frame, text="Subject: ").\
+            grid(sticky="nw", row=0, column=0, padx=5, pady=3)
         self.subject = StringVar()
         self.subject_entry = ttk.Combobox(video_info_frame, textvariable=self.subject, width=5)
         self.subject_entry['values'] = tuple(self.mouse_list)
-        self.subject_entry.grid(row=0, column=1, padx=5, pady=3)
+        self.subject_entry.\
+            grid(sticky="nw", row=0, column=1, padx=5, pady=3)
 
         # attempt
-        Label(video_info_frame, text="Attempt: ").grid(sticky="w", row=0, column=2, padx=5, pady=3)
+        Label(video_info_frame, text="Attempt: ").grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
         self.attempt = StringVar(value="1")
         self.attempt_entry = ttk.Combobox(video_info_frame, textvariable=self.attempt, width=5)
         self.attempt_entry['values'] = tuple(range(1, 10))
-        self.attempt_entry.grid(row=0, column=3, padx=5, pady=3)
+        self.attempt_entry.\
+            grid(sticky="nw", row=0, column=3, padx=5, pady=3)
 
         # type frame rate
-        Label(video_info_frame, text="Frame Rate: ").grid(sticky="w", row=1, column=0, padx=5, pady=3)
+        Label(video_info_frame, text="Frame Rate: ").\
+            grid(sticky="nw", row=1, column=0, padx=5, pady=3)
         self.fps = StringVar()
         self.fps_entry = Entry(video_info_frame, textvariable=self.fps, width=5)
         self.fps_entry.insert(END, '100')
-        self.fps_entry.grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+        self.fps_entry.\
+            grid(sticky="nw", row=1, column=1, padx=5, pady=3)
 
         # select video encoder codec
-        Label(video_info_frame, text="Video codec:").grid(sticky="w", row=1, column=2, padx=5, pady=3)
+        Label(video_info_frame, text="Video codec:").\
+            grid(sticky="nw", row=1, column=2, padx=5, pady=3)
         self.video_codec = StringVar()
         self.video_codec_entry = ttk.Combobox(video_info_frame,
                                               value=self.fourcc_codes,
                                               state="readonly", width=5)
         self.video_codec_entry.set("XVID")  # default codec
         self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
-        self.video_codec_entry.grid(row=1, column=3, padx=5, pady=3)
+        self.video_codec_entry.\
+            grid(sticky="nw", row=1, column=3, padx=5, pady=3)
         self.video_codec = self.video_codec_entry.get()  # add default video codec
 
         # output directory
         Label(video_info_frame, text="Output Directory: ", width=15, justify="left", anchor="w").\
-            grid(sticky="w", row=3, column=0, padx=5, pady=3)
+            grid(sticky="nw", row=3, column=0, padx=5, pady=3)
         self.dir_output = StringVar()
         self.output_entry = ttk.Combobox(video_info_frame, textvariable=self.dir_output, width=15)
         self.output_entry['values'] = self.output_dir
         self.output_entry.\
-            grid(row=3, column=1, columnspan=2, padx=5, pady=3)
+            grid(sticky="nw", row=3, column=1, columnspan=2, padx=5, pady=3)
         Button(video_info_frame, text="Browse", command=self.browse_output).\
-            grid(sticky="nsew", row=3, column=3, padx=5, pady=3)
+            grid(sticky="nw", row=3, column=3, padx=5, pady=3)
         video_info_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nw")
 
         # set up video
