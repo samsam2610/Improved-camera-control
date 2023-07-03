@@ -84,8 +84,9 @@ class CamGUI(object):
             return
 
         if len(self.cam) >= num + 1:
-            self.cam[num].close()
-            self.cam[num] = None
+            if isinstance(self.cam[num], ICCam):
+                self.cam[num].close()
+                self.cam[num] = None
 
         # create camera object
         cam_num = self.camera[num].get()
