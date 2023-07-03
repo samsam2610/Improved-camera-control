@@ -964,10 +964,10 @@ class CamGUI(object):
         self.video_codec = self.video_codec_entry.get()  # add default video codec
 
         # output directory
-        Label(video_info_frame, text="Output Directory: ", width=10, justify="left", anchor="w").\
+        Label(video_info_frame, text="Output Directory: ", width=15, justify="left", anchor="w").\
             grid(sticky="w", row=3, column=0, padx=5, pady=3)
         self.dir_output = StringVar()
-        self.output_entry = ttk.Combobox(video_info_frame, textvariable=self.dir_output, width=10)
+        self.output_entry = ttk.Combobox(video_info_frame, textvariable=self.dir_output, width=15)
         self.output_entry['values'] = self.output_dir
         self.output_entry.\
             grid(row=3, column=1, columnspan=2, padx=5, pady=3)
@@ -1017,7 +1017,7 @@ class CamGUI(object):
                                    command=lambda: self.save_vid(compress=False), width=14).\
             grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
         self.release_vid1 = Button(record_video_frame, text="Compress & Save Video",
-                                   command=lambda: self.save_vid(compress=True), width=14).\
+                                   command=lambda: self.save_vid(compress=True)).\
             grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
         self.release_vid2 = Button(record_video_frame, text="Delete Video",
                                    command=lambda: self.save_vid(delete=True), width=14).\
