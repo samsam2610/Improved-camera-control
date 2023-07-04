@@ -61,8 +61,21 @@ class ICCam(object):
         self.size = (self.crop['width'], self.crop['height'])
 
     def set_crop(self, top=None, left=None, height=None, width=None):
+        self.crop['top'] = top if top is not None else self.crop['top']
+        self.crop['left'] = left if left is not None else self.crop['left']
+        self.crop['height'] = height if height is not None else self.crop['height']
+        self.crop['width'] = width if width is not None else self.crop['width']
+        self.cam.StopLive()
+        self.cam.SetVideoFormat(Format=self.formats)
+        self.add_filters()
+        self.cam.StartLive()
         
-        pass
+    def get_crop(self):
+        return (self.crop['top'],
+                self.crop['left'],
+                self.crop['height'],
+                self.crop['width'])
+        
     def set_frame_rate(self, fps):
         self.cam.SetFrameRate(fps)
 

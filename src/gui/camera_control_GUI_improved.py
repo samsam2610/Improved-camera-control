@@ -109,6 +109,8 @@ class CamGUI(object):
         # get the gain and exposure values to reflect that onto the GUI
         self.exposure[num].set(self.cam[num].get_exposure())
         self.gain[num].set(self.cam[num].get_gain())
+        
+        self.set_fov(num)
 
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
@@ -208,13 +210,19 @@ class CamGUI(object):
         else:
             self.cam[num].set_formats(str(self.formats[num].get()))
 
-    def get_fov(self):
-        pass
+    def get_fov(self, num):
+        for fov_label in self.fov_labels:
+            self.fov_dict[num][fov_label].set(self.cam_details[num].crop[fov_label])
 
-    def set_fov(self):
-        pass
-    
-    def reset_fov(self):
+    def set_fov(self, num):
+        for fov_label in self.fov_labels:
+            self.cam_details[num].crop[fov_label] = self.fov_dict[num][fov_label].get()
+        self.cam[num].set_crop(top=self.cam_details[num].crop['top'],
+                               left=self.cam_details[num].crop['left'],
+                               height=self.cam_details[num].crop['height'],
+                               width=self.cam_details[num].crop['width'])
+        
+    def reset_fov(self, num):
         pass
     
     def release_trigger(self):
@@ -821,6 +829,8 @@ class CamGUI(object):
         self.format_entry = []
         self.frame_acquired_count_label = []
         self.board_detected_count_label = []
+        self.fov_dict = []
+        self.fov_labels = ['top', 'left', 'height', 'width']
 
         if not isinstance(self.number_of_cams, int):
             self.number_of_cams = int(self.number_of_cams.get())
@@ -889,33 +899,41 @@ class CamGUI(object):
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
             
             capture_settings_frame.pack_propagate(False)
-
+            
             # set FOV format
+            fov_current_dict = {'top': IntVar(),
+                                'left': IntVar(),
+                                'height': IntVar(),
+                                'width': IntVar()}
+            self.fov_dict.append(fov_current_dict)
+            
             fov_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
             Label(fov_settings_frame, text='Top').grid(row=0, column=0, padx=5, pady=3)
-            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=1, padx=5, pady=3)
+            Entry(fov_settings_frame, textvariable=self.fov_dict[i]['top'], width=5).\
+                grid(row=0, column=1, padx=5, pady=3)
 
             Label(fov_settings_frame, text='Left').grid(row=0, column=2, padx=5, pady=3)
-            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=0, column=3, padx=5, pady=3)
+            Entry(fov_settings_frame, textvariable=self.fov_dict[i]['left'], width=5).\
+                grid(row=0, column=3, padx=5, pady=3)
 
             Label(fov_settings_frame, text='Height').grid(row=1, column=0, padx=5, pady=3)
-            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=1, padx=5, pady=3)
+            Entry(fov_settings_frame, textvariable=self.fov_dict[i]['height'], width=5).\
+                grid(row=1, column=1, padx=5, pady=3)
 
             Label(fov_settings_frame, text='Width').grid(row=1, column=2, padx=5, pady=3)
-            Entry(fov_settings_frame, textvariable=StringVar(), width=5).grid(row=1, column=3, padx=5, pady=3)
-
-            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda i=i: self.reset_fov(i), width=14)
+            Entry(fov_settings_frame, textvariable=self.fov_dict[i]['width'], width=5).\
+                grid(row=1, column=3, padx=5, pady=3)
+            
+            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: self.get_fov(index_cam), width=14)
             reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
             
-            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda i=i: self.set_fov(i), width=14)
+            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: self.set_fov(index_cam), width=14)
             set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
 
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
             fov_settings_frame.pack_propagate(False)
             cur_row += 1
-            # Get the width of fov_settings_frame
         
-
             camera_status_frame = Frame(self.window)
             # label for frame acquired count
             Label(camera_status_frame, text="Frame acquired #: ").\
