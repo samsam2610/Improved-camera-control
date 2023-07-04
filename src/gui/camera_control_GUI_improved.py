@@ -217,11 +217,12 @@ class CamGUI(object):
 
     def set_fov(self, num):
         for fov_label in self.fov_labels:
-            self.cam_details[num].crop[fov_label] = self.fov_dict[num][fov_label].get()
-        self.cam[num].set_crop(top=self.cam_details[num].crop['top'],
-                               left=self.cam_details[num].crop['left'],
-                               height=self.cam_details[num].crop['height'],
-                               width=self.cam_details[num].crop['width'])
+            self.cam_details[str(num)]['crop'][fov_label] = self.fov_dict[num][fov_label].get()
+            
+        self.cam[num].set_crop(top=self.cam_details[str(num)]['crop']['top'],
+                               left=self.cam_details[str(num)]['crop']['left'],
+                               height=self.cam_details[str(num)]['crop']['height'],
+                               width=self.cam_details[str(num)]['crop']['width'])
         
     def reset_fov(self, num):
         pass
