@@ -110,7 +110,7 @@ class CamGUI(object):
         self.exposure[num].set(self.cam[num].get_exposure())
         self.gain[num].set(self.cam[num].get_gain())
         
-        self.set_fov(num)
+        self.get_fov(num)
 
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
