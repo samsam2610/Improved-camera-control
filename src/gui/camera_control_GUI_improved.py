@@ -211,7 +211,7 @@ class CamGUI(object):
             self.cam[num].set_formats(str(self.formats[num].get()))
 
     def get_fov(self, num):
-        crop_details = self.cam[num]['crop']
+        crop_details = self.cam_details[num]['crop']
         for fov_label in self.fov_labels:
             self.fov_dict[num][fov_label].set(crop_details[fov_label])
 
