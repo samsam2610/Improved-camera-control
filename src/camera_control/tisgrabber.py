@@ -132,7 +132,7 @@ class TIS_GrabberDLL(object):
                                            C.c_char_p)
 
     close_video_capture_device = __tisgrabber.IC_CloseVideoCaptureDevice
-    close_video_capture_device.argtypes = (GrabberHandlePtr)
+    close_video_capture_device.argtypes = (GrabberHandlePtr, )
 
     set_videoformat = __tisgrabber.IC_SetVideoFormat
     set_videoformat.restype = C.c_int
