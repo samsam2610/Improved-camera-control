@@ -131,8 +131,9 @@ class TIS_GrabberDLL(object):
     open_device_by_unique_name.argtypes = (GrabberHandlePtr,
                                            C.c_char_p)
 
-    close_video_capture_device = __tisgrabber.IC_CloseVideoCaptureDevice
-    close_video_capture_device.argtypes = (GrabberHandlePtr, )
+    close_device = __tisgrabber.IC_CloseVideoCaptureDevice
+    close_device.restype = None
+    close_device.argtypes = (GrabberHandlePtr, )
 
     set_videoformat = __tisgrabber.IC_SetVideoFormat
     set_videoformat.restype = C.c_int
@@ -707,7 +708,7 @@ class TIS_CAM(object):
 
         def GetImageEx(self):
             """ Return a numpy array with the image data tyes
-            If the sink is Y16 or RGB64 (not supported yet), the dtype in the array is uint16, othereise it is uint8
+            If the sink is Y16 or RGB64 (not supported yet), the dtype in the array is uint16, otherwise it is uint8
             """
             BildDaten = self.GetImageDescription()[:4]
             lWidth=BildDaten[0]
@@ -834,9 +835,6 @@ class TIS_CAM(object):
             '''
             return TIS_GrabberDLL.OpenVideoCaptureDevice(self._handle, self.s(DeviceName))
 
-        def closeVideoCaptureDevice(self):
-            TIS_GrabberDLL.close_video_capture_device(self._handle)
-        
         def CreateFrameFilter(self, name):
             frame_filter_handle = FrameFilterHandle()
 
