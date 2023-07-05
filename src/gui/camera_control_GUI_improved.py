@@ -232,14 +232,14 @@ class CamGUI(object):
         pass
         
     def set_x_offset(self, i, num):
-        self.toggle_auto_center(num)
+        self.cam[num].set_auto_center(value=self.auto_center[num].get())
         x_offset = self.x_offset_value[num].get()
         self.cam[num].set_partial_scan(x_offset=x_offset)
         self.x_offset_scale[num].set(x_offset)
         self.x_offset_spinbox[num].set(x_offset)
     
     def set_y_offset(self, i, num):
-        self.toggle_auto_center(num)
+        self.cam[num].set_auto_center(value=self.auto_center[num].get())
         y_offset = self.y_offset_value[num].get()
         self.cam[num].set_partial_scan(y_offset=y_offset)
         self.y_offset_scale[num].set(y_offset)
@@ -247,19 +247,21 @@ class CamGUI(object):
 
     def toggle_auto_center(self, num):
         current_auto_center_status = self.auto_center[num].get()
+        self.cam[num].set_auto_center(value=current_auto_center_status)
         state = "normal" if current_auto_center_status == 0 else "disabled"
         self.x_offset_scale[num].config(state=state)
         self.x_offset_spinbox[num].config(state=state)
         self.y_offset_scale[num].config(state=state)
         self.y_offset_spinbox[num].config(state=state)
+        
         if current_auto_center_status == 0:
             frame_dimension = self.get_frame_dimensions(num)
             self.x_offset_scale[num].config(to=frame_dimension[0])
             self.x_offset_spinbox[num].config(to=frame_dimension[0])
             self.y_offset_scale[num].config(to=frame_dimension[1])
             self.y_offset_spinbox[num].config(to=frame_dimension[1])
-            self.set_x_offset(num)
-            self.set_y_offset(num)
+            self.set_x_offset(None, num)
+            self.set_y_offset(None, num)
         
     def release_trigger(self):
         for num in range(len(self.cam)):
