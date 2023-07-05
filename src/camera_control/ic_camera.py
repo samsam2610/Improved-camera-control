@@ -65,8 +65,7 @@ class ICCam(object):
         self.crop['left'] = left if left is not None else self.crop['left']
         self.crop['height'] = height if height is not None else self.crop['height']
         self.crop['width'] = width if width is not None else self.crop['width']
-        self.cam.StopLive()
-        self.cam.closeVideoCaptureDevice()
+        self.cam.close()
         self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
         self.add_filters()
