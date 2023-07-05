@@ -147,9 +147,9 @@ class TIS_GrabberDLL(object):
 
     get_available_framerates = __tisgrabber.IC_GetFrameRate
     get_available_framerates.restype = C.c_int
-    get_available_framerates.argtypes = (GrabberHandlePtr,
+    get_available_framerates.argtypes = [GrabberHandlePtr,
                                          C.c_int,
-                                         C.POINTER(C.c_float))
+                                         C.POINTER(C.c_float)]
 
 #    Returns the width of the video format.
     get_video_format_width = __tisgrabber.IC_GetVideoFormatWidth
@@ -601,10 +601,12 @@ class TIS_CAM(object):
             fps = C.c_float(0.0)
             fps_list = []
 
-            while TIS_GrabberDLL.get_available_framerates(self._handle, Index, fps) == C.c_int(1):
+            if TIS_GrabberDLL.get_available_framerates(self._handle, Index, fps) == 1:
                 print(f"current fps value is {fps.value}")
                 fps_list.append(int(fps.value))
                 Index += 1
+            else:
+                print("end of fps_list")
 
             return fps_list
 
