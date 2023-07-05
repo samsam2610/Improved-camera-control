@@ -131,6 +131,8 @@ class TIS_GrabberDLL(object):
     open_device_by_unique_name.argtypes = (GrabberHandlePtr,
                                            C.c_char_p)
 
+    close_video_capture_device = __tisgrabber.IC_CloseVideoCaptureDevice
+    close_video_capture_device.argtypes = GrabberHandlePtr
 
     set_videoformat = __tisgrabber.IC_SetVideoFormat
     set_videoformat.restype = C.c_int
@@ -528,7 +530,7 @@ class TIS_CAM(object):
             
             :returns: int -- frame number that was announced as ready.
             """
-            if timeout:        
+            if timeout:
                 start = time.clock()
                 elapsed = (time.clock() - start) * 1000
                 while not self._frame['ready'] and elapsed < timeout:
@@ -832,6 +834,9 @@ class TIS_CAM(object):
             '''
             return TIS_GrabberDLL.OpenVideoCaptureDevice(self._handle, self.s(DeviceName))
 
+        def closeVideoCaptureDevice(self):
+            TIS_GrabberDLL.close_video_capture_device(self._handle)
+        
         def CreateFrameFilter(self, name):
             frame_filter_handle = FrameFilterHandle()
 
