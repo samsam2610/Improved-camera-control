@@ -254,10 +254,10 @@ class CamGUI(object):
         self.y_offset_spinbox[num].config(state=state)
         if current_auto_center_status == 0:
             frame_dimension = self.get_frame_dimensions(num)
-            self.x_offset_scale[num].config(to=frame_dimension(0))
-            self.x_offset_spinbox[num].config(to=frame_dimension(0))
-            self.y_offset_scale[num].config(to=frame_dimension(1))
-            self.y_offset_spinbox[num].config(to=frame_dimension(1))
+            self.x_offset_scale[num].config(to=frame_dimension[0])
+            self.x_offset_spinbox[num].config(to=frame_dimension[0])
+            self.y_offset_scale[num].config(to=frame_dimension[1])
+            self.y_offset_spinbox[num].config(to=frame_dimension[1])
             self.set_x_offset(num)
             self.set_y_offset(num)
         
