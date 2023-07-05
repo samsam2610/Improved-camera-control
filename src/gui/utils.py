@@ -252,6 +252,7 @@ def write_camera_details(cams=None, output_dir=None):
              'rotate': 0,
              'exposure': 0.002,
              'gain': 100,
+             'offset': {'x': 0, 'y': 0},
              'output_dir': 'E:\\live_videos'}
 
     cam_1 = {'name': 'cam2',
@@ -259,6 +260,7 @@ def write_camera_details(cams=None, output_dir=None):
              'rotate': 0,
              'exposure': 0.002,
              'gain': 100,
+             'offset': {'x': 0, 'y': 0},
              'output_dir': 'E:\\live_videos'}
 
     subs = ['test1', 'test2', 'test3']  # optional, can manually enter subject for each session.
@@ -287,12 +289,18 @@ def write_camera_details(cams=None, output_dir=None):
             'height': crop_details.get('height', 0),
             'width': crop_details.get('width', 0)
         }
+        offset_details = cam.get('offset', {})
+        offset = {
+            'x': offset_details.get('x', 0),
+            'y': offset_details.get('y', 0)
+        }
         cam_details[str(i)] = {
             'name': cam_name,
             'crop': crop,
             'rotate': cam.get('rotate', 0),
             'exposure': cam.get('exposure', 0.002),
             'gain': cam.get('gain', 100),
+            'offset': offset,
             'output_dir': cam.get('output_dir', '')
         }
 
@@ -303,5 +311,5 @@ def write_camera_details(cams=None, output_dir=None):
         'labview': []
     }
 
-    with open(out, 'w') as handle:
+    with open(output_dir, 'w') as handle:
         json.dump(details, handle, indent=4)
