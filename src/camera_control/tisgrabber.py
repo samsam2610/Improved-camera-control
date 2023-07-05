@@ -826,7 +826,7 @@ class TIS_CAM(object):
             :param Quality : If file typ is JPEG, the qualitly can be given from 1 to 100.
             :return: Error code
             '''
-            return TIS_GrabberDLL.SaveImage(self._handle, self.s(FileName), IC.ImageFileTypes[self.s(FileType)],Quality)
+            return TIS_GrabberDLL.SaveImage(self._handle, self.s(FileName), ImageFileTypes[self.s(FileType)],Quality)
 
         def openVideoCaptureDevice(self, DeviceName):
             ''' Open the device specified by DeviceName
