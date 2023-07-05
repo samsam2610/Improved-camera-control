@@ -25,6 +25,7 @@ cam_0 = {'name': 'cam1',
          'rotate': 0,
          'exposure': 0.002,
          'gain': 100,
+         'offset': {'x': 0, 'y': 0},
          'output_dir': 'E:\\live_videos'}
 
 cam_1 = {'name': 'cam2',
@@ -32,6 +33,7 @@ cam_1 = {'name': 'cam2',
          'rotate': 0,
          'exposure': 0.002,
          'gain': 100,
+         'offset': {'x': 0, 'y': 0},
          'output_dir': 'E:\\live_videos'}
 
 subs = ['test1', 'test2', 'test3']  # optional, can manually enter subject for each session.

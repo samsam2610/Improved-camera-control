@@ -111,6 +111,7 @@ class CamGUI(object):
         self.gain[num].set(self.cam[num].get_gain())
         
         self.get_fov(num)
+        self.set_partial_scan_limit(num)
 
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
@@ -235,18 +236,12 @@ class CamGUI(object):
         self.cam[num].set_auto_center(value=self.auto_center[num].get())
         x_offset = self.x_offset_value[num].get()
         self.cam[num].set_partial_scan(x_offset=int(x_offset))
-        # self.x_offset_scale[num].set(x_offset)
-        # self.x_offset_spinbox[num].delete(0, "end")
-        # self.x_offset_spinbox[num].insert(0, DoubleVar(value=x_offset))
         self.x_offset_value[num].set(x_offset)
     
     def set_y_offset(self, i, num):
         self.cam[num].set_auto_center(value=self.auto_center[num].get())
         y_offset = self.y_offset_value[num].get()
         self.cam[num].set_partial_scan(y_offset=int(y_offset))
-        # self.y_offset_scale[num].set(y_offset)
-        # self.y_offset_spinbox[num].delete(0, "end")
-        # self.y_offset_spinbox[num].insert(0, DoubleVar(value=y_offset))
         self.y_offset_value[num].set(y_offset)
         
     def toggle_auto_center(self, num):
@@ -259,13 +254,16 @@ class CamGUI(object):
         self.y_offset_spinbox[num].config(state=state)
         
         if current_auto_center_status == 0:
-            frame_dimension = self.get_frame_dimensions(num)
-            self.x_offset_scale[num].config(to=frame_dimension[0])
-            self.x_offset_spinbox[num].config(to=frame_dimension[0])
-            self.y_offset_scale[num].config(to=frame_dimension[1])
-            self.y_offset_spinbox[num].config(to=frame_dimension[1])
+            self.set_partial_scan_limit(num)
             self.set_x_offset(None, num)
             self.set_y_offset(None, num)
+       
+    def set_partial_scan_limit(self, num):
+        frame_dimension = self.get_frame_dimensions(num)
+        self.x_offset_scale[num].config(to=frame_dimension[0])
+        self.x_offset_spinbox[num].config(to=frame_dimension[0])
+        self.y_offset_scale[num].config(to=frame_dimension[1])
+        self.y_offset_spinbox[num].config(to=frame_dimension[1])
         
     def release_trigger(self):
         for num in range(len(self.cam)):
@@ -1011,7 +1009,11 @@ class CamGUI(object):
             Label(partial_scan_frame, text="X Offset: ").\
                 grid(row=0, column=0, sticky="w", padx=5, pady=3)
             
-            self.x_offset_value.append(DoubleVar())
+            try:
+                current_x_offset = self.cam_details[i]['offset']['x']
+                self.x_offset_value.append(DoubleVar(current_x_offset))
+            except:
+                self.x_offset_value.append(DoubleVar())
             self.x_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, orient=HORIZONTAL, resolution=1, variable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: self.set_x_offset(index_cam, idx), width=10, length=150))
             self.x_offset_scale[i].grid(row=0, column=1, columnspan=2, sticky="new", padx=5, pady=3)
             
@@ -1021,6 +1023,11 @@ class CamGUI(object):
             Label(partial_scan_frame, text="Y Offset: ").\
                 grid(row=1, column=0, sticky="w", padx=5, pady=3)
             
+            try:
+                current_y_offset = self.cam_details[i]['offset']['y']
+                self.y_offset_value.append(DoubleVar(current_y_offset))
+            except:
+                self.y_offset_value.append(DoubleVar())
             self.y_offset_value.append(DoubleVar())
             self.y_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, resolution=1, orient=HORIZONTAL, variable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: self.set_y_offset(index_cam, idx), width=10, length=150))
             self.y_offset_scale[i].grid(row=1, column=1, columnspan=2, sticky="nw", padx=5, pady=3)
