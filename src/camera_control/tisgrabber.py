@@ -602,6 +602,7 @@ class TIS_CAM(object):
             fps_list = []
 
             while TIS_GrabberDLL.get_available_framerates(self._handle, Index, fps) == 1:
+                print(f"current fps value is {fps.value}")
                 fps_list.append(int(fps.value))
                 Index += 1
 
