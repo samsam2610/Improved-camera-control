@@ -9,7 +9,7 @@ modified 10/3/2019 by Gary Kane - https://github.com/gkane26
 post-doctoral fellow @ the Adaptive Motor Control Lab
 https://github.com/AdaptiveMotorControlLab
 """
-
+import ctypes
 from enum import Enum
 
 import ctypes as C
@@ -598,11 +598,11 @@ class TIS_CAM(object):
         
         def GetAvailableFrameRates(self):
             Index = 0
-            fps = [0.0]
+            fps = C.c_float(0.0)
             fps_list = []
 
-            while TIS_GrabberDLL.get_available_framerates(self._handle, Index, fps[0]) == 1:
-                fps_list.append(fps[0])
+            while TIS_GrabberDLL.get_available_framerates(self._handle, Index, fps) == 1:
+                fps_list.append(fps)
                 Index += 1
 
             return fps_list
