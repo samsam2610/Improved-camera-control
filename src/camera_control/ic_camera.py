@@ -81,6 +81,9 @@ class ICCam(object):
     def set_frame_rate(self, fps):
         self.cam.SetFrameRate(fps)
 
+    def get_frame_rate_list(self):
+        return self.cam.GetAvailableFrameRates()
+        
     def set_exposure(self, val):
         val = 1 if val > 1 else val
         val = 0 if val < 0 else val
@@ -117,8 +120,8 @@ class ICCam(object):
         return (width, height)
     
     def get_video_format(self):
-        width = self.cam.get_video_format_width()
-        height = self.cam.get_video_format_height()
+        width = self.cam.GetVideoFormatWidth()
+        height = self.cam.GetVideoFormatHeight()
         return (width, height)
 
     def enable_trigger(self):

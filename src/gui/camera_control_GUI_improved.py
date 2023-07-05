@@ -24,6 +24,11 @@ import traceback
 from pathlib import Path
 from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk, Frame, Scale, HORIZONTAL, Spinbox, Checkbutton, DoubleVar
 
+from matplotlib import pyplot as plt
+import matplotlib.animation as animation
+from matplotlib import style
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 import cv2
 import ffmpy
 import numpy as np
@@ -112,7 +117,8 @@ class CamGUI(object):
         
         self.get_fov(num)
         self.set_partial_scan_limit(num)
-
+        self.get_frame_rate_list(num)
+        
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
         setup_window.destroy()
@@ -174,6 +180,7 @@ class CamGUI(object):
             cam_check_window.destroy()
         else:
             self.cam[num].set_gain(int(self.gain[num].get()))
+            self.get_frame_rate_list(num)
 
     def set_exposure(self, num):
         # check if camera set up
@@ -186,6 +193,7 @@ class CamGUI(object):
             cam_check_window.destroy()
         else:
             self.cam[num].set_exposure(float(self.exposure[num].get()))
+            self.get_frame_rate_list(num)
 
     def get_frame_dimensions(self, num):
         frame_dimension = self.cam[num].get_video_format()
@@ -214,6 +222,7 @@ class CamGUI(object):
             cam_check_window.destroy()
         else:
             self.cam[num].set_formats(str(self.formats[num].get()))
+            self.get_frame_rate_list(num)
 
     def get_fov(self, num):
         crop_details = self.cam_details[str(num)]['crop']
@@ -228,6 +237,8 @@ class CamGUI(object):
                                left=self.cam_details[str(num)]['crop']['left'],
                                height=self.cam_details[str(num)]['crop']['height'],
                                width=self.cam_details[str(num)]['crop']['width'])
+        
+        self.get_frame_rate_list(num)
     
     def reset_fov(self, num):
         pass
@@ -264,6 +275,10 @@ class CamGUI(object):
         self.x_offset_spinbox[num].config(to=frame_dimension[0])
         self.y_offset_scale[num].config(to=frame_dimension[1])
         self.y_offset_spinbox[num].config(to=frame_dimension[1])
+        
+    def get_frame_rate_list(self, num):
+        frame_rate_list = self.cam[num].get_frame_rate_list()
+        self.framerate_list[num]['values'] = frame_rate_list
         
     def release_trigger(self):
         for num in range(len(self.cam)):
@@ -617,6 +632,7 @@ class CamGUI(object):
                             row = self.board_calibration.fill_points_rows([row])
                             self.all_rows[num].extend(row)
                             self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
+                        
                         # putting frame into the frame queue along with following information
                         self.frame_queue.put((frame_current,  # the frame itself
                                               num,  # the id of the capturing camera
@@ -701,6 +717,8 @@ class CamGUI(object):
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e,
                       ''.join(traceback.format_tb(e.__traceback__)))
 
+    def plot_calibration_error(self):
+        pass
     def start_record(self):
         if len(self.vid_out) == 0:
             remind_vid_window = Tk()
@@ -870,6 +888,9 @@ class CamGUI(object):
         self.formats = []
         self.format_entry = []
         
+        self.framerate = []
+        self.framerate_list = []
+        
         self.x_offset_value = []
         self.x_offset_scale = []
         self.x_offset_spinbox = []
@@ -1003,6 +1024,23 @@ class CamGUI(object):
             camera_status_frame.\
                 grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
             camera_status_frame.pack_propagate(False)
+            
+            # framerate list frame
+            framerate_frame = Frame(self.window, borderwidth=1, relief="raised")
+            Label(framerate_frame, text="Frame Rate: ").\
+                grid(row=0, column=0, sticky="w", padx=5, pady=3)
+            self.framerate.append(IntVar())
+            self.framerate_list.append(ttk.Combobox(framerate_frame, textvariable=self.framerate[i], width=15, justify="left"))
+            self.framerate_list[i]['value'] = [100, 200]
+            self.framerate_list[i].current(0)
+            self.framerate_list[i].grid(row=0, column=1, sticky="w", padx=5, pady=3)
+            
+            Button(framerate_frame, text="Update Frame Rate", command=lambda index_cam=i: self.set_framerate(index_cam), width=14).\
+                grid(row=0, column=2, sticky="w", padx=3, pady=3)
+            
+            framerate_frame.\
+                grid(row=cur_row, column=1, padx=2, pady=3, sticky="w")
+            framerate_frame.pack_propagate(False)
             
             # partial offset scan box
             partial_scan_frame = Frame(self.window, borderwidth=1, relief="raised")
@@ -1166,6 +1204,10 @@ class CamGUI(object):
                                                 background="red", state="disabled", width=14)
         self.toggle_calibration_button.\
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
+        
+        self.open_calibration_error_plot = Button(calibration_frame, text="Plot Calibration", command=self.plot_calibration_error).\
+            grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
+        
         calibration_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nw")
         cur_row += 1
 

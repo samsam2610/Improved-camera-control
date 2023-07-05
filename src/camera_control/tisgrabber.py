@@ -145,6 +145,11 @@ class TIS_GrabberDLL(object):
     set_framerate.argtypes = (GrabberHandlePtr,
                                            C.c_float)
 
+    get_available_framerates = __tisgrabber.IC_GetFrameRate
+    get_available_framerates.restype = C.c_int
+    get_available_framerates.argtypes = (GrabberHandlePtr,
+                                         C.c_int,
+                                         C.POINTER(C.c_float))
 
 #    Returns the width of the video format.
     get_video_format_width = __tisgrabber.IC_GetVideoFormatWidth
@@ -581,20 +586,31 @@ class TIS_CAM(object):
         def SaveDeviceStateToFile(self, FileName):
             return TIS_GrabberDLL.SaveDeviceStateToFile(self._handle, self.s(FileName))
 
-        def LoadDeviceStateFromFile(self,FileName):
+        def LoadDeviceStateFromFile(self, FileName):
             self._handle = TIS_GrabberDLL.LoadDeviceStateFromFile(self._handle,self.s(FileName))
 
 
-        def SetVideoFormat(self,Format):
+        def SetVideoFormat(self, Format):
             return TIS_GrabberDLL.set_videoformat(self._handle, self.s(Format))
 
-        def SetFrameRate(self,FPS):
+        def SetFrameRate(self, FPS):
             return TIS_GrabberDLL.set_framerate(self._handle, FPS)
+        
+        def GetAvailableFrameRates(self):
+            Index = 0
+            fps = [0.0]
+            fps_list = []
 
-        def get_video_format_width(self):
+            while TIS_GrabberDLL.get_available_framerates(self._handle, Index, fps) == 1:
+                fps_list.append(fps[0])
+                Index += 1
+
+            return fps_list
+
+        def GetVideoFormatWidth(self):
             return TIS_GrabberDLL.get_video_format_width(self._handle)
 
-        def get_video_format_height(self):
+        def GetVideoFormatHeight(self):
             return TIS_GrabberDLL.get_video_format_height(self._handle)
 
 
