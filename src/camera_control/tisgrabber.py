@@ -145,11 +145,11 @@ class TIS_GrabberDLL(object):
     set_framerate.argtypes = (GrabberHandlePtr,
                                            C.c_float)
 
-    get_available_framerates = __tisgrabber.IC_GetFrameRate
+    get_available_framerates = __tisgrabber.IC_GetAvailableFrameRates
     get_available_framerates.restype = C.c_int
-    get_available_framerates.argtypes = [GrabberHandlePtr,
+    get_available_framerates.argtypes = (GrabberHandlePtr,
                                          C.c_int,
-                                         C.POINTER(C.c_float)]
+                                         C.POINTER(C.c_float))
 
 #    Returns the width of the video format.
     get_video_format_width = __tisgrabber.IC_GetVideoFormatWidth
