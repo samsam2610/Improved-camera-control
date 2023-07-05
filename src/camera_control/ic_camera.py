@@ -115,6 +115,11 @@ class ICCam(object):
         height = im.shape[0]
         width = im.shape[1]
         return (width, height)
+    
+    def get_video_format(self):
+        width = self.cam.get_video_format_width()
+        height = self.cam.get_video_format_height()
+        return (width, height)
 
     def enable_trigger(self):
         self.cam.SetPropertySwitch("Trigger", "Enable", True)
@@ -128,6 +133,16 @@ class ICCam(object):
     def disable_trigger(self):
         self.cam.SetPropertySwitch("Trigger", "Enable", False)
 
+    def set_auto_center(self, value):
+        self.cam.SetPropertySwitch("Partial scan", "Auto-center", value)
+        
+    def set_partial_scan(self, x_offset=None, y_offset=None):
+        if x_offset is not None:
+            self.cam.SetPropertyValue("Partial scan", "X Offset", x_offset)
+            
+        if y_offset is not None:
+            self.cam.SetPropertyValue("Partial scan", "Y Offset", y_offset)
+            
     def start(self, show_display=1):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive(show_display)

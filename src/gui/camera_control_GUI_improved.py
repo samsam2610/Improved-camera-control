@@ -22,7 +22,7 @@ import threading
 import time
 import traceback
 from pathlib import Path
-from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk, Frame
+from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk, Frame, Scale, HORIZONTAL, Spinbox, Checkbutton, DoubleVar
 
 import cv2
 import ffmpy
@@ -186,6 +186,10 @@ class CamGUI(object):
         else:
             self.cam[num].set_exposure(float(self.exposure[num].get()))
 
+    def get_frame_dimensions(self, num):
+        frame_dimension = self.cam[num].get_video_format()
+        return frame_dimension
+        
     def get_formats(self, num):
         # check if camera set up
         if len(self.cam) < num + 1:
@@ -223,15 +227,45 @@ class CamGUI(object):
                                left=self.cam_details[str(num)]['crop']['left'],
                                height=self.cam_details[str(num)]['crop']['height'],
                                width=self.cam_details[str(num)]['crop']['width'])
-        
+    
     def reset_fov(self, num):
         pass
+        
+    def set_x_offset(self, num):
+        x_offset = self.x_offset_value[num].get()
+        self.cam[num].set_partial_scan(x_offset=x_offset)
+        self.x_offset_scale[num].set(x_offset)
+        self.x_offset_spinbox[num].set(x_offset)
     
+    def set_y_offset(self, num):
+        y_offset = self.y_offset_value[num].get()
+        self.cam[num].set_partial_scan(y_offset=y_offset)
+        self.y_offset_scale[num].set(y_offset)
+        self.y_offset_spinbox[num].set(y_offset)
+
+    def toggle_auto_center(self, num):
+        current_auto_center_status = self.auto_center[num].get()
+        state = "normal" if current_auto_center_status == 0 else "disabled"
+        self.x_offset_scale[num].config(state=state)
+        self.x_offset_spinbox[num].config(state=state)
+        self.y_offset_scale[num].config(state=state)
+        self.y_offset_spinbox[num].config(state=state)
+        if current_auto_center_status == 0:
+            frame_dimension = self.get_frame_dimensions(num)
+            self.x_offset_scale[num].config(to=frame_dimension(0))
+            self.x_offset_spinbox[num].config(to=frame_dimension(0))
+            self.y_offset_scale[num].config(to=frame_dimension(1))
+            self.y_offset_spinbox[num].config(to=frame_dimension(1))
+            self.set_x_offset(num)
+            self.set_y_offset(num)
+        
     def release_trigger(self):
-        pass
+        for num in range(len(self.cam)):
+            self.cam[num].disable_trigger()
     
     def snap_image(self):
-        pass
+        for num in range(len(self.cam)):
+            self.cam[num].get_image()
 
     def create_video_files(self):
         if not os.path.isdir(os.path.normpath(self.dir_output.get())):
@@ -829,6 +863,16 @@ class CamGUI(object):
         self.fourcc_codes = ["DIVX", "XVID", "Y800"]
         self.formats = []
         self.format_entry = []
+        
+        self.x_offset_value = []
+        self.x_offset_scale = []
+        self.x_offset_spinbox = []
+        
+        self.y_offset_value = []
+        self.y_offset_scale = []
+        self.y_offset_spinbox = []
+        
+        self.auto_center = []
         self.frame_acquired_count_label = []
         self.board_detected_count_label = []
         self.fov_dict = []
@@ -942,17 +986,47 @@ class CamGUI(object):
                 grid(row=0, column=0, sticky="w", padx=5, pady=3)
             self.frame_acquired_count_label.append(Label(camera_status_frame, text="0", width=5))
             self.frame_acquired_count_label[i].\
-                grid(row=0, column=1, sticky="w", padx=5, pady=3)
+                grid(row=0, column=1, sticky="nw", padx=5, pady=3)
 
             # label for frame acquired count
             Label(camera_status_frame, text="Detected board #: ").\
                 grid(row=0, column=2, sticky="w", padx=5, pady=3)
             self.board_detected_count_label.append(Label(camera_status_frame, text="0", width=5))
             self.board_detected_count_label[i].\
-                grid(row=0, column=3, sticky="w", padx=5, pady=3)
+                grid(row=0, column=3, sticky="nw", padx=5, pady=3)
             camera_status_frame.\
                 grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
             camera_status_frame.pack_propagate(False)
+            
+            # partial offset scan box
+            partial_scan_frame = Frame(self.window, borderwidth=1, relief="raised")
+            Label(partial_scan_frame, text="X Offset: ").\
+                grid(row=0, column=0, sticky="w", padx=5, pady=3)
+            
+            self.x_offset_value.append(DoubleVar())
+            self.x_offset_scale.append(Scale(partial_scan_frame, from_=0, to=200, orient=HORIZONTAL, variable=self.x_offset_value[i], command=lambda index_cam=i: self.set_x_offset(index_cam), width=10, length=150))
+            self.x_offset_scale[i].grid(row=0, column=1, columnspan=2, sticky="new", padx=5, pady=3)
+            
+            self.x_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0, to=100, textvariable=self.x_offset_value[i], command=lambda index_cam=i: self.set_x_offset(index_cam), width=5))
+            self.x_offset_spinbox[i].grid(row=0, column=4, columnspan=1, sticky="w", padx=5, pady=3)
+            
+            Label(partial_scan_frame, text="Y Offset: ").\
+                grid(row=1, column=0, sticky="w", padx=5, pady=3)
+            
+            self.y_offset_value.append(DoubleVar())
+            self.y_offset_scale.append(Scale(partial_scan_frame, from_=0, to=200, orient=HORIZONTAL, variable=self.y_offset_value[i], command=lambda index_cam=i: self.set_y_offset(index_cam), width=10, length=150))
+            self.y_offset_scale[i].grid(row=1, column=1, columnspan=2, sticky="nw", padx=5, pady=3)
+            
+            self.y_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0, to=100, textvariable=self.y_offset_value[i], command=lambda index_cam=i: self.set_y_offset(index_cam), width=5))
+            self.y_offset_spinbox[i].grid(row=1, column=4, columnspan=1, sticky="w", padx=5, pady=3)
+            
+            self.auto_center.append(IntVar())
+            Checkbutton(partial_scan_frame, text="Auto-center", variable=self.auto_center[i], command=lambda index_cam=i: self.toggle_auto_center(index_cam)).\
+                grid(row=0, column=5, sticky="w", padx=5, pady=3)
+            
+            partial_scan_frame.\
+                grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
+            partial_scan_frame.pack_propagate(False)
             cur_row += 1
 
             # empty row
