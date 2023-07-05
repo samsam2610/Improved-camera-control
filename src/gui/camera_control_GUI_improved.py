@@ -234,14 +234,14 @@ class CamGUI(object):
     def set_x_offset(self, i, num):
         self.cam[num].set_auto_center(value=self.auto_center[num].get())
         x_offset = self.x_offset_value[num].get()
-        self.cam[num].set_partial_scan(x_offset=x_offset)
+        self.cam[num].set_partial_scan(x_offset=int(x_offset))
         self.x_offset_scale[num].set(x_offset)
         self.x_offset_spinbox[num].set(x_offset)
     
     def set_y_offset(self, i, num):
         self.cam[num].set_auto_center(value=self.auto_center[num].get())
         y_offset = self.y_offset_value[num].get()
-        self.cam[num].set_partial_scan(y_offset=y_offset)
+        self.cam[num].set_partial_scan(y_offset=int(y_offset))
         self.y_offset_scale[num].set(y_offset)
         self.y_offset_spinbox[num].set(y_offset)
 
