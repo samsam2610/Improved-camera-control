@@ -118,6 +118,7 @@ class CamGUI(object):
         self.get_fov(num)
         self.set_partial_scan_limit(num)
         self.get_frame_rate_list(num)
+        self.set_frame_rate(num, framerate=100)
         
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
@@ -279,6 +280,14 @@ class CamGUI(object):
     def get_frame_rate_list(self, num):
         frame_rate_list = self.cam[num].get_frame_rate_list()
         self.framerate_list[num]['values'] = frame_rate_list
+        
+    def set_frame_rate(self, num, framerate=None):
+        if framerate is None:
+            selected_frame_rate = self.framerate_list[num].get()
+        else:
+            selected_frame_rate = framerate
+        self.cam[num].set_frame_rate(int(selected_frame_rate))
+        self.framerate[num].set(selected_frame_rate)
         
     def release_trigger(self):
         for num in range(len(self.cam)):
