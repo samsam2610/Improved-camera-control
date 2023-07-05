@@ -237,7 +237,7 @@ class CamGUI(object):
         self.cam[num].set_partial_scan(x_offset=int(x_offset))
         self.x_offset_scale[num].set(x_offset)
         self.x_offset_spinbox[num].delete(0, "end")
-        self.x_offset_spinbox[num].insert(0, str(x_offset))
+        self.x_offset_spinbox[num].insert(0, DoubleVar(value=x_offset))
     
     def set_y_offset(self, i, num):
         self.cam[num].set_auto_center(value=self.auto_center[num].get())
@@ -245,7 +245,7 @@ class CamGUI(object):
         self.cam[num].set_partial_scan(y_offset=int(y_offset))
         self.y_offset_scale[num].set(y_offset)
         self.y_offset_spinbox[num].delete(0, "end")
-        self.y_offset_spinbox[num].insert(0, str(y_offset))
+        self.y_offset_spinbox[num].insert(0, DoubleVar(value=y_offset))
 
     def toggle_auto_center(self, num):
         current_auto_center_status = self.auto_center[num].get()
