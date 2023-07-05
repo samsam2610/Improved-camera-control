@@ -231,13 +231,13 @@ class CamGUI(object):
     def reset_fov(self, num):
         pass
         
-    def set_x_offset(self, num):
+    def set_x_offset(self, i, num):
         x_offset = self.x_offset_value[num].get()
         self.cam[num].set_partial_scan(x_offset=x_offset)
         self.x_offset_scale[num].set(x_offset)
         self.x_offset_spinbox[num].set(x_offset)
     
-    def set_y_offset(self, num):
+    def set_y_offset(self, i, num):
         y_offset = self.y_offset_value[num].get()
         self.cam[num].set_partial_scan(y_offset=y_offset)
         self.y_offset_scale[num].set(y_offset)
@@ -1004,20 +1004,20 @@ class CamGUI(object):
                 grid(row=0, column=0, sticky="w", padx=5, pady=3)
             
             self.x_offset_value.append(DoubleVar())
-            self.x_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, orient=HORIZONTAL, resolution=1, variable=self.x_offset_value[i], command=lambda index_cam=i: self.set_x_offset(index_cam), width=10, length=150))
+            self.x_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, orient=HORIZONTAL, resolution=1, variable=self.x_offset_value[i], command=lambda index_cam=i: self.set_x_offset(index_cam, i), width=10, length=150))
             self.x_offset_scale[i].grid(row=0, column=1, columnspan=2, sticky="new", padx=5, pady=3)
             
-            self.x_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.x_offset_value[i], command=lambda index_cam=i: self.set_x_offset(index_cam), width=5))
+            self.x_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.x_offset_value[i], command=lambda index_cam=i: self.set_x_offset(index_cam, i), width=5))
             self.x_offset_spinbox[i].grid(row=0, column=4, columnspan=1, sticky="w", padx=5, pady=3)
             
             Label(partial_scan_frame, text="Y Offset: ").\
                 grid(row=1, column=0, sticky="w", padx=5, pady=3)
             
             self.y_offset_value.append(DoubleVar())
-            self.y_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, resolution=1, orient=HORIZONTAL, variable=self.y_offset_value[i], command=lambda index_cam=i: self.set_y_offset(index_cam), width=10, length=150))
+            self.y_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, resolution=1, orient=HORIZONTAL, variable=self.y_offset_value[i], command=lambda index_cam=i: self.set_y_offset(index_cam, i), width=10, length=150))
             self.y_offset_scale[i].grid(row=1, column=1, columnspan=2, sticky="nw", padx=5, pady=3)
             
-            self.y_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.y_offset_value[i], command=lambda index_cam=i: self.set_y_offset(index_cam), width=5))
+            self.y_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.y_offset_value[i], command=lambda index_cam=i: self.set_y_offset(index_cam, i), width=5))
             self.y_offset_spinbox[i].grid(row=1, column=4, columnspan=1, sticky="w", padx=5, pady=3)
             
             self.auto_center.append(IntVar())
