@@ -911,6 +911,8 @@ class CamGUI(object):
         self.auto_center = []
         self.frame_acquired_count_label = []
         self.board_detected_count_label = []
+        self.trigger_status_label = []
+        
         self.fov_dict = []
         self.fov_labels = ['top', 'left', 'height', 'width']
 
@@ -959,23 +961,23 @@ class CamGUI(object):
                 grid(row=0, column=0, sticky="nsew", padx=5, pady=3)
             
             self.exposure.append(StringVar())
-            self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=5, justify="left"))
-            self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+            self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=7, justify="left"))
+            self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, columnspan=2, padx=5, pady=3)
 
             Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: self.set_exposure(index_cam), width=14).\
-                grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+                grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
             
             # change gain
             Label(capture_settings_frame, text='Gain:', width=8, justify="left", anchor="w").\
-                grid(row=1, column=0, padx=5, pady=3)
+                grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
                 
             self.gain.append(StringVar())
-            self.gain_entry.append(Entry(capture_settings_frame, textvariable=self.gain[i], width=5, justify="left"))
+            self.gain_entry.append(Entry(capture_settings_frame, textvariable=self.gain[i], width=7, justify="left"))
             self.gain_entry[i].\
-                grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+                grid(sticky="nsew", row=1, column=1, columnspan=2, padx=5, pady=3)
             
             Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda index_cam=i: self.set_gain(index_cam), width=14).\
-                grid(sticky="nsew", row=1, column=2, pady=3, padx=5)
+                grid(sticky="nsew", row=1, column=3, pady=3, padx=5)
             
             capture_settings_frame.\
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
@@ -992,19 +994,19 @@ class CamGUI(object):
             fov_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
             Label(fov_settings_frame, text='Top').grid(row=0, column=0, padx=5, pady=3)
             Entry(fov_settings_frame, textvariable=self.fov_dict[i]['top'], width=5).\
-                grid(row=0, column=1, padx=5, pady=3)
+                grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
 
             Label(fov_settings_frame, text='Left').grid(row=0, column=2, padx=5, pady=3)
             Entry(fov_settings_frame, textvariable=self.fov_dict[i]['left'], width=5).\
-                grid(row=0, column=3, padx=5, pady=3)
+                grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
 
             Label(fov_settings_frame, text='Height').grid(row=1, column=0, padx=5, pady=3)
             Entry(fov_settings_frame, textvariable=self.fov_dict[i]['height'], width=5).\
-                grid(row=1, column=1, padx=5, pady=3)
+                grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
 
             Label(fov_settings_frame, text='Width').grid(row=1, column=2, padx=5, pady=3)
             Entry(fov_settings_frame, textvariable=self.fov_dict[i]['width'], width=5).\
-                grid(row=1, column=3, padx=5, pady=3)
+                grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
             
             reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: self.get_fov(index_cam), width=14)
             reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
@@ -1012,7 +1014,7 @@ class CamGUI(object):
             set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: self.set_fov(index_cam), width=14)
             set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
 
-            fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
+            fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             fov_settings_frame.pack_propagate(False)
             cur_row += 1
         
@@ -1030,6 +1032,14 @@ class CamGUI(object):
             self.board_detected_count_label.append(Label(camera_status_frame, text="0", width=5))
             self.board_detected_count_label[i].\
                 grid(row=0, column=3, sticky="nw", padx=5, pady=3)
+            
+            # label for trigger status
+            Label(camera_status_frame, text="Trigger status: ").\
+                grid(row=1, column=0, sticky="w", padx=5, pady=3)
+            self.trigger_status_label.append(Label(camera_status_frame, text="False", width=5))
+            self.trigger_status_label[i].\
+                grid(row=1, column=1, sticky="nw", padx=5, pady=3)
+            
             camera_status_frame.\
                 grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
             camera_status_frame.pack_propagate(False)
@@ -1039,16 +1049,16 @@ class CamGUI(object):
             Label(framerate_frame, text="Frame Rate: ").\
                 grid(row=0, column=0, sticky="w", padx=5, pady=3)
             self.framerate.append(IntVar())
-            self.framerate_list.append(ttk.Combobox(framerate_frame, textvariable=self.framerate[i], width=15, justify="left"))
+            self.framerate_list.append(ttk.Combobox(framerate_frame, textvariable=self.framerate[i], width=5, justify="left"))
             self.framerate_list[i]['value'] = [100, 200]
             self.framerate_list[i].current(0)
             self.framerate_list[i].grid(row=0, column=1, sticky="w", padx=5, pady=3)
             
             Button(framerate_frame, text="Update Frame Rate", command=lambda index_cam=i: self.set_framerate(index_cam), width=14).\
-                grid(row=0, column=2, sticky="w", padx=3, pady=3)
+                grid(row=0, column=3, sticky="nsew", padx=3, pady=3)
             
             framerate_frame.\
-                grid(row=cur_row, column=1, padx=2, pady=3, sticky="w")
+                grid(row=cur_row, column=1, padx=2, pady=3, sticky="new")
             framerate_frame.pack_propagate(False)
             
             # partial offset scan box
@@ -1087,7 +1097,7 @@ class CamGUI(object):
                 grid(row=0, column=5, sticky="w", padx=5, pady=3)
             
             partial_scan_frame.\
-                grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
+                grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             partial_scan_frame.pack_propagate(False)
             cur_row += 1
 
@@ -1151,7 +1161,7 @@ class CamGUI(object):
             grid(sticky="nw", row=3, column=1, columnspan=2, padx=5, pady=3)
         Button(video_info_frame, text="Browse", command=self.browse_output).\
             grid(sticky="nw", row=3, column=3, padx=5, pady=3)
-        video_info_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nw")
+        video_info_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nsew")
 
         # set up video
         setup_video_label = Label(self.window, text="Setup Videos: ", font=("Arial", 12, "bold"))
@@ -1175,7 +1185,7 @@ class CamGUI(object):
         Button(setup_video_frame, text="Release Trigger", command=self.release_trigger).\
             grid(sticky="nsew", row=2, column=1, columnspan=1, padx=5, pady=3)
         
-        setup_video_frame.grid(row=cur_row, column=1, padx=2, pady=3, sticky="nw")
+        setup_video_frame.grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
 
         # record videos
         record_video_label = Label(self.window, text="Record Videos: ", font=("Arial", 12, "bold"))
@@ -1198,7 +1208,7 @@ class CamGUI(object):
         self.release_vid2 = Button(record_video_frame, text="Delete Video",
                                    command=lambda: self.save_vid(delete=True), width=14).\
             grid(sticky="nsew", row=2, column=1, padx=5, pady=3)
-        record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
+        record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
         cur_row += 2
         
         # calibrate videos
