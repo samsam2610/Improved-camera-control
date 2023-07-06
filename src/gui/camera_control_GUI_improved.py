@@ -201,12 +201,11 @@ class CamGUI(object):
             
             # Calculate mean, mode, median, and standard deviation of the differences
             mean_diff = np.mean(cam_time_1_diff - cam_time_2_diff)
-            mode_diff = np.mode(cam_time_1_diff - cam_time_2_diff)
             median_diff = np.median(cam_time_1_diff - cam_time_2_diff)
             std_diff = np.std(cam_time_1_diff - cam_time_2_diff)
             
-            temp_text = "Difference: Mean={:.6f}, Mode={}, Median={:.6f}, Std={:.6f}".format(
-                mean_diff, mode_diff, median_diff, std_diff)
+            temp_text = "Difference: Mean={:.6f}, Median={:.6f}, Std={:.6f}".format(
+                mean_diff, median_diff, std_diff)
             return_text.append(temp_text)
 
         return return_text
