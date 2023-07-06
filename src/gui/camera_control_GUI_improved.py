@@ -458,7 +458,7 @@ class CamGUI(object):
                                       + int(da_fps) + 'f'
                                       + int(temp_exposure) + 'e'
                                       + int(temp_gain) + 'g')
-                self.vid_file.append(os.path.normpath(self.out_dir + '/' +
+                self.vid_file.append(os.path.normpath(self.dir_output.get() + '/' +
                                                       self.base_name[i] +
                                                       self.attempt.get() +
                                                       '.avi'))
