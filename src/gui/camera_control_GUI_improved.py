@@ -154,17 +154,43 @@ class CamGUI(object):
             jitter2 = np.diff(cam2)
             temp_text = 'No missing frames'
             return_text.append(temp_text)
-
-            tolerance = (1 / frameRate) * .5
-
+            
+            tolerance = (1 / frameRate) * 0.5
+            
             # Find frames that are too long or short
-            droppedFrames = np.where(
+            droppedFrames1 = np.where(
                 np.logical_or(jitter1 < 1 / frameRate - tolerance, jitter1 > 1 / frameRate + tolerance))
-            # droppedFrames2 = np.where(np.logical_or(jitter2 < 1/frameRate - tolerance, jitter2 > 1/frameRate + tolerance))
-            if np.size(droppedFrames) > 0:
-                temp_text = "These frames may not be exactly synchronized: " + str(droppedFrames)
+            droppedFrames2 = np.where(
+                np.logical_or(jitter2 < 1 / frameRate - tolerance, jitter2 > 1 / frameRate + tolerance))
+            
+            if np.size(droppedFrames1) > 0:
+                temp_text = "These frames may not be exactly synchronized (jitter1): " + str(droppedFrames1)
             else:
-                temp_text = "frames are synced!"
+                temp_text = "Frames cam 1 are synced!"
+            return_text.append(temp_text)
+            
+            if np.size(droppedFrames2) > 0:
+                temp_text = "These frames may not be exactly synchronized (jitter2): " + str(droppedFrames2)
+            else:
+                temp_text = "Frames from cam 2 are synced!"
+            return_text.append(temp_text)
+            
+            mean_jitter1 = np.mean(jitter1)
+            median_jitter1 = np.median(jitter1)
+            std_jitter1 = np.std(jitter1)
+            outliers_jitter1 = np.where(
+                np.logical_or(jitter1 < mean_jitter1 - 2 * std_jitter1, jitter1 > mean_jitter1 + 2 * std_jitter1))
+            
+            mean_jitter2 = np.mean(jitter2)
+            median_jitter2 = np.median(jitter2)
+            std_jitter2 = np.std(jitter2)
+            outliers_jitter2 = np.where(
+                np.logical_or(jitter2 < mean_jitter2 - 2 * std_jitter2, jitter2 > mean_jitter2 + 2 * std_jitter2))
+            
+            temp_text = f"Cam 1: Mean={mean_jitter1}, Median={median_jitter1}, Std={std_jitter1}, Outliers={outliers_jitter1}"
+            return_text.append(temp_text)
+            
+            temp_text = f"Cam 2: Mean={mean_jitter2}, Median={median_jitter2}, Std={std_jitter2}, Outliers={outliers_jitter2}"
             return_text.append(temp_text)
 
         return return_text
