@@ -116,7 +116,7 @@ class CamGUI(object):
         self.set_partial_scan_limit(num)
         self.get_frame_rate_list(num)
         self.set_frame_rate(num, framerate=100)
-        self.trigger_status_label[num]['text'] = 'Disabled'
+        self.trigger_status_label[num]['text'] = 'Reallly longggggggggggggggggggg message'
         
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
@@ -1039,9 +1039,9 @@ class CamGUI(object):
             # label for trigger status
             Label(camera_status_frame, text="Trigger status: ").\
                 grid(row=1, column=0, sticky="w", padx=5, pady=3)
-            self.trigger_status_label.append(Label(camera_status_frame, text="False", width=5))
+            self.trigger_status_label.append(Label(camera_status_frame, text="Disabled", width=30, anchor="w"))
             self.trigger_status_label[i].\
-                grid(row=1, column=1, sticky="nw", padx=5, pady=3)
+                grid(row=1, column=1, columnspan=3, sticky="w", padx=5, pady=3)
             
             camera_status_frame.\
                 grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
