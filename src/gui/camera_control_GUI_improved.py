@@ -433,7 +433,7 @@ class CamGUI(object):
             self.cam_name_no_space = []
 
             # subject_name, dir_name = generate_folder()
-            subject_name = 'sam'
+            subject_name = self.subject.get()
             for num in range(len(self.cam)):
                 temp_exposure = str(round(math.log2(1/float((self.exposure[num].get())))))
                 temp_gain = str(round(float(self.gain[num].get())))
