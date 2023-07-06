@@ -394,7 +394,7 @@ class CamGUI(object):
             # subject_name, dir_name = generate_folder()
             subject_name = 'sam'
             for num in range(len(self.cam)):
-                temp_exposure = str(self.exposure[num].get())
+                temp_exposure = str(round(math.log2(1/float((self.exposure[num].get())))))
                 temp_gain = str(self.gain[num].get())
                 self.cam_name_no_space.append(self.cam_name[num].replace(' ', ''))
                 self.base_name.append(self.cam_name_no_space[num] + '_' +
@@ -449,14 +449,14 @@ class CamGUI(object):
             self.base_name = []
             this_row = 3
             for i in range(len(self.cam)):
-                temp_exposure = str(self.exposure[i].get())
+                temp_exposure = str(round(math.log2(1/float(self.exposure[i].get()))))
                 temp_gain = str(self.gain[i].get())
                 self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
                 self.base_name.append(self.cam_name_no_space[i] + '_'
                                       + self.subject.get() + '_'
                                       + date + '_'
                                       + str(int(da_fps)) + 'f'
-                                      + str(int(temp_exposure)) + 'e'
+                                      + temp_exposure + 'e'
                                       + str(int(temp_gain)) + 'g')
                 self.vid_file.append(os.path.normpath(self.dir_output.get() + '/' +
                                                       self.base_name[i] +
