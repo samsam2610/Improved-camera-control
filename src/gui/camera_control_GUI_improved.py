@@ -196,8 +196,8 @@ class CamGUI(object):
             return_text.append(temp_text)
             
             # Calculate differences between cam_time_1 and cam_time_2
-            cam_time_1_diff = np.diff(cam_time_1)
-            cam_time_2_diff = np.diff(cam_time_2)
+            cam_time_1_diff = cam1 - cam1[0]
+            cam_time_2_diff = cam2 - cam2[0]
             
             # Calculate mean, mode, median, and standard deviation of the differences
             mean_diff = np.mean(cam_time_1_diff - cam_time_2_diff)
