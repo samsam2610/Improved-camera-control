@@ -399,9 +399,9 @@ class CamGUI(object):
                 self.cam_name_no_space.append(self.cam_name[num].replace(' ', ''))
                 self.base_name.append(self.cam_name_no_space[num] + '_' +
                                       subject_name + '_' +
-                                      int(da_fps) + 'f' +
-                                      int(temp_exposure) + 'e' +
-                                      int(temp_gain) + 'g')
+                                      str(int(da_fps)) + 'f' +
+                                      str(int(temp_exposure)) + 'e' +
+                                      str(int(temp_gain)) + 'g')
                 self.vid_file.append(os.path.normpath(self.dir_output.get() +
                                                       '/' +
                                                       self.base_name[num] +
