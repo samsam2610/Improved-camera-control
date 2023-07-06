@@ -468,7 +468,7 @@ class CamGUI(object):
             self.create_output_files(subject_name=subject_name)
             self.setup = True
 
-    def record_on_thread(self, num):
+    def record_on_thread(self, num, barrier=None):
         fps = int(self.fps.get())
         if self.trigger_on == 1:
             try:
@@ -492,6 +492,8 @@ class CamGUI(object):
         try:
             while self.record_on.get():
                 if time.perf_counter() >= next_frame:
+                    if barrier is not None:
+                        barrier.wait()
                     self.frame_times[num].append(time.perf_counter())
                     self.vid_out[num].write(self.cam[num].get_image())
                     next_frame = max(next_frame + 1.0 / fps, self.frame_times[num][-1] + 0.5 / fps)
@@ -740,9 +742,14 @@ class CamGUI(object):
             remind_vid_window.destroy()
         else:
             self.vid_start_time = time.perf_counter()
+            if int(self.force_frame_sync.get()):
+                barrier = threading.Barrier(len(self.cam))
+            else:
+                barrier = None
+                
             t = []
             for i in range(len(self.cam)):
-                t.append(threading.Thread(target=self.record_on_thread, args=(i,)))
+                t.append(threading.Thread(target=self.record_on_thread, args=(i, barrier)))
                 t[-1].daemon = True
                 t[-1].start()
 
@@ -1213,6 +1220,12 @@ class CamGUI(object):
         self.release_vid2 = Button(record_video_frame, text="Delete Video",
                                    command=lambda: self.save_vid(delete=True), width=14).\
             grid(sticky="nsew", row=2, column=1, padx=5, pady=3)
+        
+        self.force_sync = IntVar(value=0)
+        self.force_frame_sync = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_sync,
+                                            onvalue=1, offvalue=0, width=5)
+        self.force_frame_sync.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)
+        
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
         cur_row += 2
         
