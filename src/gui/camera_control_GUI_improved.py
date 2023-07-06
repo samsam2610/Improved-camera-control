@@ -1222,7 +1222,7 @@ class CamGUI(object):
             grid(sticky="nsew", row=2, column=1, padx=5, pady=3)
         
         self.force_frame_sync = IntVar(value=0)
-        self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_sync,
+        self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_frame_sync,
                                                 onvalue=1, offvalue=0, width=5)
         self.force_frame_sync_button.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)
         
