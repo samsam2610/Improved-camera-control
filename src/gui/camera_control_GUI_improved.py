@@ -855,6 +855,8 @@ class CamGUI(object):
             save_msg += "The following files have been saved:"
             for i in saved_files:
                 save_msg += "\n" + i
+                
+            self.attempt.set(str(int(self.attempt.get()) + 1))
 
         elif delete:
             save_msg = "Video has been deleted, please set up a new video to take another recording."
@@ -1172,7 +1174,7 @@ class CamGUI(object):
         Label(video_info_frame, text="Subject: ").\
             grid(sticky="nw", row=0, column=0, padx=5, pady=3)
         self.subject = StringVar(value='Mouse')
-        self.subject_entry = ttk.Combobox(video_info_frame, textvariable=self.subject, width=5)
+        self.subject_entry = ttk.Combobox(video_info_frame, textvariable=self.subject, width=15)
         self.subject_entry['values'] = tuple(self.mouse_list)
         self.subject_entry.\
             grid(sticky="nw", row=0, column=1, padx=5, pady=3)
