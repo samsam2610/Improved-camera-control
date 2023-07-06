@@ -1171,7 +1171,7 @@ class CamGUI(object):
         video_info_frame = Frame(self.window, borderwidth=1, relief="raised")
         Label(video_info_frame, text="Subject: ").\
             grid(sticky="nw", row=0, column=0, padx=5, pady=3)
-        self.subject = StringVar('Sam')
+        self.subject = StringVar(value='Mouse')
         self.subject_entry = ttk.Combobox(video_info_frame, textvariable=self.subject, width=5)
         self.subject_entry['values'] = tuple(self.mouse_list)
         self.subject_entry.\
