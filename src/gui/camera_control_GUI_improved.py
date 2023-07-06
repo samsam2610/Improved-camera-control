@@ -451,6 +451,7 @@ class CamGUI(object):
                                                       self.base_name[num] +
                                                       '.avi'))
                 self.trigger_status_label[num]['text'] = 'Trigger Ready'
+                self.trigger_status_indicator[num]['bg'] = 'red'
 
                 # Check if video files already exist, if yes, ask to change or overwrite
             self.create_video_files()
@@ -517,12 +518,14 @@ class CamGUI(object):
         if self.trigger_on == 1:
             try:
                 self.trigger_status_label[num]['text'] = 'Waiting for trigger...'
+                self.trigger_status_indicator[num]['bg'] = 'yellow'
                 trigger_start_time = time.perf_counter()
                 self.cam[num].enable_trigger()
                 self.cam[num].frame_ready()
                 self.frame_times[num].append(time.perf_counter())
                 trigger_wait_time = time.perf_counter() - trigger_start_time
                 self.trigger_status_label[num]['text'] = f'Trigger received. Waited {trigger_wait_time:.4f}s...'
+                self.trigger_status_indicator[num]['bg'] = 'green'
                 self.cam[num].disable_trigger()
                 start_in_one = math.trunc(time.perf_counter()) + 1
                 while time.perf_counter() < start_in_one:
@@ -811,6 +814,7 @@ class CamGUI(object):
         saved_files = []
         for num in range(len(self.cam)):
             self.trigger_status_label[num]['text'] = 'Disabled'
+            self.trigger_status_indicator[num]['bg'] = 'gray'
             
         # check that videos have been initialized
 
@@ -969,6 +973,8 @@ class CamGUI(object):
         self.auto_center = []
         self.frame_acquired_count_label = []
         self.board_detected_count_label = []
+        
+        self.trigger_status_indicator = []
         self.trigger_status_label = []
         
         self.fov_dict = []
@@ -1092,7 +1098,8 @@ class CamGUI(object):
                 grid(row=0, column=3, sticky="nw", padx=5, pady=3)
             
             # label for trigger status
-            Label(camera_status_frame, text="Trigger status: ").\
+            self.trigger_status_indicator.append(Label(camera_status_frame, text="Trigger status: ", bg="gray"))
+            self.trigger_status_indicator[i].\
                 grid(row=1, column=0, sticky="w", padx=5, pady=3)
             self.trigger_status_label.append(Label(camera_status_frame, text="Disabled", width=30, anchor="w"))
             self.trigger_status_label[i].\
@@ -1129,7 +1136,7 @@ class CamGUI(object):
                 self.x_offset_value.append(DoubleVar(current_x_offset))
             except:
                 self.x_offset_value.append(DoubleVar())
-            self.x_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, orient=HORIZONTAL, resolution=1, variable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: self.set_x_offset(index_cam, idx), width=10, length=150))
+            self.x_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, orient=HORIZONTAL, resolution=1, variable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: self.set_x_offset(index_cam, idx), width=6, length=150))
             self.x_offset_scale[i].grid(row=0, column=1, columnspan=2, sticky="new", padx=5, pady=3)
             
             self.x_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: self.set_x_offset(index_cam, idx), width=5))
@@ -1144,7 +1151,7 @@ class CamGUI(object):
             except:
                 self.y_offset_value.append(DoubleVar())
             self.y_offset_value.append(DoubleVar())
-            self.y_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, resolution=1, orient=HORIZONTAL, variable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: self.set_y_offset(index_cam, idx), width=10, length=150))
+            self.y_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, resolution=1, orient=HORIZONTAL, variable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: self.set_y_offset(index_cam, idx), width=6, length=150))
             self.y_offset_scale[i].grid(row=1, column=1, columnspan=2, sticky="nw", padx=5, pady=3)
             
             self.y_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: self.set_y_offset(index_cam, idx), width=5))
