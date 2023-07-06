@@ -187,10 +187,26 @@ class CamGUI(object):
             outliers_jitter2 = np.where(
                 np.logical_or(jitter2 < mean_jitter2 - 2 * std_jitter2, jitter2 > mean_jitter2 + 2 * std_jitter2))
             
-            temp_text = f"Cam 1: Mean={mean_jitter1}, Median={median_jitter1}, Std={std_jitter1}, Outliers={outliers_jitter1}"
+            temp_text = "Cam 1: Mean={:.6f}s, Median={:.6f}s, Std={:.6f}s".format(
+                mean_jitter1, median_jitter1, std_jitter1)
             return_text.append(temp_text)
             
-            temp_text = f"Cam 2: Mean={mean_jitter2}, Median={median_jitter2}, Std={std_jitter2}, Outliers={outliers_jitter2}"
+            temp_text = "Cam 2: Mean={:.6f}s, Median={:.6f}s, Std={:.6f}s".format(
+                mean_jitter2, median_jitter2, std_jitter2)
+            return_text.append(temp_text)
+            
+            # Calculate differences between cam_time_1 and cam_time_2
+            cam_time_1_diff = np.diff(cam_time_1)
+            cam_time_2_diff = np.diff(cam_time_2)
+            
+            # Calculate mean, mode, median, and standard deviation of the differences
+            mean_diff = np.mean(cam_time_1_diff - cam_time_2_diff)
+            mode_diff = np.mode(cam_time_1_diff - cam_time_2_diff)
+            median_diff = np.median(cam_time_1_diff - cam_time_2_diff)
+            std_diff = np.std(cam_time_1_diff - cam_time_2_diff)
+            
+            temp_text = "Difference: Mean={:.6f}, Mode={}, Median={:.6f}, Std={:.6f}".format(
+                mean_diff, mode_diff, median_diff, std_diff)
             return_text.append(temp_text)
 
         return return_text
