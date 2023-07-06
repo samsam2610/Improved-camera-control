@@ -399,9 +399,9 @@ class CamGUI(object):
                 self.cam_name_no_space.append(self.cam_name[num].replace(' ', ''))
                 self.base_name.append(self.cam_name_no_space[num] + '_' +
                                       subject_name + '_' +
-                                      da_fps + 'f' +
-                                      temp_exposure + 'e' +
-                                      temp_gain + 'g')
+                                      int(da_fps) + 'f' +
+                                      int(temp_exposure) + 'e' +
+                                      int(temp_gain) + 'g')
                 self.vid_file.append(os.path.normpath(self.dir_output.get() +
                                                       '/' +
                                                       self.base_name[num] +
@@ -455,9 +455,9 @@ class CamGUI(object):
                 self.base_name.append(self.cam_name_no_space[i] + '_'
                                       + self.subject.get() + '_'
                                       + date + '_'
-                                      + da_fps + 'f'
-                                      + temp_exposure + 'e'
-                                      + temp_gain + 'g')
+                                      + int(da_fps) + 'f'
+                                      + int(temp_exposure) + 'e'
+                                      + int(temp_gain) + 'g')
                 self.vid_file.append(os.path.normpath(self.out_dir + '/' +
                                                       self.base_name[i] +
                                                       self.attempt.get() +
@@ -1221,10 +1221,10 @@ class CamGUI(object):
                                    command=lambda: self.save_vid(delete=True), width=14).\
             grid(sticky="nsew", row=2, column=1, padx=5, pady=3)
         
-        self.force_sync = IntVar(value=0)
-        self.force_frame_sync = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_sync,
-                                            onvalue=1, offvalue=0, width=5)
-        self.force_frame_sync.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)
+        self.force_frame_sync = IntVar(value=0)
+        self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_sync,
+                                                onvalue=1, offvalue=0, width=5)
+        self.force_frame_sync_button.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)
         
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
         cur_row += 2
