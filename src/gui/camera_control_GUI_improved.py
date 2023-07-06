@@ -405,7 +405,7 @@ class CamGUI(object):
                                       da_fps + 'f' +
                                       temp_exposure + 'e' +
                                       temp_gain + 'g')
-                self.vid_file.append(os.path.normpath(dir_name + '/' + self.base_name[i] + '.avi'))
+                self.vid_file.append(os.path.normpath(dir_name + '/' + self.base_name[num] + '.avi'))
                 self.trigger_status_label[num]['text'] = 'Trigger Ready'
 
                 # Check if video files already exist, if yes, ask to change or overwrite
@@ -472,7 +472,7 @@ class CamGUI(object):
         fps = int(self.fps.get())
         if self.trigger_on == 1:
             try:
-                self.trigger_status_label[num]['text'] = 'Waiting for trigger...
+                self.trigger_status_label[num]['text'] = 'Waiting for trigger...'
                 self.cam[num].enable_trigger()
                 self.cam[num].frame_ready()
                 self.frame_times[num].append(time.perf_counter())
@@ -756,7 +756,9 @@ class CamGUI(object):
     def save_vid(self, compress=False, delete=False):
 
         saved_files = []
-
+        for num in range(len(self.cam)):
+            self.trigger_status_label[num]['text'] = 'Disabled'
+            
         # check that videos have been initialized
 
         if len(self.vid_out) == 0:
