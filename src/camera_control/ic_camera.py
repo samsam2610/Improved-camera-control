@@ -146,6 +146,11 @@ class ICCam(object):
         if y_offset is not None:
             self.cam.SetPropertyValue("Partial scan", "Y Offset", y_offset)
             
+    def get_partial_scan(self):
+        x_offset = self.cam.GetPropertyValue("Partial scan", "X Offset")
+        y_offset = self.cam.GetPropertyValue("Partial scan", "Y Offset")
+        return (x_offset, y_offset)
+    
     def start(self, show_display=1):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive(show_display)

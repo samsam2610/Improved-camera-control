@@ -116,7 +116,11 @@ class CamGUI(object):
         self.set_partial_scan_limit(num)
         self.get_frame_rate_list(num)
         self.set_frame_rate(num, framerate=100)
-        self.trigger_status_label[num]['text'] = 'Reallly longggggggggggggggggggg message'
+        self.trigger_status_label[num]['text'] = 'Disabled'
+        
+        [x_offset_value, y_offset_value] = self.cam[num].get_partial_scan_offset()
+        self.x_offset_value[num].set(x_offset_value)
+        self.y_offset_value[num].set(y_offset_value)
         
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
