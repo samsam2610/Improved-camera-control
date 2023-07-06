@@ -385,17 +385,14 @@ class CamGUI(object):
             day = str(day) if day >= 10 else '0' + str(day)
             year = str(datetime.datetime.now().year)
             date = year + '-' + month + '-' + day
-
-            self.cam_name_no_space = []
-            this_row = 3
-
+            
             # Preallocate vid_file dir
             self.vid_file = []
             self.base_name = []
+            self.cam_name_no_space = []
 
             # subject_name, dir_name = generate_folder()
             subject_name = 'sam'
-            dir_name = "E:\\tmp"
             for num in range(len(self.cam)):
                 temp_exposure = str(self.exposure[num].get())
                 temp_gain = str(self.gain[num].get())
@@ -405,7 +402,10 @@ class CamGUI(object):
                                       da_fps + 'f' +
                                       temp_exposure + 'e' +
                                       temp_gain + 'g')
-                self.vid_file.append(os.path.normpath(dir_name + '/' + self.base_name[num] + '.avi'))
+                self.vid_file.append(os.path.normpath(self.dir_output.get() +
+                                                      '/' +
+                                                      self.base_name[num] +
+                                                      '.avi'))
                 self.trigger_status_label[num]['text'] = 'Trigger Ready'
 
                 # Check if video files already exist, if yes, ask to change or overwrite
