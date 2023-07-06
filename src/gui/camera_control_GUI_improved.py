@@ -102,9 +102,6 @@ class CamGUI(object):
         self.cam_name[num] = names[cam_num]
         self.cam[num] = ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get())
         
-    # else:
-        #     self.cam_name.append(names[cam_num])
-        #     self.cam.append(ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get()))
         self.cam[num].start()
         
         # set gain and exposure using the values from the json
@@ -119,6 +116,7 @@ class CamGUI(object):
         self.set_partial_scan_limit(num)
         self.get_frame_rate_list(num)
         self.set_frame_rate(num, framerate=100)
+        self.trigger_status_label[num]['text'] = 'Disabled'
         
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
@@ -398,20 +396,22 @@ class CamGUI(object):
             # subject_name, dir_name = generate_folder()
             subject_name = 'sam'
             dir_name = "E:\\tmp"
-            for i in range(len(self.cam)):
-                temp_exposure = str(self.exposure[i].get())
-                temp_gain = str(self.gain[i].get())
-                self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
-                self.base_name.append(self.cam_name_no_space[i] + '_' +
+            for num in range(len(self.cam)):
+                temp_exposure = str(self.exposure[num].get())
+                temp_gain = str(self.gain[num].get())
+                self.cam_name_no_space.append(self.cam_name[num].replace(' ', ''))
+                self.base_name.append(self.cam_name_no_space[num] + '_' +
                                       subject_name + '_' +
                                       da_fps + 'f' +
                                       temp_exposure + 'e' +
                                       temp_gain + 'g')
                 self.vid_file.append(os.path.normpath(dir_name + '/' + self.base_name[i] + '.avi'))
+                self.trigger_status_label[num]['text'] = 'Trigger Ready'
 
                 # Check if video files already exist, if yes, ask to change or overwrite
             self.create_video_files()
             self.create_output_files(subject_name=subject_name)
+            
             self.setup = True
 
     def set_up_vid(self):
@@ -472,10 +472,11 @@ class CamGUI(object):
         fps = int(self.fps.get())
         if self.trigger_on == 1:
             try:
+                self.trigger_status_label[num]['text'] = 'Waiting for trigger...
                 self.cam[num].enable_trigger()
                 self.cam[num].frame_ready()
                 self.frame_times[num].append(time.perf_counter())
-                self.received_pulse_label['text'] = 'pulse_receieved!'
+                self.trigger_status_label[num]['text'] = 'Trigger received!'
                 self.cam[num].disable_trigger()
                 start_in_one = math.trunc(time.perf_counter()) + 1
                 while time.perf_counter() < start_in_one:
