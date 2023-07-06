@@ -434,6 +434,9 @@ class CamGUI(object):
 
             # subject_name, dir_name = generate_folder()
             subject_name = self.subject.get()
+            if subject_name is None:
+                subject_name = 'Sam'
+                
             for num in range(len(self.cam)):
                 temp_exposure = str(round(math.log2(1/float((self.exposure[num].get())))))
                 temp_gain = str(round(float(self.gain[num].get())))
@@ -1168,7 +1171,7 @@ class CamGUI(object):
         video_info_frame = Frame(self.window, borderwidth=1, relief="raised")
         Label(video_info_frame, text="Subject: ").\
             grid(sticky="nw", row=0, column=0, padx=5, pady=3)
-        self.subject = StringVar()
+        self.subject = StringVar('Sam')
         self.subject_entry = ttk.Combobox(video_info_frame, textvariable=self.subject, width=5)
         self.subject_entry['values'] = tuple(self.mouse_list)
         self.subject_entry.\
