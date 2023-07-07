@@ -350,8 +350,9 @@ class CamGUI(object):
         if self.is_camera_set_up(num) is False:
             self.show_camera_error()
             return
-
-        self.current_framerate[num].set(self.cam[num].get_frame_rate())
+        current_frame_rate = self.cam[num].get_frame_rate()
+        self.current_framerate[num].set(int(current_frame_rate))
+        return current_frame_rate
         
     def set_frame_rate(self, num, framerate=None):
         if self.is_camera_set_up(num) is False:
@@ -363,7 +364,8 @@ class CamGUI(object):
             selected_frame_rate = framerate
         self.cam[num].set_frame_rate(int(selected_frame_rate))
         self.framerate[num].set(selected_frame_rate)
-        self.get_current_frame_rate(num)
+        current_framerate = self.get_current_frame_rate(num)
+        print(f'Frame rate set to {current_framerate} fps')
         
     def release_trigger(self):
         for num in range(len(self.cam)):
