@@ -151,6 +151,15 @@ class ICCam(object):
         y_offset = self.cam.GetPropertyValue("Partial scan", "Y Offset")
         return (x_offset, y_offset)
     
+    def get_trigger_polarity(self):
+        polarity = self.cam.GetPropertySwitch("Trigger", "Polarity", Value=[])
+        return polarity
+    
+    def set_trigger_polarity(self, value):
+        self.cam.SetPropertySwitch("Trigger", "Polarity", value)
+        polarity = self.cam.GetPropertySwitch("Trigger", "Polarity", Value=[])
+        return polarity
+    
     def start(self, show_display=1):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive(show_display)

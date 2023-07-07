@@ -122,6 +122,9 @@ class CamGUI(object):
         self.x_offset_value[num].set(x_offset_value)
         self.y_offset_value[num].set(y_offset_value)
         
+        polarity = self.cam[num].get_trigger_polarity()
+        self.polarity[num].set(polarity)
+        
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
         setup_window.destroy()
@@ -313,6 +316,9 @@ class CamGUI(object):
             self.set_x_offset(None, num)
             self.set_y_offset(None, num)
        
+    def toggle_polarity(self, num):
+        self.cam[num].set_trigger_polarity(value=int(self.polarity[num].get()))
+        
     def set_partial_scan_limit(self, num):
         frame_dimension = self.get_frame_dimensions(num)
         self.x_offset_scale[num].config(to=frame_dimension[0])
@@ -983,6 +989,8 @@ class CamGUI(object):
         self.frame_acquired_count_label = []
         self.board_detected_count_label = []
         
+        self.polarity = []
+        
         self.trigger_status_indicator = []
         self.trigger_status_label = []
         
@@ -1169,6 +1177,10 @@ class CamGUI(object):
             self.auto_center.append(IntVar())
             Checkbutton(partial_scan_frame, text="Auto-center", variable=self.auto_center[i], command=lambda index_cam=i: self.toggle_auto_center(index_cam)).\
                 grid(row=0, column=5, sticky="w", padx=5, pady=3)
+            
+            self.polarity.append(IntVar())
+            Checkbutton(partial_scan_frame, text="Polarity", variable=self.polarity[i], command=lambda index_cam=i: self.toggle_polarity(index_cam), onvalue=1, offvalue=0).\
+                grid(row=1, column=5, sticky="w", padx=5, pady=3)
             
             partial_scan_frame.\
                 grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
