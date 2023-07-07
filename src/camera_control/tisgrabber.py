@@ -144,6 +144,10 @@ class TIS_GrabberDLL(object):
     set_framerate.restype = C.c_int
     set_framerate.argtypes = (GrabberHandlePtr,
                                            C.c_float)
+    
+    get_framerate = __tisgrabber.IC_GetFrameRate
+    get_framerate.restype = C.c_float
+    get_framerate.argtypes = (GrabberHandlePtr)
 
     get_available_framerates = __tisgrabber.IC_GetAvailableFrameRates
     get_available_framerates.restype = C.c_int
@@ -596,6 +600,9 @@ class TIS_CAM(object):
         def SetFrameRate(self, FPS):
             return TIS_GrabberDLL.set_framerate(self._handle, FPS)
         
+        def GetFrameRate(self):
+            return TIS_GrabberDLL.get_framerate(self._handle)
+        
         def GetAvailableFrameRates(self):
             Index = 0
             fps = C.c_float()
@@ -804,7 +811,7 @@ class TIS_CAM(object):
         def PropertyOnePush(self, Property, Element ):
             error = TIS_GrabberDLL.PropertyOnePush(self._handle,
                                                     self.s(Property),
-                                                    self.s(Element ))
+                                                    self.s(Element))
             return error
 
         def SetPropertyAbsoluteValue(self, Property, Element, Value ):

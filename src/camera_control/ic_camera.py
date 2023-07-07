@@ -81,6 +81,9 @@ class ICCam(object):
     def set_frame_rate(self, fps):
         self.cam.SetFrameRate(fps)
 
+    def get_frame_rate(self):
+        return self.cam.GetFrameRate()
+    
     def get_frame_rate_list(self):
         return self.cam.GetAvailableFrameRates()
         

@@ -116,6 +116,7 @@ class CamGUI(object):
         self.set_partial_scan_limit(num)
         self.get_frame_rate_list(num)
         self.set_frame_rate(num, framerate=100)
+        self.get_current_frame_rate(num)
         self.trigger_status_label[num]['text'] = 'Disabled'
         
         [x_offset_value, y_offset_value] = self.cam[num].get_partial_scan()
@@ -217,59 +218,62 @@ class CamGUI(object):
 
         return return_text
 
-    def set_gain(self, num):
-        # check if camera set up
-        if len(self.cam) < num + 1:
-            cam_check_window = Tk()
-            Label(cam_check_window, text="No camera is found! \nPlease initialize camera before setting gain.").pack()
-            Button(cam_check_window, text="Ok", command=lambda: cam_check_window.quit()).pack()
-            cam_check_window.mainloop()
-            cam_check_window.destroy()
-        else:
-            self.cam[num].set_gain(int(self.gain[num].get()))
-            self.get_frame_rate_list(num)
+    def show_camera_error(self):
+        error_message = "No camera is found! \nPlease initialize camera before setting gain."
+        self.show_error_window(error_message)
 
+    @staticmethod
+    def show_error_window(message):
+        error_window = Tk()
+        Label(error_window, text=message).pack()
+        Button(error_window, text="Ok", command=error_window.destroy).pack()
+        error_window.mainloop()
+        error_window.destroy()
+        
+    def is_camera_set_up(self, num):
+        return self.cam[num] is not None
+        
+    def set_gain(self, num):
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
+            
+        self.cam[num].set_gain(int(self.gain[num].get()))
+        self.get_frame_rate_list(num)
+        
     def set_exposure(self, num):
         # check if camera set up
-        if len(self.cam) < num + 1:
-            cam_check_window = Tk()
-            Label(cam_check_window,
-                  text="No camera is found! \nPlease initialize camera before setting exposure.").pack()
-            Button(cam_check_window, text="Ok", command=lambda: cam_check_window.quit()).pack()
-            cam_check_window.mainloop()
-            cam_check_window.destroy()
-        else:
-            self.cam[num].set_exposure(float(self.exposure[num].get()))
-            self.get_frame_rate_list(num)
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
+        
+        self.cam[num].set_exposure(float(self.exposure[num].get()))
+        self.get_frame_rate_list(num)
 
     def get_frame_dimensions(self, num):
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
+        
         frame_dimension = self.cam[num].get_video_format()
         return frame_dimension
         
     def get_formats(self, num):
         # check if camera set up
-        if len(self.cam) < num + 1:
-            cam_check_window = Tk()
-            Label(cam_check_window,
-                  text="No camera is found! \nPlease initialize camera before setting exposure.").pack()
-            Button(cam_check_window, text="Ok", command=lambda: cam_check_window.quit()).pack()
-            cam_check_window.mainloop()
-            cam_check_window.destroy()
-        else:
-            return self.cam[num].get_formats()
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
+
+        return self.cam[num].get_formats()
 
     def set_formats(self, num):
         # check if camera set up
-        if len(self.cam) < num + 1:
-            cam_check_window = Tk()
-            Label(cam_check_window,
-                  text="No camera is found! \nPlease initialize camera before setting exposure.").pack()
-            Button(cam_check_window, text="Ok", command=lambda: cam_check_window.quit()).pack()
-            cam_check_window.mainloop()
-            cam_check_window.destroy()
-        else:
-            self.cam[num].set_formats(str(self.formats[num].get()))
-            self.get_frame_rate_list(num)
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
+
+        self.cam[num].set_formats(str(self.formats[num].get()))
+        self.get_frame_rate_list(num)
 
     def get_fov(self, num):
         crop_details = self.cam_details[str(num)]['crop']
@@ -277,6 +281,10 @@ class CamGUI(object):
             self.fov_dict[num][fov_label].set(crop_details[fov_label])
 
     def set_fov(self, num):
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
+        
         for fov_label in self.fov_labels:
             self.cam_details[str(num)]['crop'][fov_label] = self.fov_dict[num][fov_label].get()
             
@@ -303,6 +311,10 @@ class CamGUI(object):
         self.y_offset_value[num].set(y_offset)
         
     def toggle_auto_center(self, num):
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
+        
         current_auto_center_status = self.auto_center[num].get()
         self.cam[num].set_auto_center(value=current_auto_center_status)
         state = "normal" if current_auto_center_status == 0 else "disabled"
@@ -317,6 +329,10 @@ class CamGUI(object):
             self.set_y_offset(None, num)
        
     def toggle_polarity(self, num):
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
+
         self.cam[num].set_trigger_polarity(value=int(self.polarity[num].get()))
         
     def set_partial_scan_limit(self, num):
@@ -330,7 +346,17 @@ class CamGUI(object):
         frame_rate_list = self.cam[num].get_frame_rate_list()
         self.framerate_list[num]['values'] = frame_rate_list
         
+    def get_current_frame_rate(self, num):
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
+
+        self.current_framerate[num].set(self.cam[num].get_frame_rate())
+        
     def set_frame_rate(self, num, framerate=None):
+        if self.is_camera_set_up(num) is False:
+            self.show_camera_error()
+            return
         if framerate is None:
             selected_frame_rate = self.framerate_list[num].get()
         else:
@@ -793,6 +819,7 @@ class CamGUI(object):
 
     def plot_calibration_error(self):
         pass
+    
     def start_record(self):
         if len(self.vid_out) == 0:
             remind_vid_window = Tk()
@@ -936,7 +963,7 @@ class CamGUI(object):
             self.number_of_cams = 2
 
         for i in range(self.number_of_cams):
-            self.cam.append([])
+            self.cam.append(None)
             self.cam_name.append([])
             
         self.createGUI()
@@ -976,6 +1003,7 @@ class CamGUI(object):
         
         self.framerate = []
         self.framerate_list = []
+        self.current_framerate = []
         
         self.x_offset_value = []
         self.x_offset_scale = []
@@ -1136,8 +1164,14 @@ class CamGUI(object):
             self.framerate_list[i].current(0)
             self.framerate_list[i].grid(row=0, column=1, sticky="w", padx=5, pady=3)
             
-            Button(framerate_frame, text="Update Frame Rate", command=lambda index_cam=i: self.set_framerate(index_cam), width=14).\
+            Button(framerate_frame, text="Update Frame Rate", command=lambda index_cam=i: self.set_frame_rate(index_cam), width=14).\
                 grid(row=0, column=3, sticky="nsew", padx=3, pady=3)
+           
+            Label(framerate_frame, text="Current Frame Rate: ").\
+                    grid(row=1, column=0, sticky="w", padx=5, pady=3)
+            self.current_framerate.append(IntVar())
+            Label(framerate_frame, textvariable=self.current_framerate[i], width=5).\
+                    grid(row=1, column=1, sticky="w", padx=5, pady=3)
             
             framerate_frame.\
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="new")
