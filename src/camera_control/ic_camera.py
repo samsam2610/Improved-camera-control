@@ -79,7 +79,7 @@ class ICCam(object):
                 self.crop['width'])
         
     def set_frame_rate(self, fps):
-        self.cam.SetFrameRate(fps)
+        return self.cam.SetFrameRate(fps)
 
     def get_frame_rate(self):
         return self.cam.GetFrameRate()
