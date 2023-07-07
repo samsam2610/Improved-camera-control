@@ -147,7 +147,7 @@ class TIS_GrabberDLL(object):
     
     get_framerate = __tisgrabber.IC_GetFrameRate
     get_framerate.restype = C.c_float
-    get_framerate.argtypes = (GrabberHandlePtr)
+    get_framerate.argtypes = (GrabberHandlePtr, )
 
     get_available_framerates = __tisgrabber.IC_GetAvailableFrameRates
     get_available_framerates.restype = C.c_int
