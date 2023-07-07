@@ -153,7 +153,7 @@ class ICCam(object):
     
     def get_trigger_polarity(self):
         polarity = [0]
-        self.cam.GetPropertySwitch("Trigger", "Polarity", Value=[])
+        self.cam.GetPropertySwitch("Trigger", "Polarity", Value=polarity)
         return polarity[0]
     
     def set_trigger_polarity(self, value):
