@@ -362,8 +362,8 @@ class CamGUI(object):
             selected_frame_rate = self.framerate_list[num].get()
         else:
             selected_frame_rate = framerate
-        self.cam[num].set_frame_rate(int(selected_frame_rate))
-        result = self.framerate[num].set(selected_frame_rate)
+        result = self.cam[num].set_frame_rate(int(selected_frame_rate))
+        self.framerate[num].set(selected_frame_rate)
         current_framerate = self.get_current_frame_rate(num)
         print(f'Selected: {selected_frame_rate }. Frame rate set to {current_framerate} fps. Result: {result}')
         
