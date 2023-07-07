@@ -363,6 +363,7 @@ class CamGUI(object):
             selected_frame_rate = framerate
         self.cam[num].set_frame_rate(int(selected_frame_rate))
         self.framerate[num].set(selected_frame_rate)
+        self.get_current_frame_rate(num)
         
     def release_trigger(self):
         for num in range(len(self.cam)):
