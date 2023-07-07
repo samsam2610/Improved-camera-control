@@ -398,7 +398,10 @@ class CamGUI(object):
                                                               'TIMESTAMPS_' + self.cam_name_no_space[i])
             self.current_file_label['text'] = subject_name
             self.frame_times.append([])
-
+        
+        # empty out the video's stat message
+        self.save_msg = ""
+     
     def sync_setup(self):
 
         if len(self.vid_out) > 0:
@@ -813,6 +816,13 @@ class CamGUI(object):
         ff = ffmpy.FFmpeg(inputs=ff_input, outputs=ff_output)
         ff.run()
 
+    def display_recorded_stats(self):
+        save_window = Tk()
+        Label(save_window, text=self.save_msg).pack()
+        Button(save_window, text="Close", command=lambda: save_window.quit()).pack()
+        save_window.mainloop()
+        save_window.destroy()
+        
     def save_vid(self, compress=False, delete=False):
 
         saved_files = []
@@ -850,8 +860,7 @@ class CamGUI(object):
                     saved_files.append(self.ts_file[i])
                     if compress:
                         threading.Thread(target=lambda: self.compress_vid(i)).start()
-
-        save_msg = ""
+            
         if len(saved_files) > 0:
             if len(self.frame_times) > 1:
                 cam0_times = np.array(self.frame_times[0])
@@ -859,25 +868,21 @@ class CamGUI(object):
                 fps = int(self.fps.get())
                 check_frame_text = self.check_frame(cam0_times, cam1_times, fps)
                 for texty in check_frame_text:
-                    save_msg += texty + '\n'
-            save_msg += "The following files have been saved:"
+                    self.save_msg += texty + '\n'
+            self.save_msg += "The following files have been saved:"
             for i in saved_files:
-                save_msg += "\n" + i
+                self.save_msg += "\n" + i
                 
             self.attempt.set(str(int(self.attempt.get()) + 1))
 
         elif delete:
-            save_msg = "Video has been deleted, please set up a new video to take another recording."
+            self.save_msg = "Video has been deleted, please set up a new video to take another recording."
         elif not frames_taken:
-            save_msg = 'Video was initialized but no frames were recorded.\n' \
+            self.save_msg = 'Video was initialized but no frames were recorded.\n' \
                        'Video has been deleted, please set up a new video to take another recording.'
 
-        if save_msg:
-            save_window = Tk()
-            Label(save_window, text=save_msg).pack()
-            Button(save_window, text="Close", command=lambda: save_window.quit()).pack()
-            save_window.mainloop()
-            save_window.destroy()
+        if self.save_msg:
+            self.display_recorded_stats()
 
         self.vid_out = []
         self.frame_times = []
@@ -1282,6 +1287,9 @@ class CamGUI(object):
         self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_frame_sync,
                                                 onvalue=1, offvalue=0, width=5)
         self.force_frame_sync_button.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)
+        
+        Button(record_video_frame, text="Display stats", command=self.display_recorded_stats, width=10).\
+            grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
         
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
         cur_row += 2
