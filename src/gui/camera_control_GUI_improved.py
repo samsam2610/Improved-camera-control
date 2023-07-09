@@ -23,6 +23,7 @@ import time
 import traceback
 from pathlib import Path
 from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk, Frame, Scale, HORIZONTAL, Spinbox, Checkbutton, DoubleVar
+from idlelib.tooltip import Hovertip
 
 from matplotlib import pyplot as plt
 import matplotlib.animation as animation
@@ -600,6 +601,12 @@ class CamGUI(object):
         else:
             print(f"Calibration file '{file_name}' does not exist.")
 
+    def set_calibration_buttons_group(self, state):
+        self.toggle_calibration_button['state'] = state
+        self.snap_calibration_button['state'] = state
+        self.recalibrate_button['state'] = state
+        self.update_calibration_button['state'] = state
+        
     def setup_calibration(self):
 
         self.calibration_process_stats['text'] = 'Initializing calibration process...'
@@ -622,13 +629,9 @@ class CamGUI(object):
             self.frame_count = []
             self.all_rows = []
 
-            # check if camera set up
-            if len(self.cam) == 0:
-                self.show_camera_error()
-                return
-            
             self.calibration_process_stats['text'] = 'Cameras found. Recording the frame sizes'
-            self.toggle_calibration_button["state"] = "normal"
+            self.set_calibration_buttons_group(state='normal')
+            
             self.calibration_toggle_status = False
             frame_sizes = []
             self.frame_times = []
@@ -688,7 +691,7 @@ class CamGUI(object):
                 t.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i, barrier)))
                 t[-1].daemon = True
                 t[-1].start()
-            t.append(threading.Thread(target=self.detect_marker_on_thread))
+            t.append(threading.Thread(target=self.process_marker_on_thread))
             t[-1].daemon = True
             t[-1].start()
             t.append(threading.Thread(target=self.calibrate_on_thread))
@@ -696,10 +699,6 @@ class CamGUI(object):
             t[-1].start()
 
     def toggle_calibration(self):
-        if len(self.vid_out) == 0:
-            self.show_video_error()
-            return
-        
         if self.calibration_toggle_status:
             self.calibration_toggle_status = False
             self.toggle_calibration_button.config(text="Capture Off", background="red")
@@ -709,9 +708,6 @@ class CamGUI(object):
 
     def snap_calibration_frame(self):
         current_frames = []
-        if len(self.vid_out) == 0:
-            self.show_video_error()
-            return
         
         # capture a single frame from each camera first
         for num in range(len(self.cam)):
@@ -779,7 +775,7 @@ class CamGUI(object):
                       "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1],
                       "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
 
-    def detect_marker_on_thread(self):
+    def process_marker_on_thread(self):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         while True:
@@ -817,6 +813,12 @@ class CamGUI(object):
                       "| Frame count:", frame_count, "| Capture time:", capture_time, "| Traceback:",
                       ''.join(traceback.format_tb(e.__traceback__)))
 
+    def recalibrate(self):
+        pass
+    
+    def update_calibration(self):
+        pass
+    
     def calibrate_on_thread(self):
         self.calibration_error = float('inf')
         print(f'Current error: {self.calibration_error}')
@@ -944,6 +946,7 @@ class CamGUI(object):
         self.frame_times = []
         self.current_file_label['text'] = ""
         self.received_pulse_label['text'] = ""
+        self.set_calibration_buttons_group(state='disabled')
 
     def close_window(self):
 
@@ -1368,19 +1371,35 @@ class CamGUI(object):
         calibration_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="nw")
         cur_row += 1
         calibration_frame = Frame(self.window, borderwidth=1, relief="raised")
-        Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration).\
+        self.setup_calibration_button = Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration)
+        self.setup_calibration_button.\
             grid(sticky="nsew", row=0, column=0, columnspan=1, padx=5, pady=3)
+        Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
 
         self.toggle_calibration_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration,
                                                 background="red", state="disabled", width=14)
         self.toggle_calibration_button.\
             grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
+        Hovertip(self.toggle_calibration_button, "Press this button to start capturing frames for calibration. ")
         
-        Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame()).\
+        self.snap_calibration_button = Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame, state="disabled")
+        self.snap_calibration_button.\
             grid(sticky="nsew", row=1, column=1, columnspan=1, padx=5, pady=3)
+        Hovertip(self.snap_calibration_button, "Press this button to snap a frame for calibration. ")
+        
+        self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled")
+        self.update_calibration_button.\
+            grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
+        Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
+        
+        self.recalibrate_button = Button(calibration_frame, text="Recalibrate", command=self.recalibrate, state="disabled")
+        self.recalibrate_button.\
+            grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
+        Hovertip(self.recalibrate_button, "Press this button to recalibrate using all the frames. ")
         
         self.open_calibration_error_plot = Button(calibration_frame, text="Plot Calibration", command=self.plot_calibration_error).\
-            grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=0, column=3, columnspan=1, padx=5, pady=3)
+        # Hovertip(self.open_calibration_error_plot, "Press this button to plot the calibration error. ")
         
         calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
         cur_row += 1
