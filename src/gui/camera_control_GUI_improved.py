@@ -898,6 +898,8 @@ class CamGUI(object):
                     self.cgroup.metadata['adjusted'] = False
                     if self.calibration_error is not None:
                         self.cgroup.metadata['error'] = float(self.calibration_error)
+                        self.calibration_error_value.set(f'{self.calibration_error:.5f}')
+                        
                     self.cgroup.dump(self.calibration_out)
                     self.rows_fname_available = False
                     self.calibration_toggle_status = False
@@ -1481,6 +1483,19 @@ class CamGUI(object):
         Hovertip(self.open_calibration_error_plot, "Press this button to plot the calibration error. ")
         
         calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
+        
+        
+        # calibration result
+        calibration_result_label = Label(self.window, text="Calibration Result: ", font=("Arial", 12, "bold"))
+        calibration_result_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
+        
+        calibration_result_frame = Frame(self.window)
+        Label(calibration_result_frame, text="Calibration Error: ").\
+            grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
+        self.calibration_error_value = StringVar()
+        self.calibration_error_label = Label(calibration_result_frame, textvariable=self.calibration_error_value)
+        self.calibration_error_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
+        calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         cur_row += 1
 
         # File status
