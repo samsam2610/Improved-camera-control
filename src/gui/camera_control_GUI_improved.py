@@ -603,19 +603,33 @@ class CamGUI(object):
             print(f"Calibration file '{file_name}' does not exist.")
 
     def set_calibration_buttons_group(self, state):
-        button_states = {
-            'disabled': 'normal',
-            'normal': 'disabled'
-        }
+        # button_states = {
+        #     'disabled': 'normal',
+        #     'normal': 'disabled'
+        # }
     
-        button_state = button_states.get(state, 'normal')
+        # button_state = button_states.get(state, 'normal')
         
         self.toggle_calibration_button['state'] = state
         self.snap_calibration_button['state'] = state
         self.recalibrate_button['state'] = state
         self.update_calibration_button['state'] = state
-        self.calibration_duration_entry['state'] = button_state
+        # self.calibration_duration_entry['state'] = button_state
         
+    def set_calibration_duration(self):
+        self.calibration_duration_text = self.calibration_duration_entry.get()
+
+        if self.calibration_duration_text == "Inf":
+            self.calibration_duration = float('inf')
+        else:
+            try:
+                self.calibration_duration = int(self.calibration_duration_text)
+            except ValueError:
+                messagebox.showerror("Error", "Invalid input. Please enter an integer value or 'Inf'.")
+                return 0
+        
+        return 1
+ 
     def setup_calibration(self):
 
         self.calibration_process_stats['text'] = 'Initializing calibration process...'
@@ -655,16 +669,9 @@ class CamGUI(object):
             self.clear_calibration_file(self.calibration_out)
             self.rows_fname_available = False
             
-            self.calibration_duration_text = self.calibration_duration_entry.get()
-
-            if self.calibration_duration_text == "Inf":
-                self.calibration_duration = float('inf')
-            else:
-                try:
-                    self.calibration_duration = int(self.calibration_duration_text)
-                except ValueError:
-                    messagebox.showerror("Error", "Invalid input. Please enter an integer value or 'Inf'.")
-                    return
+            result = self.set_calibration_duration()
+            if result == 0:
+                return
 
             # Create a shared queue to store frames
             self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
@@ -722,9 +729,14 @@ class CamGUI(object):
         if self.calibration_toggle_status:
             self.calibration_toggle_status = False
             self.toggle_calibration_button.config(text="Capture Off", background="red")
+            self.calibration_duration_entry['state'] = 'normal'
         else:
+            result = self.set_calibration_duration()
+            if result == 0:
+                return
             self.calibration_toggle_status = True
             self.toggle_calibration_button.config(text="Capture On", background="green")
+            self.calibration_duration_entry['state'] = 'disabled'
 
     def snap_calibration_frame(self):
         current_frames = []
@@ -761,7 +773,8 @@ class CamGUI(object):
         next_frame = start_time
         while True:
             try:
-                while self.calibration_toggle_status:
+                capture_start_time = time.perf_counter()
+                while self.calibration_toggle_status and (time.perf_counter()-capture_start_time < self.calibration_duration):
                     if time.perf_counter() >= next_frame:
                         barrier.wait()
                         self.frame_times[num].append(time.perf_counter())
@@ -789,6 +802,9 @@ class CamGUI(object):
                                               self.frame_times[num][-1]))  # captured time
 
                         next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
+                
+                if time.perf_counter() - capture_start_time > self.calibration_duration and self.calibration_toggle_status:
+                    self.calibration_toggle_status = False
                     
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
@@ -800,7 +816,7 @@ class CamGUI(object):
         frame_counts = {}  # array to store frame counts for each thread_id
         while True:
             try:
-                while self.calibration_toggle_status:
+                while self.calibration_toggle_status or self.frame_queue.qsize() > 0:
                     # Retrieve frame information from the queue
                     frame, thread_id, frame_count, capture_time = self.frame_queue.get()
                     if thread_id not in frame_groups:
