@@ -22,7 +22,8 @@ import threading
 import time
 import traceback
 from pathlib import Path
-from tkinter import Entry, Label, Button, StringVar, IntVar, Tk, END, Radiobutton, filedialog, ttk, Frame, Scale, HORIZONTAL, Spinbox, Checkbutton, DoubleVar
+from tkinter import Entry, Label, Button, StringVar, IntVar,\
+    Tk, END, Radiobutton, filedialog, ttk, Frame, Scale, HORIZONTAL, Spinbox, Checkbutton, DoubleVar, messagebox
 from idlelib.tooltip import Hovertip
 
 from matplotlib import pyplot as plt
@@ -602,10 +603,18 @@ class CamGUI(object):
             print(f"Calibration file '{file_name}' does not exist.")
 
     def set_calibration_buttons_group(self, state):
+        button_states = {
+            'disabled': 'normal',
+            'normal': 'disabled'
+        }
+    
+        button_state = button_states.get(state, 'normal')
+        
         self.toggle_calibration_button['state'] = state
         self.snap_calibration_button['state'] = state
         self.recalibrate_button['state'] = state
         self.update_calibration_button['state'] = state
+        self.calibration_duration_entry['state'] = button_state
         
     def setup_calibration(self):
 
@@ -645,6 +654,17 @@ class CamGUI(object):
             self.clear_calibration_file(self.rows_fname)
             self.clear_calibration_file(self.calibration_out)
             self.rows_fname_available = False
+            
+            self.calibration_duration_text = self.calibration_duration_entry.get()
+
+            if self.calibration_duration_text == "Inf":
+                self.calibration_duration = float('inf')
+            else:
+                try:
+                    self.calibration_duration = int(self.calibration_duration_text)
+                except ValueError:
+                    messagebox.showerror("Error", "Invalid input. Please enter an integer value or 'Inf'.")
+                    return
 
             # Create a shared queue to store frames
             self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
@@ -1092,7 +1112,7 @@ class CamGUI(object):
 
             # change exposure
             capture_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
-            Label(capture_settings_frame, text='Exposure:', width=8, justify="left", anchor="w").\
+            Label(capture_settings_frame, text='Exposure (s):', width=8, justify="left", anchor="w").\
                 grid(row=0, column=0, sticky="nsew", padx=5, pady=3)
             
             self.exposure.append(StringVar())
@@ -1182,7 +1202,7 @@ class CamGUI(object):
             
             # framerate list frame
             framerate_frame = Frame(self.window, borderwidth=1, relief="raised")
-            Label(framerate_frame, text="Frame Rate: ").\
+            Label(framerate_frame, text="Frame Rate (fps): ").\
                 grid(row=0, column=0, sticky="w", padx=5, pady=3)
             self.framerate.append(IntVar())
             self.framerate_list.append(ttk.Combobox(framerate_frame, textvariable=self.framerate[i], width=5, justify="left"))
@@ -1205,7 +1225,7 @@ class CamGUI(object):
             
             # partial offset scan box
             partial_scan_frame = Frame(self.window, borderwidth=1, relief="raised")
-            Label(partial_scan_frame, text="X Offset: ").\
+            Label(partial_scan_frame, text="X Offset (px): ").\
                 grid(row=0, column=0, sticky="w", padx=5, pady=3)
             
             try:
@@ -1219,7 +1239,7 @@ class CamGUI(object):
             self.x_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: self.set_x_offset(index_cam, idx), width=5))
             self.x_offset_spinbox[i].grid(row=0, column=4, columnspan=1, sticky="w", padx=5, pady=3)
             
-            Label(partial_scan_frame, text="Y Offset: ").\
+            Label(partial_scan_frame, text="Y Offset (px): ").\
                 grid(row=1, column=0, sticky="w", padx=5, pady=3)
             
             try:
@@ -1366,14 +1386,24 @@ class CamGUI(object):
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
         cur_row += 2
         
-        # calibrate videos
+        ## calibrate video section
         calibration_label = Label(self.window, text="Calibration: ", font=("Arial", 12, "bold"))
         calibration_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="nw")
         cur_row += 1
         calibration_frame = Frame(self.window, borderwidth=1, relief="raised")
+        
+        #  calibration duration
+        calibration_duration_frame = Frame(calibration_frame)
+        Label(calibration_duration_frame, text="Capture Duration(s): ").\
+            grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
+        self.calibration_duration_entry = Entry(calibration_duration_frame, width=5)
+        self.calibration_duration_entry.insert(0, "30")
+        self.calibration_duration_entry.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
+        calibration_duration_frame.grid(row=0, column=0, padx=5, pady=3, sticky="nsew")
+        
         self.setup_calibration_button = Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration)
         self.setup_calibration_button.\
-            grid(sticky="nsew", row=0, column=0, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
         Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
 
         self.toggle_calibration_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration,
