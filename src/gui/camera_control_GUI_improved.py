@@ -61,7 +61,7 @@ class CamGUI(object):
             self.output_dir = self.output_dir + (self.cam_details[str(i)]['output_dir'],)
 
         self.window = None
-        self.calibration_toggle_status = False
+        self.calibration_capture_toggle_status = False
         self.selectCams()
 
     def browse_output(self):
@@ -655,7 +655,9 @@ class CamGUI(object):
             self.calibration_process_stats['text'] = 'Cameras found. Recording the frame sizes'
             self.set_calibration_buttons_group(state='normal')
             
+            self.calibration_capture_toggle_status = False
             self.calibration_toggle_status = False
+            
             frame_sizes = []
             self.frame_times = []
             self.previous_frame_count = []
@@ -669,6 +671,7 @@ class CamGUI(object):
             self.clear_calibration_file(self.calibration_out)
             self.rows_fname_available = False
             
+            # Set calibration parameter
             result = self.set_calibration_duration()
             if result == 0:
                 return
@@ -709,7 +712,6 @@ class CamGUI(object):
 
             self.calibration_process_stats['text'] = 'Setting the frame sizes...'
             self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
-            self.init_matrix = True
             self.calibration_process_stats['text'] = 'Prepping done. Starting calibration...'
             self.vid_start_time = time.perf_counter()
             t = []
@@ -725,19 +727,23 @@ class CamGUI(object):
             t[-1].daemon = True
             t[-1].start()
 
-    def toggle_calibration(self):
-        if self.calibration_toggle_status:
-            self.calibration_toggle_status = False
-            self.toggle_calibration_button.config(text="Capture Off", background="red")
+    def toggle_calibration_capture(self):
+        if self.calibration_capture_toggle_status:
+            self.calibration_capture_toggle_status = False
+            self.toggle_calibration_capture_button.config(text="Capture Off", background="red")
             self.calibration_duration_entry['state'] = 'normal'
         else:
             result = self.set_calibration_duration()
             if result == 0:
                 return
-            self.calibration_toggle_status = True
-            self.toggle_calibration_button.config(text="Capture On", background="green")
+            
+            self.current_all_rows = []
+            for i in range(len(self.cam)):
+                self.current_all_rows.append([])
+            self.calibration_capture_toggle_status = True
+            self.toggle_calibration_capture_button.config(text="Capture On", background="green")
             self.calibration_duration_entry['state'] = 'disabled'
-
+            
     def snap_calibration_frame(self):
         current_frames = []
         
@@ -763,6 +769,7 @@ class CamGUI(object):
 
                 row = self.board_calibration.fill_points_rows([row])
                 self.all_rows[num].extend(row)
+                self.current_all_rows[num].extend(row)
                 self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
                 self.frame_acquired_count_label[num]['text'] = f'{self.frame_count[num]}'
                 self.vid_out[num].write(frame_current)
@@ -774,7 +781,7 @@ class CamGUI(object):
         while True:
             try:
                 capture_start_time = time.perf_counter()
-                while self.calibration_toggle_status and (time.perf_counter()-capture_start_time < self.calibration_duration):
+                while self.calibration_capture_toggle_status and (time.perf_counter()-capture_start_time < self.calibration_duration):
                     if time.perf_counter() >= next_frame:
                         barrier.wait()
                         self.frame_times[num].append(time.perf_counter())
@@ -803,8 +810,9 @@ class CamGUI(object):
 
                         next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
                 
-                if time.perf_counter() - capture_start_time > self.calibration_duration and self.calibration_toggle_status:
-                    self.calibration_toggle_status = False
+                if time.perf_counter() - capture_start_time > self.calibration_duration and self.calibration_capture_toggle_status:
+                    self.calibration_capture_toggle_status = False
+                    self.toggle_calibration_capture()
                     
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
@@ -816,7 +824,7 @@ class CamGUI(object):
         frame_counts = {}  # array to store frame counts for each thread_id
         while True:
             try:
-                while self.calibration_toggle_status or self.frame_queue.qsize() > 0:
+                while self.calibration_capture_toggle_status or self.frame_queue.qsize() > 0:
                     # Retrieve frame information from the queue
                     frame, thread_id, frame_count, capture_time = self.frame_queue.get()
                     if thread_id not in frame_groups:
@@ -850,9 +858,17 @@ class CamGUI(object):
                       ''.join(traceback.format_tb(e.__traceback__)))
 
     def recalibrate(self):
+        if self.calibration_toggle_status is False:
+            self.recalibrate_status = True
+            self.update_calibration_status = False
+            self.calibration_toggle_status = True
         pass
     
     def update_calibration(self):
+        if self.calibration_toggle_status is False:
+            self.update_calibration_status = True
+            self.recalibrate_status = False
+            self.calibration_toggle_status = True
         pass
     
     def calibrate_on_thread(self):
@@ -860,29 +876,31 @@ class CamGUI(object):
         print(f'Current error: {self.calibration_error}')
         while True:
             try:
-                if self.rows_fname_available:
+                if self.calibration_toggle_status:
                     print(f'Current error: {self.calibration_error}')
-                    with open(self.rows_fname, 'rb') as f:
-                        all_rows = pickle.load(f)
-                        
-                    all_rows = [row[-100:] if len(row) >= 100 else row for row in all_rows]
+                    if self.recalibrate_status:
+                        with open(self.rows_fname, 'rb') as f:
+                            all_rows = pickle.load(f)
+                    
+                    if self.update_calibration_status:
+                        all_rows = copy.deepcopy(self.current_all_rows)
+                     
+                    init_matrix = bool(self.init_matrix_check.get())
+                    # all_rows = [row[-100:] if len(row) >= 100 else row for row in all_rows]
                     self.calibration_error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
-                                                                        init_intrinsics=self.init_matrix,
-                                                                        init_extrinsics=self.init_matrix,
+                                                                        init_intrinsics=init_matrix,
+                                                                        init_extrinsics=init_matrix,
                                                                         max_nfev=200, n_iters=6,
                                                                         n_samp_iter=200, n_samp_full=1000,
                                                                         verbose=True)
 
-                    # with open(self.cgroup_fname, "wb") as f:
-                    #     cgroup = pickle.dump(cgroup)
-
-                    self.init_matrix = False
                     # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
                     self.cgroup.metadata['adjusted'] = False
                     if self.calibration_error is not None:
                         self.cgroup.metadata['error'] = float(self.calibration_error)
                     self.cgroup.dump(self.calibration_out)
                     self.rows_fname_available = False
+                    self.calibration_toggle_status = False
 
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e,
@@ -1359,13 +1377,18 @@ class CamGUI(object):
         # trigger
         self.trigger_on = IntVar(value=0)
         self.trigger_button_on = Radiobutton(setup_video_frame, text=" Trigger On", selectcolor='green', indicatoron=0,
-                                             variable=self.trigger_on, value=1)\
-            .grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+                                             variable=self.trigger_on, value=1)
+        self.trigger_button_on.\
+            grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
         self.trigger_button_off = Radiobutton(setup_video_frame, text="Trigger Off", selectcolor='red', indicatoron=0,
-                                              variable=self.trigger_on, value=0)\
-            .grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
-        Button(setup_video_frame, text="Release Trigger", command=self.release_trigger).\
+                                              variable=self.trigger_on, value=0)
+        self.trigger_button_off.\
+            grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+        
+        self.release_trigger_button = Button(setup_video_frame, text="Release Trigger", command=self.release_trigger)
+        self.release_trigger_button.\
             grid(sticky="nsew", row=2, column=1, columnspan=1, padx=5, pady=3)
+        Hovertip(self.release_trigger_button, "Release trigger to if stuck in trigger mode")
         
         setup_video_frame.grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
 
@@ -1422,11 +1445,11 @@ class CamGUI(object):
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
         Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
 
-        self.toggle_calibration_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration,
+        self.toggle_calibration_capture_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration_capture,
                                                 background="red", state="disabled", width=14)
-        self.toggle_calibration_button.\
+        self.toggle_calibration_capture_button.\
             grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
-        Hovertip(self.toggle_calibration_button, "Press this button to start capturing frames for calibration. ")
+        Hovertip(self.toggle_calibration_capture_button, "Press this button to start capturing frames for calibration. ")
         
         self.snap_calibration_button = Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame, state="disabled")
         self.snap_calibration_button.\
@@ -1443,9 +1466,16 @@ class CamGUI(object):
             grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.recalibrate_button, "Press this button to recalibrate using all the frames. ")
         
-        self.open_calibration_error_plot = Button(calibration_frame, text="Plot Calibration", command=self.plot_calibration_error).\
+        self.init_matrix_check = IntVar(value=0)
+        self.init_matrix_checkbutton = Checkbutton(calibration_frame, text="Re-Init Matrix", variable=self.init_matrix_check,
+                                                onvalue=1, offvalue=0, width=11)
+        self.init_matrix_checkbutton.grid(sticky="nw", row=1, column=3, padx=5, pady=3)
+        Hovertip(self.init_matrix_checkbutton, "Check this button to force re-initialize the calibration matrix. ")
+        
+        self.open_calibration_error_plot = Button(calibration_frame, text="Plot Calibration", command=self.plot_calibration_error)
+        self.open_calibration_error_plot.\
             grid(sticky="nsew", row=0, column=3, columnspan=1, padx=5, pady=3)
-        # Hovertip(self.open_calibration_error_plot, "Press this button to plot the calibration error. ")
+        Hovertip(self.open_calibration_error_plot, "Press this button to plot the calibration error. ")
         
         calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
         cur_row += 1
