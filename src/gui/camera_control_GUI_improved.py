@@ -1350,6 +1350,7 @@ class CamGUI(object):
         self.video_codec_entry.\
             grid(sticky="nw", row=1, column=3, padx=5, pady=3)
         self.video_codec = self.video_codec_entry.get()  # add default video codec
+        Hovertip(self.video_codec_entry, "Select video codec for video recording")
 
         # output directory
         Label(video_info_frame, text="Output Directory: ", width=15, justify="left", anchor="w").\
@@ -1359,8 +1360,10 @@ class CamGUI(object):
         self.output_entry['values'] = self.output_dir
         self.output_entry.\
             grid(sticky="nw", row=3, column=1, columnspan=2, padx=5, pady=3)
-        Button(video_info_frame, text="Browse", command=self.browse_output).\
+        self.browse_dir_button = Button(video_info_frame, text="Browse", command=self.browse_output)
+        self.browse_dir_button.\
             grid(sticky="nw", row=3, column=3, padx=5, pady=3)
+        Hovertip(self.browse_dir_button, "Select output directory for video recording")
         video_info_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nsew")
 
         # set up video
