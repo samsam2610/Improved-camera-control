@@ -222,6 +222,10 @@ class CamGUI(object):
     def show_camera_error(self):
         error_message = "No camera is found! \nPlease initialize camera before setting gain."
         self.show_error_window(error_message)
+        
+    def show_video_error(self):
+        error_message = "Video writer is not initialized. \nPlease set up video first."
+        self.show_error_window(error_message)
 
     @staticmethod
     def show_error_window(message):
@@ -359,6 +363,7 @@ class CamGUI(object):
         if self.is_camera_set_up(num) is False:
             self.show_camera_error()
             return
+        
         if framerate is None:
             selected_frame_rate = self.framerate_list[num].get()
         else:
@@ -454,53 +459,49 @@ class CamGUI(object):
 
         # check if camera set up
         if len(self.cam) == 0:
-            cam_check_window = Tk()
-            Label(cam_check_window,
-                  text="No camera is found! \nPlease initialize camera before setting up video.").pack()
-            Button(cam_check_window, text="Ok", command=lambda: cam_check_window.quit()).pack()
-            cam_check_window.mainloop()
-            cam_check_window.destroy()
-        else:
-            self.trigger_on = 1
-            da_fps = str(self.fps.get())
-            month = datetime.datetime.now().month
-            month = str(month) if month >= 10 else '0' + str(month)
-            day = datetime.datetime.now().day
-            day = str(day) if day >= 10 else '0' + str(day)
-            year = str(datetime.datetime.now().year)
-            date = year + '-' + month + '-' + day
-            
-            # Preallocate vid_file dir
-            self.vid_file = []
-            self.base_name = []
-            self.cam_name_no_space = []
+            self.show_camera_error()
+            return
+        
+        self.trigger_on = 1
+        da_fps = str(self.fps.get())
+        month = datetime.datetime.now().month
+        month = str(month) if month >= 10 else '0' + str(month)
+        day = datetime.datetime.now().day
+        day = str(day) if day >= 10 else '0' + str(day)
+        year = str(datetime.datetime.now().year)
+        date = year + '-' + month + '-' + day
+        
+        # Preallocate vid_file dir
+        self.vid_file = []
+        self.base_name = []
+        self.cam_name_no_space = []
 
-            # subject_name, dir_name = generate_folder()
-            subject_name = self.subject.get()
-            if subject_name is None:
-                subject_name = 'Sam'
-                
-            for num in range(len(self.cam)):
-                temp_exposure = str(round(math.log2(1/float((self.exposure[num].get())))))
-                temp_gain = str(round(float(self.gain[num].get())))
-                self.cam_name_no_space.append(self.cam_name[num].replace(' ', ''))
-                self.base_name.append(self.cam_name_no_space[num] + '_' +
-                                      subject_name + '_' +
-                                      str(int(da_fps)) + 'f' +
-                                      temp_exposure + 'e' +
-                                      temp_gain + 'g')
-                self.vid_file.append(os.path.normpath(self.dir_output.get() +
-                                                      '/' +
-                                                      self.base_name[num] +
-                                                      '.avi'))
-                self.trigger_status_label[num]['text'] = 'Trigger Ready'
-                self.trigger_status_indicator[num]['bg'] = 'red'
-
-                # Check if video files already exist, if yes, ask to change or overwrite
-            self.create_video_files()
-            self.create_output_files(subject_name=subject_name)
+        # subject_name, dir_name = generate_folder()
+        subject_name = self.subject.get()
+        if subject_name is None:
+            subject_name = 'Sam'
             
-            self.setup = True
+        for num in range(len(self.cam)):
+            temp_exposure = str(round(math.log2(1/float((self.exposure[num].get())))))
+            temp_gain = str(round(float(self.gain[num].get())))
+            self.cam_name_no_space.append(self.cam_name[num].replace(' ', ''))
+            self.base_name.append(self.cam_name_no_space[num] + '_' +
+                                  subject_name + '_' +
+                                  str(int(da_fps)) + 'f' +
+                                  temp_exposure + 'e' +
+                                  temp_gain + 'g')
+            self.vid_file.append(os.path.normpath(self.dir_output.get() +
+                                                  '/' +
+                                                  self.base_name[num] +
+                                                  '.avi'))
+            self.trigger_status_label[num]['text'] = 'Trigger Ready'
+            self.trigger_status_indicator[num]['bg'] = 'red'
+
+            # Check if video files already exist, if yes, ask to change or overwrite
+        self.create_video_files()
+        self.create_output_files(subject_name=subject_name)
+        
+        self.setup = True
 
     def set_up_vid(self):
         if len(self.vid_out) > 0:
@@ -516,45 +517,41 @@ class CamGUI(object):
 
         # check if camera set up
         if len(self.cam) == 0:
-            cam_check_window = Tk()
-            Label(cam_check_window,
-                  text="No camera is found! \nPlease initialize camera before setting up video.").pack()
-            Button(cam_check_window, text="Ok", command=lambda: cam_check_window.quit()).pack()
-            cam_check_window.mainloop()
-            cam_check_window.destroy()
-        else:
-            self.trigger_on = 0
-            da_fps = str(self.fps.get())
-            month = datetime.datetime.now().month
-            month = str(month) if month >= 10 else '0' + str(month)
-            day = datetime.datetime.now().day
-            day = str(day) if day >= 10 else '0' + str(day)
-            year = str(datetime.datetime.now().year)
-            date = year + '-' + month + '-' + day
+            self.show_camera_error()
+            return
+        
+        self.trigger_on = 0
+        da_fps = str(self.fps.get())
+        month = datetime.datetime.now().month
+        month = str(month) if month >= 10 else '0' + str(month)
+        day = datetime.datetime.now().day
+        day = str(day) if day >= 10 else '0' + str(day)
+        year = str(datetime.datetime.now().year)
+        date = year + '-' + month + '-' + day
 
-            self.cam_name_no_space = []
-            self.vid_file = []
-            self.base_name = []
-            this_row = 3
-            for i in range(len(self.cam)):
-                temp_exposure = str(round(math.log2(1/float(self.exposure[i].get()))))
-                temp_gain = str(round(float(self.gain[i].get())))
-                self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
-                self.base_name.append(self.cam_name_no_space[i] + '_'
-                                      + self.subject.get() + '_'
-                                      + date + '_'
-                                      + str(int(da_fps)) + 'f'
-                                      + temp_exposure + 'e'
-                                      + temp_gain + 'g')
-                self.vid_file.append(os.path.normpath(self.dir_output.get() + '/' +
-                                                      self.base_name[i] +
-                                                      self.attempt.get() +
-                                                      '.avi'))
+        self.cam_name_no_space = []
+        self.vid_file = []
+        self.base_name = []
+        this_row = 3
+        for i in range(len(self.cam)):
+            temp_exposure = str(round(math.log2(1/float(self.exposure[i].get()))))
+            temp_gain = str(round(float(self.gain[i].get())))
+            self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+            self.base_name.append(self.cam_name_no_space[i] + '_'
+                                  + self.subject.get() + '_'
+                                  + date + '_'
+                                  + str(int(da_fps)) + 'f'
+                                  + temp_exposure + 'e'
+                                  + temp_gain + 'g')
+            self.vid_file.append(os.path.normpath(self.dir_output.get() + '/' +
+                                                  self.base_name[i] +
+                                                  self.attempt.get() +
+                                                  '.avi'))
 
-            self.create_video_files()
-            subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
-            self.create_output_files(subject_name=subject_name)
-            self.setup = True
+        self.create_video_files()
+        subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
+        self.create_output_files(subject_name=subject_name)
+        self.setup = True
 
     def record_on_thread(self, num, barrier=None):
         fps = int(self.fps.get())
@@ -627,89 +624,121 @@ class CamGUI(object):
 
             # check if camera set up
             if len(self.cam) == 0:
-                cam_check_window = Tk()
-                Label(cam_check_window,
-                      text="No camera is found! \nPlease initialize camera before setting up video.").pack()
-                Button(cam_check_window, text="Ok", command=lambda: cam_check_window.quit()).pack()
-                cam_check_window.mainloop()
-                cam_check_window.destroy()
-            else:
-                self.calibration_process_stats['text'] = 'Cameras found. Recording the frame sizes'
-                self.toggle_calibration_button["state"] = "normal"
-                self.calibration_toggle_status = False
-                frame_sizes = []
-                self.frame_times = []
-                self.previous_frame_count = []
-                self.current_frame_count = []
-                self.frame_process_threshold = 10
-                self.queue_frame_threshold = 1000
-                # Check available detection file, if file available will delete it (for now)
-                self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
-                self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml')
-                self.clear_calibration_file(self.rows_fname)
-                self.clear_calibration_file(self.calibration_out)
-                self.rows_fname_available = False
+                self.show_camera_error()
+                return
+            
+            self.calibration_process_stats['text'] = 'Cameras found. Recording the frame sizes'
+            self.toggle_calibration_button["state"] = "normal"
+            self.calibration_toggle_status = False
+            frame_sizes = []
+            self.frame_times = []
+            self.previous_frame_count = []
+            self.current_frame_count = []
+            self.frame_process_threshold = 10
+            self.queue_frame_threshold = 1000
+            # Check available detection file, if file available will delete it (for now)
+            self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
+            self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml')
+            self.clear_calibration_file(self.rows_fname)
+            self.clear_calibration_file(self.calibration_out)
+            self.rows_fname_available = False
 
-                # Create a shared queue to store frames
-                self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
+            # Create a shared queue to store frames
+            self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
 
-                # Boolean for detections.pickle is updated
-                self.detection_update = False
-                
-                # Sync camera capture time using threading.Barrier
-                barrier = threading.Barrier(len(self.cam))
+            # Boolean for detections.pickle is updated
+            self.detection_update = False
+            
+            # Sync camera capture time using threading.Barrier
+            barrier = threading.Barrier(len(self.cam))
 
-                # create output file names
-                self.vid_file = []
-                self.base_name = []
-                self.cam_name_no_space = []
+            # create output file names
+            self.vid_file = []
+            self.base_name = []
+            self.cam_name_no_space = []
 
-                for i in range(len(self.cam)):
-                    # write code to create a list of base names for the videos
-                    self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
-                    self.base_name.append(self.cam_name_no_space[i] + '_' + 'calibration_')
-                    self.vid_file.append(os.path.normpath(self.dir_output.get() +
-                                                          '/' +
-                                                          self.base_name[i] +
-                                                          self.attempt.get() +
-                                                          '.avi'))
+            for i in range(len(self.cam)):
+                # write code to create a list of base names for the videos
+                self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+                self.base_name.append(self.cam_name_no_space[i] + '_' + 'calibration_')
+                self.vid_file.append(os.path.normpath(self.dir_output.get() +
+                                                      '/' +
+                                                      self.base_name[i] +
+                                                      self.attempt.get() +
+                                                      '.avi'))
 
-                    frame_sizes.append(self.cam[i].get_image_dimensions())
-                    self.frame_count.append(1)
-                    self.all_rows.append([])
-                    self.previous_frame_count.append(0)
-                    self.current_frame_count.append(0)
+                frame_sizes.append(self.cam[i].get_image_dimensions())
+                self.frame_count.append(1)
+                self.all_rows.append([])
+                self.previous_frame_count.append(0)
+                self.current_frame_count.append(0)
 
-                # check if file exists, ask to overwrite or change attempt number if it does
-                self.create_video_files()
-                self.create_output_files(subject_name='Sam')
+            # check if file exists, ask to overwrite or change attempt number if it does
+            self.create_video_files()
+            self.create_output_files(subject_name='Sam')
 
-                self.calibration_process_stats['text'] = 'Setting the frame sizes...'
-                self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
-                self.init_matrix = True
-                self.calibration_process_stats['text'] = 'Prepping done. Starting calibration...'
-                self.vid_start_time = time.perf_counter()
-                t = []
+            self.calibration_process_stats['text'] = 'Setting the frame sizes...'
+            self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
+            self.init_matrix = True
+            self.calibration_process_stats['text'] = 'Prepping done. Starting calibration...'
+            self.vid_start_time = time.perf_counter()
+            t = []
 
-                for i in range(len(self.cam)):
-                    t.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i, barrier)))
-                    t[-1].daemon = True
-                    t[-1].start()
-                t.append(threading.Thread(target=self.detect_marker_on_thread))
+            for i in range(len(self.cam)):
+                t.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i, barrier)))
                 t[-1].daemon = True
                 t[-1].start()
-                t.append(threading.Thread(target=self.calibrate_on_thread))
-                t[-1].daemon = True
-                t[-1].start()
+            t.append(threading.Thread(target=self.detect_marker_on_thread))
+            t[-1].daemon = True
+            t[-1].start()
+            t.append(threading.Thread(target=self.calibrate_on_thread))
+            t[-1].daemon = True
+            t[-1].start()
 
     def toggle_calibration(self):
+        if len(self.vid_out) == 0:
+            self.show_video_error()
+            return
+        
         if self.calibration_toggle_status:
             self.calibration_toggle_status = False
-            self.toggle_calibration_button.config(text="Calibration Off", background="red")
+            self.toggle_calibration_button.config(text="Capture Off", background="red")
         else:
             self.calibration_toggle_status = True
-            self.toggle_calibration_button.config(text="Calibration On", background="green")
+            self.toggle_calibration_button.config(text="Capture On", background="green")
 
+    def snap_calibration_frame(self):
+        current_frames = []
+        if len(self.vid_out) == 0:
+            self.show_video_error()
+            return
+        
+        # capture a single frame from each camera first
+        for num in range(len(self.cam)):
+            self.frame_times[num].append(time.perf_counter())
+            self.frame_count[num] += 1
+            current_frames.append(self.cam[num].get_image())
+            self.frame_acquired_count_label[num]['text'] = f'{self.frame_count[num]}'
+            
+        # then detect the marker and save those frames to the open videos
+        for num in range(len(self.cam)):
+            # detect the marker as the frame is acquired
+            frame_current = current_frames[num]
+            corners, ids = self.board_calibration.detect_image(frame_current)
+            if corners is not None:
+                key = self.frame_count[num]
+                row = {
+                    'framenum': key,
+                    'corners': corners,
+                    'ids': ids
+                }
+
+                row = self.board_calibration.fill_points_rows([row])
+                self.all_rows[num].extend(row)
+                self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
+                self.frame_acquired_count_label[num]['text'] = f'{self.frame_count[num]}'
+                self.vid_out[num].write(frame_current)
+    
     def record_calibrate_on_thread(self, num, barrier):
         fps = int(self.fps.get())
         start_time = time.perf_counter()
@@ -826,23 +855,20 @@ class CamGUI(object):
     
     def start_record(self):
         if len(self.vid_out) == 0:
-            remind_vid_window = Tk()
-            Label(remind_vid_window, text="VideoWriter not initialized! \nPlease set up video and try again.").pack()
-            Button(remind_vid_window, text="Ok", command=lambda: remind_vid_window.quit()).pack()
-            remind_vid_window.mainloop()
-            remind_vid_window.destroy()
+            self.show_video_error()
+            return
+        
+        self.vid_start_time = time.perf_counter()
+        if int(self.force_frame_sync.get()):
+            barrier = threading.Barrier(len(self.cam))
         else:
-            self.vid_start_time = time.perf_counter()
-            if int(self.force_frame_sync.get()):
-                barrier = threading.Barrier(len(self.cam))
-            else:
-                barrier = None
-                
-            t = []
-            for i in range(len(self.cam)):
-                t.append(threading.Thread(target=self.record_on_thread, args=(i, barrier)))
-                t[-1].daemon = True
-                t[-1].start()
+            barrier = None
+            
+        t = []
+        for i in range(len(self.cam)):
+            t.append(threading.Thread(target=self.record_on_thread, args=(i, barrier)))
+            t[-1].daemon = True
+            t[-1].start()
 
     def compress_vid(self, ind):
         ff_input = dict()
@@ -868,35 +894,28 @@ class CamGUI(object):
             self.trigger_status_indicator[num]['bg'] = 'gray'
             
         # check that videos have been initialized
-
         if len(self.vid_out) == 0:
-            not_initialized_window = Tk()
-            Label(not_initialized_window,
-                  text="Video writer is not initialized. Please set up first to record a video.").pack()
-            Button(not_initialized_window, text="Ok", command=lambda: not_initialized_window.quit()).pack()
-            not_initialized_window.mainloop()
-            not_initialized_window.destroy()
+            self.show_video_error()
+            return
 
-        else:
+        # check for frames before saving. if any video has not taken frames, delete all videos
+        frames_taken = all([len(i) > 0 for i in self.frame_times])
 
-            # check for frames before saving. if any video has not taken frames, delete all videos
-            frames_taken = all([len(i) > 0 for i in self.frame_times])
-
-            # release video writer (saves file).
-            # if no frames taken or delete specified,
-            # delete the file and do not save timestamp files; otherwise, save timestamp files.
-            for i in range(len(self.vid_out)):
-                self.vid_out[i].release()
-                self.vid_out[i] = None
-                if (delete) or (not frames_taken):
-                    os.remove(self.vid_file[i])
-                else:
-                    np.save(str(self.ts_file[i]), np.array(self.frame_times[i]))
-                    np.savetxt(str(self.ts_file_csv[i]), np.array(self.frame_times[i]), delimiter=",")
-                    saved_files.append(self.vid_file[i])
-                    saved_files.append(self.ts_file[i])
-                    if compress:
-                        threading.Thread(target=lambda: self.compress_vid(i)).start()
+        # release video writer (saves file).
+        # if no frames taken or delete specified,
+        # delete the file and do not save timestamp files; otherwise, save timestamp files.
+        for i in range(len(self.vid_out)):
+            self.vid_out[i].release()
+            self.vid_out[i] = None
+            if (delete) or (not frames_taken):
+                os.remove(self.vid_file[i])
+            else:
+                np.save(str(self.ts_file[i]), np.array(self.frame_times[i]))
+                np.savetxt(str(self.ts_file_csv[i]), np.array(self.frame_times[i]), delimiter=",")
+                saved_files.append(self.vid_file[i])
+                saved_files.append(self.ts_file[i])
+                if compress:
+                    threading.Thread(target=lambda: self.compress_vid(i)).start()
             
         if len(saved_files) > 0:
             if len(self.frame_times) > 1:
@@ -1352,15 +1371,18 @@ class CamGUI(object):
         Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration).\
             grid(sticky="nsew", row=0, column=0, columnspan=1, padx=5, pady=3)
 
-        self.toggle_calibration_button = Button(calibration_frame, text="Calibration Off", command=self.toggle_calibration,
+        self.toggle_calibration_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration,
                                                 background="red", state="disabled", width=14)
         self.toggle_calibration_button.\
-            grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
+        
+        Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame()).\
+            grid(sticky="nsew", row=1, column=1, columnspan=1, padx=5, pady=3)
         
         self.open_calibration_error_plot = Button(calibration_frame, text="Plot Calibration", command=self.plot_calibration_error).\
             grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
         
-        calibration_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nw")
+        calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
         cur_row += 1
 
         # File status
