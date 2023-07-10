@@ -1661,8 +1661,8 @@ class CamGUI(object):
             grid(sticky="nsew", row=0, column=0, columnspan=1, rowspan=1, padx=5, pady=3)
         Button(setup_video_frame, text="Setup Trigger", command=self.sync_setup, width=14).\
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
-        Button(setup_video_frame, text="Snap A Frame", command=self.snap_image, width=14).\
-            grid(sticky="nsew", row=2, column=0, columnspan=1, padx=5, pady=3)
+        # Button(setup_video_frame, text="Snap A Frame", command=self.snap_image, width=14).\
+            # grid(sticky="nsew", row=2, column=0, columnspan=1, padx=5, pady=3)
         # trigger
         self.trigger_on = IntVar(value=0)
         self.trigger_button_on = Radiobutton(setup_video_frame, text=" Trigger On", selectcolor='green', indicatoron=0,
