@@ -603,7 +603,12 @@ class CamGUI(object):
             print(f"Calibration file '{file_name}' does not exist.")
 
     def set_calibration_buttons_group(self, state):
-        
+        """
+        Sets the state of the calibration buttons group.
+
+        :param state: The state to set for the buttons. Valid values are 'normal', 'active', 'disabled', 'pressed', or 'focus'.
+        :type state: str
+        """
         self.toggle_calibration_capture_button['state'] = state
         self.snap_calibration_button['state'] = state
         self.recalibrate_button['state'] = state
@@ -626,7 +631,32 @@ class CamGUI(object):
         return 1
  
     def setup_calibration(self):
+        """
+        Method: setup_calibration
 
+        This method initializes the calibration process. It performs the following steps:
+
+        1. Initializes the calibration process by updating the status text.
+        2. Looks for the config.toml directory if debug_mode is enabled.
+        3. Loads the config file and determines the calibration board.
+        4. Initializes camera calibration objects.
+        5. Records frame sizes and initializes camera objects.
+        6. Configures calibration buttons and toggle statuses.
+        7. Clears previous calibration files.
+        8. Sets calibration duration parameter.
+        9. Creates a shared queue to store frames.
+        10. Updates the boolean flag for detection updates.
+        11. Synchronizes camera capture time using threading.Barrier.
+        12. Creates output file names for the calibration videos.
+        13. Sets frame sizes for the cameras.
+        14. Starts the calibration process by recording frames, processing markers, and calibrating.
+
+        Parameters:
+        - None
+
+        Return Type:
+        - None
+        """
         self.calibration_process_stats['text'] = 'Initializing calibration process...'
         from src.gui.utils import load_config, get_calibration_board
         if self.running_config['debug_mode']:
@@ -724,6 +754,25 @@ class CamGUI(object):
             t[-1].start()
 
     def toggle_calibration_capture(self):
+        """
+        Toggles the calibration capture on or off.
+
+        Parameters:
+        - self: The object instance.
+
+        Returns:
+        None
+
+        Example usage:
+        toggle_calibration_capture()
+
+        Note:
+        If `self.calibration_capture_toggle_status` is True, the method will toggle it to False and update the GUI elements accordingly.
+        If `self.calibration_capture_toggle_status` is False, the method will set the calibration duration using the `set_calibration_duration()` method.
+        If the result of `set_calibration_duration()` is 0, the method will return without performing any further actions.
+        The method then initializes an empty list `self.current_all_rows` and sets `self.calibration_capture_toggle_status` to True.
+        It updates the GUI elements to reflect the changes and disables certain buttons.
+        """
         if self.calibration_capture_toggle_status:
             self.calibration_capture_toggle_status = False
             self.toggle_calibration_capture_button.config(text="Capture Off", background="red")
@@ -746,6 +795,20 @@ class CamGUI(object):
             self.test_calibration_live_button['state'] = 'disabled'
             
     def snap_calibration_frame(self):
+        """
+        Take a snapshot of the calibration frame from each camera.
+
+        Returns:
+        None
+
+        This method captures a single frame from each camera and then detects a marker in each frame. The marker detected frames are saved to the open videos. The detected corners and marker ids for each frame are stored in the `self.all_rows` list.
+
+        During the capture process, the `self.frame_times` list is updated with the current time in order to track the frame acquisition time. The `self.frame_count` list is also incremented to keep track of the number of frames acquired for each camera.
+
+        This method updates the following labels:
+        - `self.frame_acquired_count_label`: shows the number of frames acquired for each camera
+        - `self.board_detected_count_label`: shows the total number of detected frames for each camera
+        """
         current_frames = []
         
         # capture a single frame from each camera first
@@ -776,6 +839,15 @@ class CamGUI(object):
                 self.vid_out[num].write(frame_current)
     
     def record_calibrate_on_thread(self, num, barrier):
+        """
+        Records frames from a camera on a separate thread for calibration purposes.
+
+        :param num: The ID of the capturing camera.
+        :param barrier: A threading.barrier object used to synchronize the start of frame capturing.
+
+        :return: None
+
+        """
         fps = int(self.fps.get())
         start_time = time.perf_counter()
         next_frame = start_time
@@ -822,6 +894,25 @@ class CamGUI(object):
                       "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
 
     def process_marker_on_thread(self):
+        """
+        Process marker on a separate thread.
+
+        This method retrieves frame information from the frame queue and processes it. The frames are grouped by thread ID
+        and stored in a dictionary called frame_groups. The method continuously loops until the calibration_capture_toggle_status
+        is True or the frame queue is not empty.
+
+        Parameters:
+        - self: The current instance of the class.
+
+        Returns:
+        This method does not return any value.
+
+        Raises:
+        This method may raise an exception when an error occurs during processing.
+
+        Example usage:
+        process_marker_on_thread()
+        """
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         while True:
@@ -860,20 +951,50 @@ class CamGUI(object):
                       ''.join(traceback.format_tb(e.__traceback__)))
 
     def recalibrate(self):
+        """
+        Recalibrates the device.
+
+        Recalibrates the device by updating the necessary calibration statuses. This method should be called when the calibration toggle status is "False".
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         if self.calibration_toggle_status is False:
             self.recalibrate_status = True
             self.update_calibration_status = False
             self.calibration_toggle_status = True
-        pass
     
     def update_calibration(self):
+        """
+         Updates the calibration status.
+
+        If the calibration toggle status is False, it sets the update calibration status to True, recalibrate status to False,
+        and calibration toggle status to True.
+
+        Parameters:
+            self (object): The instance of the class.
+
+        Returns:
+            None
+        """
         if self.calibration_toggle_status is False:
             self.update_calibration_status = True
             self.recalibrate_status = False
             self.calibration_toggle_status = True
-        pass
     
     def calibrate_on_thread(self):
+        """
+        Calibrates the system on a separate thread.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         self.calibration_error = float('inf')
         print(f'Current error: {self.calibration_error}')
         while True:
@@ -912,6 +1033,20 @@ class CamGUI(object):
                       ''.join(traceback.format_tb(e.__traceback__)))
 
     def plot_calibration_error(self):
+        """
+        Plot the calibration error progression.
+
+        This method creates a new window using the Tkinter library and plots the given list of calibration error values. The plot is displayed using Matplotlib embedded in the Tkinter window.
+
+        Parameters:
+        - None
+
+        Return Type:
+        - None
+
+        Example Usage:
+        plot_calibration_error()
+        """
         root = Tk()
         root.title('Calibration Error')
         root.geometry('500x500')
@@ -959,6 +1094,19 @@ class CamGUI(object):
             t[-1].start()
            
     def draw_calibration_on_thread(self, num, barrier):
+        """
+        Draws calibration on a separate thread for a given camera.
+
+        Parameters:
+        - num: The camera number.
+        - barrier: A threading.Barrier object used to synchronize multiple threads.
+
+        Returns:
+        None
+
+        Example usage:
+        draw_calibration_on_thread(0, barrier)
+        """
         window_name = f'Camera {num}'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(window_name, 640, 480)
@@ -982,6 +1130,8 @@ class CamGUI(object):
     
     @staticmethod
     def draw_axis(frame, camera_matrix, dist_coeff, board, aruco_dict, params, verbose=True):
+        """
+        """
         try:
             corners, ids, rejected_points = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=params)
 
