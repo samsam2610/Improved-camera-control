@@ -598,9 +598,9 @@ class TIS_CAM(object):
             return TIS_GrabberDLL.set_videoformat(self._handle, self.s(Format))
 
         def SetFrameRate(self, FPS):
-            self.StopLive()
+            # self.StopLive()
             result = TIS_GrabberDLL.set_framerate(self._handle, FPS)
-            self.StartLive()
+            # self.StartLive()
             return result
         
         def GetFrameRate(self):

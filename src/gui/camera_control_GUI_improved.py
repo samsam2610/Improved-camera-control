@@ -110,7 +110,7 @@ class CamGUI(object):
         # set gain and exposure using the values from the json
         self.cam[num].set_exposure(float(self.cam_details[str(num)]['exposure']))
         self.cam[num].set_gain(int(self.cam_details[str(num)]['gain']))
-
+        self.cam[num].start()
         # get the gain and exposure values to reflect that onto the GUI
         self.exposure[num].set(self.cam[num].get_exposure())
         self.gain[num].set(self.cam[num].get_gain())
@@ -1661,8 +1661,8 @@ class CamGUI(object):
             grid(sticky="nsew", row=0, column=0, columnspan=1, rowspan=1, padx=5, pady=3)
         Button(setup_video_frame, text="Setup Trigger", command=self.sync_setup, width=14).\
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
-        # Button(setup_video_frame, text="Snap A Frame", command=self.snap_image, width=14).\
-            # grid(sticky="nsew", row=2, column=0, columnspan=1, padx=5, pady=3)
+        Button(setup_video_frame, text="Snap A Frame", command=self.snap_image, width=14).\
+            grid(sticky="nsew", row=2, column=0, columnspan=1, padx=5, pady=3)
         # trigger
         self.trigger_on = IntVar(value=0)
         self.trigger_button_on = Radiobutton(setup_video_frame, text=" Trigger On", selectcolor='green', indicatoron=0,
@@ -1721,76 +1721,76 @@ class CamGUI(object):
         calibration_frame = Frame(self.window, borderwidth=1, relief="raised")
         
         #  calibration duration
-        # calibration_duration_frame = Frame(calibration_frame)
-        # Label(calibration_duration_frame, text="Capture Duration(s): ").\
-        #     grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
-        # self.calibration_duration_entry = Entry(calibration_duration_frame, width=5)
-        # self.calibration_duration_entry.insert(0, "30")
-        # self.calibration_duration_entry.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
-        # calibration_duration_frame.grid(row=0, column=0, padx=5, pady=3, sticky="nsew")
-        #
-        # self.setup_calibration_button = Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration)
-        # self.setup_calibration_button.\
-        #     grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
-        # Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
-        #
-        # self.toggle_calibration_capture_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration_capture,
-        #                                         background="red", state="disabled", width=14)
-        # self.toggle_calibration_capture_button.\
-        #     grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
-        # Hovertip(self.toggle_calibration_capture_button, "Press this button to start capturing frames for calibration. ")
-        #
-        # self.snap_calibration_button = Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame, state="disabled")
-        # self.snap_calibration_button.\
-        #     grid(sticky="nsew", row=1, column=1, columnspan=1, padx=5, pady=3)
-        # Hovertip(self.snap_calibration_button, "Press this button to snap a frame for calibration. ")
-        #
-        # self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled")
-        # self.update_calibration_button.\
-        #     grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
-        # Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
-        #
-        # self.recalibrate_button = Button(calibration_frame, text="Recalibrate", command=self.recalibrate, state="disabled")
-        # self.recalibrate_button.\
-        #     grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
-        # Hovertip(self.recalibrate_button, "Press this button to recalibrate using all the frames. ")
-        #
-        # self.init_matrix_check = IntVar(value=0)
-        # self.init_matrix_checkbutton = Checkbutton(calibration_frame, text="Re-Init Matrix", variable=self.init_matrix_check,
-        #                                         onvalue=1, offvalue=0, width=11)
-        # self.init_matrix_checkbutton.grid(sticky="nw", row=0, column=3, padx=5, pady=3)
-        # Hovertip(self.init_matrix_checkbutton, "Check this button to force re-initialize the calibration matrix. ")
-        #
-        # added_board_frame = Frame(calibration_frame)
-        # Label(added_board_frame, text="Added Board #: ").\
-        #     grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
-        # self.added_board_value = StringVar(value="0")
-        # self.added_board_label = Label(added_board_frame, width=5, textvariable=self.added_board_value)
-        # self.added_board_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
-        # added_board_frame.grid(row=1, column=3, padx=5, pady=3, sticky="nsew")
-        #
-        # self.plot_calibration_error_button = Button(calibration_frame, text="Plot Calibration Error", command=self.plot_calibration_error)
-        # self.plot_calibration_error_button.\
-        #     grid(sticky="nsew", row=0, column=4, columnspan=1, padx=5, pady=3)
-        # Hovertip(self.plot_calibration_error_button, "Press this button to plot the calibration error. ")
-        #
-        # self.test_calibration_live_button = Button(calibration_frame, text="Test Calibration Live", command=self.test_calibration_live, state="disabled")
-        # self.test_calibration_live_button.\
-        #     grid(sticky="nsew", row=1, column=4, columnspan=1, padx=5, pady=3)
-        #
-        # calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
-        #
-        # # calibration result
-        # calibration_result_label = Label(self.window, text="Calibration Result: ", font=("Arial", 12, "bold"))
-        # calibration_result_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
-        #
-        # calibration_result_frame = Frame(self.window)
-        # Label(calibration_result_frame, text="Calibration Error: ").\
-        #     grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
-        # self.calibration_error_value = StringVar()
-        # self.calibration_error_label = Label(calibration_result_frame, textvariable=self.calibration_error_value)
-        # self.calibration_error_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
-        # calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
+        calibration_duration_frame = Frame(calibration_frame)
+        Label(calibration_duration_frame, text="Capture Duration(s): ").\
+            grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
+        self.calibration_duration_entry = Entry(calibration_duration_frame, width=5)
+        self.calibration_duration_entry.insert(0, "30")
+        self.calibration_duration_entry.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
+        calibration_duration_frame.grid(row=0, column=0, padx=5, pady=3, sticky="nsew")
+        
+        self.setup_calibration_button = Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration)
+        self.setup_calibration_button.\
+            grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
+        Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
+
+        self.toggle_calibration_capture_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration_capture,
+                                                background="red", state="disabled", width=14)
+        self.toggle_calibration_capture_button.\
+            grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
+        Hovertip(self.toggle_calibration_capture_button, "Press this button to start capturing frames for calibration. ")
+        
+        self.snap_calibration_button = Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame, state="disabled")
+        self.snap_calibration_button.\
+            grid(sticky="nsew", row=1, column=1, columnspan=1, padx=5, pady=3)
+        Hovertip(self.snap_calibration_button, "Press this button to snap a frame for calibration. ")
+        
+        self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled")
+        self.update_calibration_button.\
+            grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
+        Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
+        
+        self.recalibrate_button = Button(calibration_frame, text="Recalibrate", command=self.recalibrate, state="disabled")
+        self.recalibrate_button.\
+            grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
+        Hovertip(self.recalibrate_button, "Press this button to recalibrate using all the frames. ")
+        
+        self.init_matrix_check = IntVar(value=0)
+        self.init_matrix_checkbutton = Checkbutton(calibration_frame, text="Re-Init Matrix", variable=self.init_matrix_check,
+                                                onvalue=1, offvalue=0, width=11)
+        self.init_matrix_checkbutton.grid(sticky="nw", row=0, column=3, padx=5, pady=3)
+        Hovertip(self.init_matrix_checkbutton, "Check this button to force re-initialize the calibration matrix. ")
+        
+        added_board_frame = Frame(calibration_frame)
+        Label(added_board_frame, text="Added Board #: ").\
+            grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
+        self.added_board_value = StringVar(value="0")
+        self.added_board_label = Label(added_board_frame, width=5, textvariable=self.added_board_value)
+        self.added_board_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
+        added_board_frame.grid(row=1, column=3, padx=5, pady=3, sticky="nsew")
+        
+        self.plot_calibration_error_button = Button(calibration_frame, text="Plot Calibration Error", command=self.plot_calibration_error)
+        self.plot_calibration_error_button.\
+            grid(sticky="nsew", row=0, column=4, columnspan=1, padx=5, pady=3)
+        Hovertip(self.plot_calibration_error_button, "Press this button to plot the calibration error. ")
+        
+        self.test_calibration_live_button = Button(calibration_frame, text="Test Calibration Live", command=self.test_calibration_live, state="disabled")
+        self.test_calibration_live_button.\
+            grid(sticky="nsew", row=1, column=4, columnspan=1, padx=5, pady=3)
+        
+        calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
+        
+        # calibration result
+        calibration_result_label = Label(self.window, text="Calibration Result: ", font=("Arial", 12, "bold"))
+        calibration_result_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
+        
+        calibration_result_frame = Frame(self.window)
+        Label(calibration_result_frame, text="Calibration Error: ").\
+            grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
+        self.calibration_error_value = StringVar()
+        self.calibration_error_label = Label(calibration_result_frame, textvariable=self.calibration_error_value)
+        self.calibration_error_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
+        calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         cur_row += 1
 
         # File status
