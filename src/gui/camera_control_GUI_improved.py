@@ -610,7 +610,7 @@ class CamGUI(object):
     
         # button_state = button_states.get(state, 'normal')
         
-        self.toggle_calibration_button['state'] = state
+        self.toggle_calibration_capture_button['state'] = state
         self.snap_calibration_button['state'] = state
         self.recalibrate_button['state'] = state
         self.update_calibration_button['state'] = state
@@ -662,7 +662,7 @@ class CamGUI(object):
             self.frame_times = []
             self.previous_frame_count = []
             self.current_frame_count = []
-            self.frame_process_threshold = 10
+            self.frame_process_threshold = 2
             self.queue_frame_threshold = 1000
             # Check available detection file, if file available will delete it (for now)
             self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
@@ -732,6 +732,7 @@ class CamGUI(object):
             self.calibration_capture_toggle_status = False
             self.toggle_calibration_capture_button.config(text="Capture Off", background="red")
             self.calibration_duration_entry['state'] = 'normal'
+            self.added_board_value.set(f'{len(self.current_all_rows[0])}')
         else:
             result = self.set_calibration_duration()
             if result == 0:
@@ -800,6 +801,7 @@ class CamGUI(object):
 
                             row = self.board_calibration.fill_points_rows([row])
                             self.all_rows[num].extend(row)
+                            self.current_all_rows[num].extend(row)
                             self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
                         
                         # putting frame into the frame queue along with following information
@@ -836,13 +838,13 @@ class CamGUI(object):
                     frame_counts[thread_id] += 1
                     self.frame_acquired_count_label[thread_id]['text'] = f'{frame_count}'
                     self.vid_out[thread_id].write(frame)
-
+                    
                     # Process the frame group (frames with the same thread_id)
                     # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
                     if all(count >= self.frame_process_threshold for count in frame_counts.values()):
-                        self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} ' \
-                                                                 f'frames acquired from each camera,' \
-                                                                 f' detecting the markers...'
+                        # self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} ' \
+                        #                                          f'frames acquired from each camera,' \
+                        #                                          f' detecting the markers...'
                         
                         with open(self.rows_fname, 'wb') as file:
                             pickle.dump(self.all_rows, file)
@@ -909,6 +911,9 @@ class CamGUI(object):
                       ''.join(traceback.format_tb(e.__traceback__)))
 
     def plot_calibration_error(self):
+        pass
+    
+    def test_calibration_live(self):
         pass
     
     def start_record(self):
@@ -1474,16 +1479,27 @@ class CamGUI(object):
         self.init_matrix_check = IntVar(value=0)
         self.init_matrix_checkbutton = Checkbutton(calibration_frame, text="Re-Init Matrix", variable=self.init_matrix_check,
                                                 onvalue=1, offvalue=0, width=11)
-        self.init_matrix_checkbutton.grid(sticky="nw", row=1, column=3, padx=5, pady=3)
+        self.init_matrix_checkbutton.grid(sticky="nw", row=0, column=3, padx=5, pady=3)
         Hovertip(self.init_matrix_checkbutton, "Check this button to force re-initialize the calibration matrix. ")
         
-        self.open_calibration_error_plot = Button(calibration_frame, text="Plot Calibration", command=self.plot_calibration_error)
-        self.open_calibration_error_plot.\
-            grid(sticky="nsew", row=0, column=3, columnspan=1, padx=5, pady=3)
+        added_board_frame = Frame(calibration_frame)
+        Label(added_board_frame, text="Added Board #: ").\
+            grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
+        self.added_board_value = StringVar(value="0")
+        self.added_board_label = Label(added_board_frame, width=5, textvariable=self.added_board_value)
+        self.added_board_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
+        added_board_frame.grid(row=1, column=3, padx=5, pady=3, sticky="nsew")
+        
+        self.plot_calibration_error = Button(calibration_frame, text="Plot Calibration Error", command=self.plot_calibration_error)
+        self.plot_calibration_error.\
+            grid(sticky="nsew", row=0, column=4, columnspan=1, padx=5, pady=3)
         Hovertip(self.open_calibration_error_plot, "Press this button to plot the calibration error. ")
         
-        calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
+        self.test_calibration_live_button = Button(calibration_frame, text="Test Calibration Live", command=self.test_calibration_live, state="disabled")
+        self.test_calibration_live_button.\
+            grid(sticky="nsew", row=1, column=4, columnspan=1, padx=5, pady=3)
         
+        calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
         
         # calibration result
         calibration_result_label = Label(self.window, text="Calibration Result: ", font=("Arial", 12, "bold"))
