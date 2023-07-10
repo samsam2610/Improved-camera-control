@@ -603,18 +603,13 @@ class CamGUI(object):
             print(f"Calibration file '{file_name}' does not exist.")
 
     def set_calibration_buttons_group(self, state):
-        # button_states = {
-        #     'disabled': 'normal',
-        #     'normal': 'disabled'
-        # }
-    
-        # button_state = button_states.get(state, 'normal')
         
         self.toggle_calibration_capture_button['state'] = state
         self.snap_calibration_button['state'] = state
         self.recalibrate_button['state'] = state
         self.update_calibration_button['state'] = state
-        # self.calibration_duration_entry['state'] = button_state
+        self.plot_calibration_error_button['state'] = state
+        self.test_calibration_live_button['state'] = state
         
     def set_calibration_duration(self):
         self.calibration_duration_text = self.calibration_duration_entry.get()
@@ -675,7 +670,8 @@ class CamGUI(object):
             result = self.set_calibration_duration()
             if result == 0:
                 return
-
+            
+            self.error_list = []
             # Create a shared queue to store frames
             self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
 
@@ -733,6 +729,8 @@ class CamGUI(object):
             self.toggle_calibration_capture_button.config(text="Capture Off", background="red")
             self.calibration_duration_entry['state'] = 'normal'
             self.added_board_value.set(f'{len(self.current_all_rows[0])}')
+            self.plot_calibration_error_button['state'] = 'normal'
+            self.test_calibration_live_button['state'] = 'normal'
         else:
             result = self.set_calibration_duration()
             if result == 0:
@@ -744,6 +742,8 @@ class CamGUI(object):
             self.calibration_capture_toggle_status = True
             self.toggle_calibration_capture_button.config(text="Capture On", background="green")
             self.calibration_duration_entry['state'] = 'disabled'
+            self.plot_calibration_error_button['state'] = 'disabled'
+            self.test_calibration_live_button['state'] = 'disabled'
             
     def snap_calibration_frame(self):
         current_frames = []
@@ -901,6 +901,7 @@ class CamGUI(object):
                     if self.calibration_error is not None:
                         self.cgroup.metadata['error'] = float(self.calibration_error)
                         self.calibration_error_value.set(f'{self.calibration_error:.5f}')
+                        self.error_list.append(self.calibration_error)
                         
                     self.cgroup.dump(self.calibration_out)
                     self.rows_fname_available = False
@@ -911,10 +912,137 @@ class CamGUI(object):
                       ''.join(traceback.format_tb(e.__traceback__)))
 
     def plot_calibration_error(self):
-        pass
-    
+        root = Tk()
+        root.title('Calibration Error')
+        root.geometry('500x500')
+        root.configure(background='white')
+        
+        error_list = self.error_list
+        fig, ax = plt.subplots()
+
+        # Plot the error values
+        ax.plot(error_list)
+
+        # Customize the plot
+        ax.set_xlabel('Iteration')
+        ax.set_ylabel('Error')
+        ax.set_title('Error Progression')
+
+        # Display the plot
+        import tkinter as tk
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+        
+        canvas = FigureCanvasTkAgg(fig, master=root)
+        canvas.draw()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        
+        toolbar = NavigationToolbar2Tk(canvas, root)
+        toolbar.update()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        
+        root.mainloop()
+        
     def test_calibration_live(self):
-        pass
+        calibration_file = self.calibration_out
+        if not os.path.exists(calibration_file):
+            messagebox.showerror('Error', 'Calibration file not found!')
+            return
+        
+        from src.aniposelib.cameras import CameraGroup
+        self.cgroup_test = CameraGroup.load(calibration_file)# cgroup_test is loaded with the calibration file
+        barrier = threading.Barrier(len(self.cam))
+        
+        t = []
+        for i in range(len(self.cam)):
+            t.append(threading.Thread(target=self.draw_calibration_on_thread, args=(i, barrier)))
+            t[-1].daemon = True
+            t[-1].start()
+           
+    def draw_calibration_on_thread(self, num, barrier):
+        window_name = f'Camera {num}'
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(window_name, 640, 480)
+        from utils import aruco_dict
+        from cv2 import aruco
+        params = aruco.DetectorParameters_create()
+        params.cornerRefinementMethod = aruco.CORNER_REFINE_CONTOUR
+        params.adaptiveThreshWinSizeMin = 100
+        params.adaptiveThreshWinSizeMax = 1000
+        params.adaptiveThreshWinSizeStep = 50
+        params.adaptiveThreshConstant = 0
+        
+        while cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0:
+            barrier.wait()
+            frame_current = self.cam[num].get_image()
+            if frame_current is None:
+                drawn_frame = self.draw_axis(frame_current, camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
+                                                dist_coeff=self.cgroup_test.cameras[num].get_distortion(),
+                                                board=self.board_calibration, aruco_dict=aruco_dict, params=params)
+                cv2.imshow(window_name, drawn_frame)
+    
+    @staticmethod
+    def draw_axis(frame, camera_matrix, dist_coeff, board, aruco_dict, params, verbose=True):
+        try:
+            corners, ids, rejected_points = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=params)
+
+            if corners is None or ids is None:
+                print('No corner detected')
+                return None
+            if len(corners) != len(ids) or len(corners) == 0:
+                print('Incorrect corner or no corner detected!')
+                return None
+
+            corners, ids, rejectedCorners, recoveredIdxs = cv2.aruco.refineDetectedMarkers(frame, board, corners, ids,
+                                                                                           rejected_points, camera_matrix,
+                                                                                           dist_coeff, parameters=params)
+
+            if len(corners) == 0:
+                return None
+
+            ret, c_corners, c_ids = cv2.aruco.interpolateCornersCharuco(corners, ids,
+                                                                        frame, board,
+                                                                        cameraMatrix=camera_matrix, distCoeffs=dist_coeff)
+
+            if c_corners is None or c_ids is None or len(c_corners) < 5:
+                print('No corner detected after interpolation!')
+                return None
+
+            n_corners = c_corners.size // 2
+            reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
+
+            ret, p_rvec, p_tvec = cv2.aruco.estimatePoseCharucoBoard(reshape_corners,
+                                                                        c_ids,
+                                                                        board,
+                                                                        camera_matrix,
+                                                                        dist_coeff)
+
+            if p_rvec is None or p_tvec is None:
+                print('Cant detect rotation!')
+                return None
+            if np.isnan(p_rvec).any() or np.isnan(p_tvec).any():
+                print('Rotation is not usable')
+                return None
+
+            cv2.aruco.drawAxis(image=frame, cameraMatrix=camera_matrix, distCoeffs=dist_coeff,
+                               rvec=p_rvec, tvec=p_tvec, length=20)
+
+            cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, c_ids)
+            cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+            # cv2.aruco.drawDetectedMarkers(frame, rejected_points, borderColor=(100, 0, 240))
+
+        except cv2.error as e:
+            import sys
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            return None
+
+        if verbose:
+            print('Translation : {0}'.format(p_tvec))
+            print('Rotation    : {0}'.format(p_rvec))
+            print('Distance from camera: {0} m'.format(np.linalg.norm(p_tvec)))
+
+        return frame
     
     def start_record(self):
         if len(self.vid_out) == 0:
@@ -1490,10 +1618,10 @@ class CamGUI(object):
         self.added_board_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
         added_board_frame.grid(row=1, column=3, padx=5, pady=3, sticky="nsew")
         
-        self.plot_calibration_error = Button(calibration_frame, text="Plot Calibration Error", command=self.plot_calibration_error)
-        self.plot_calibration_error.\
+        self.plot_calibration_error_button = Button(calibration_frame, text="Plot Calibration Error", command=self.plot_calibration_error)
+        self.plot_calibration_error_button.\
             grid(sticky="nsew", row=0, column=4, columnspan=1, padx=5, pady=3)
-        Hovertip(self.open_calibration_error_plot, "Press this button to plot the calibration error. ")
+        Hovertip(self.plot_calibration_error_button, "Press this button to plot the calibration error. ")
         
         self.test_calibration_live_button = Button(calibration_frame, text="Test Calibration Live", command=self.test_calibration_live, state="disabled")
         self.test_calibration_live_button.\
