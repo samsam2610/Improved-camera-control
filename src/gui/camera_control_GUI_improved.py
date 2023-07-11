@@ -1207,6 +1207,10 @@ class CamGUI(object):
         if toggle_staus:
             self.toggle_video_recording_status = False
             self.toggle_video_recording_button.config(text="Capture Off", background="red")
+            if self.toggle_continuous_mode.get() == 1:
+                for i in range(len(self.cam)):
+                    self.cam[i].turn_off_continuous_mode()
+        
         else: # start recording videos and change button text
             self.toggle_video_recording_status = True
             self.toggle_video_recording_button.config(text="Capture On", background="green")
@@ -1217,6 +1221,10 @@ class CamGUI(object):
             else:
                 barrier = None
                 
+            if self.toggle_continuous_mode.get() == 1:
+                for i in range(len(self.cam)):
+                    self.cam[i].turn_on_continuous_mode()
+                    
             t = []
             for i in range(len(self.cam)):
                 t.append(threading.Thread(target=self.record_on_thread, args=(i, barrier)))

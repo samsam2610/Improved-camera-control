@@ -165,7 +165,17 @@ class ICCam(object):
         polarity = [0]
         self.cam.GetPropertySwitch("Trigger", "Polarity", Value=polarity)
         return polarity[0]
-    
+   
+    def turn_off_continuous_mode(self):
+        self.cam.StopLive()
+        self.cam.SetContinuousMode(0)
+        self.cam.StartLive()
+        
+    def turn_on_continuous_mode(self):
+        self.cam.StopLive()
+        self.cam.SetContinuousMode(1)
+        self.cam.StartLive()
+        
     def start(self, show_display=1):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive(show_display)
