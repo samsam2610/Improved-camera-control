@@ -593,7 +593,6 @@ class TIS_CAM(object):
         def LoadDeviceStateFromFile(self, FileName):
             self._handle = TIS_GrabberDLL.LoadDeviceStateFromFile(self._handle,self.s(FileName))
 
-
         def SetVideoFormat(self, Format):
             return TIS_GrabberDLL.set_videoformat(self._handle, self.s(Format))
 
@@ -623,14 +622,12 @@ class TIS_CAM(object):
         def GetVideoFormatHeight(self):
             return TIS_GrabberDLL.get_video_format_height(self._handle)
 
-
         def GetDevices(self):
             self._Devices=[]
             iDevices = TIS_GrabberDLL.get_devicecount()
             for i in range(iDevices):
                 self._Devices.append(TIS_GrabberDLL.get_unique_name_from_list(i))
             return self._Devices
-
 
         def GetVideoFormats(self):
             self._Properties=[]
@@ -692,21 +689,20 @@ class TIS_CAM(object):
             Error = TIS_GrabberDLL.StopLive(self._handle)
             return Error
 
-
         def SnapImage(self):
             Error = TIS_GrabberDLL.SnapImage(self._handle, 2000)
             return Error
 
-
         def GetImageDescription(self):
-            lWidth=C.c_long()
-            lHeight= C.c_long()
-            iBitsPerPixel=C.c_int()
-            COLORFORMAT=C.c_int()
+            lWidth = C.c_long()
+            lHeight = C.c_long()
+            iBitsPerPixel = C.c_int()
+            COLORFORMAT = C.c_int()
 
-            Error = TIS_GrabberDLL.GetImageDescription(self._handle, lWidth,
-                                        lHeight,iBitsPerPixel,COLORFORMAT)
-            return (lWidth.value,lHeight.value,iBitsPerPixel.value,COLORFORMAT.value)
+            Error = TIS_GrabberDLL.GetImageDescription(self._handle,
+                                                       lWidth, lHeight,
+                                                       iBitsPerPixel, COLORFORMAT)
+            return (lWidth.value, lHeight.value, iBitsPerPixel.value, COLORFORMAT.value)
 
         def GetImagePtr(self):
             ImagePtr = TIS_GrabberDLL.GetImagePtr(self._handle)
@@ -748,28 +744,28 @@ class TIS_CAM(object):
 
             pixeltype = np.uint8
 
-            if  BildDaten[3] == 4: #SinkFormats.Y16:
+            if BildDaten[3] == 4:  #SinkFormats.Y16:
                 pixeltype = np.uint16
                 iBytesPerPixel = 1
 
-            img = np.ndarray(buffer = Bild.contents,
-                         dtype = pixeltype,
-                         shape = (lHeight,
+            img = np.ndarray(buffer=Bild.contents,
+                         dtype=pixeltype,
+                         shape=(lHeight,
                                   lWidth,
                                   iBytesPerPixel))
             return img
 
 
-        def GetCameraProperty(self,iProperty):
+        def GetCameraProperty(self, iProperty):
             lFocusPos = C.c_long()
             Error = TIS_GrabberDLL.GetCameraProperty(self._handle,iProperty, lFocusPos)
             return (lFocusPos.value)
 
-        def SetCameraProperty(self,iProperty,iValue):
-            Error = TIS_GrabberDLL.SetCameraProperty(self._handle,iProperty, iValue)
+        def SetCameraProperty(self, iProperty, iValue):
+            Error = TIS_GrabberDLL.SetCameraProperty(self._handle, iProperty, iValue)
             return (Error)
 
-        def SetPropertyValue(self, Property, Element, Value ):
+        def SetPropertyValue(self, Property, Element, Value):
             error = TIS_GrabberDLL.SetPropertyValue(self._handle,
                                                     self.s(Property),
                                                     self.s(Element),

@@ -426,6 +426,9 @@ class CamGUI(object):
                 self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
             else:
                 self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
+                
+            self.toggle_video_recording_button['state'] = 'normal'
+            self.toggle_video_recording_button['text'] = 'Click to start recording'
 
     def create_output_files(self, subject_name='Sam'):
         # create output file names
@@ -1195,22 +1198,30 @@ class CamGUI(object):
 
         return frame
     
-    def start_record(self):
-        if len(self.vid_out) == 0:
-            self.show_video_error()
-            return
-        
-        self.vid_start_time = time.perf_counter()
-        if int(self.force_frame_sync.get()):
-            barrier = threading.Barrier(len(self.cam))
+    def toggle_video_recording(self, set_status=None):
+        if set_status is not None:
+            toggle_staus = not set_status
         else:
-            barrier = None
+            toggle_staus = self.toggle_video_recording_status
+        
+        if toggle_staus:
+            self.toggle_video_recording_status = False
+            self.toggle_video_recording_button.config(text="Capture Off", background="red")
+        else: # start recording videos and change button text
+            self.toggle_video_recording_status = True
+            self.toggle_video_recording_button.config(text="Capture On", background="green")
             
-        t = []
-        for i in range(len(self.cam)):
-            t.append(threading.Thread(target=self.record_on_thread, args=(i, barrier)))
-            t[-1].daemon = True
-            t[-1].start()
+            self.vid_start_time = time.perf_counter()
+            if int(self.force_frame_sync.get()):
+                barrier = threading.Barrier(len(self.cam))
+            else:
+                barrier = None
+                
+            t = []
+            for i in range(len(self.cam)):
+                t.append(threading.Thread(target=self.record_on_thread, args=(i, barrier)))
+                t[-1].daemon = True
+                t[-1].start()
 
     def compress_vid(self, ind):
         ff_input = dict()
@@ -1229,7 +1240,10 @@ class CamGUI(object):
         save_window.destroy()
         
     def save_vid(self, compress=False, delete=False):
-
+        self.toggle_video_recording(set_status='False')
+        self.toggle_video_recording_button['state'] = 'disabled'
+        self.toggle_video_recording_button['text'] = 'Capture Disabled'
+        
         saved_files = []
         for num in range(len(self.cam)):
             self.trigger_status_label[num]['text'] = 'Disabled'
@@ -1685,31 +1699,42 @@ class CamGUI(object):
         record_video_label = Label(self.window, text="Record Videos: ", font=("Arial", 12, "bold"))
         record_video_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
         
+        # recording buttons
         record_video_frame = Frame(self.window, borderwidth=1, relief="raised")
-        self.record_on = IntVar(value=0)
-        self.button_on = Radiobutton(record_video_frame, text="Record On", selectcolor='green', indicatoron=0,
-                                     variable=self.record_on, value=1, command=self.start_record, width=14).\
-            grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
-        self.button_off = Radiobutton(record_video_frame, text="Record Off", selectcolor='red', indicatoron=0,
-                                      variable=self.record_on, value=0, width=14).\
-            grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
-        self.release_vid0 = Button(record_video_frame, text="Save Video",
-                                   command=lambda: self.save_vid(compress=False), width=14).\
-            grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
-        self.release_vid1 = Button(record_video_frame, text="Compress & Save Video",
-                                   command=lambda: self.save_vid(compress=True)).\
-            grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
-        self.release_vid2 = Button(record_video_frame, text="Delete Video",
-                                   command=lambda: self.save_vid(delete=True), width=14).\
-            grid(sticky="nsew", row=2, column=1, padx=5, pady=3)
+        self.toggle_video_recording_status = IntVar(value=0)
+        self.toggle_video_recording_button = Button(record_video_frame, text="Capture Disabled",
+                                                    background="red", state="disabled", width=14, command=self.toggle_video_recording)
+        self.toggle_video_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
+        Hovertip(self.toggle_video_recording_button, "Start/Stop recording video")
         
+        # set recording properties
         self.force_frame_sync = IntVar(value=0)
         self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_frame_sync,
-                                                onvalue=1, offvalue=0, width=5)
-        self.force_frame_sync_button.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)
+                                                   onvalue=1, offvalue=0, width=13)
+        self.force_frame_sync_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
+        Hovertip(self.force_frame_sync_button, "Force frame sync for camera captured on threads")
+
+        self.toggle_continuous_mode = IntVar(value=0)
+        self.toggle_continuous_mode_button = Checkbutton(record_video_frame, text="Continuous Mode", variable=self.toggle_continuous_mode,
+                                                         onvalue=1, offvalue=0, width=13)
+        self.toggle_continuous_mode_button.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)
+        Hovertip(self.toggle_continuous_mode_button, "Toggle continuous mode during video recording")
         
-        Button(record_video_frame, text="Display stats", command=self.display_recorded_stats, width=10).\
-            grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
+        # save videos
+        self.release_vid0 = Button(record_video_frame, text="Save Video",
+                                   command=lambda: self.save_vid(compress=False), width=14).\
+            grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+
+        self.release_vid2 = Button(record_video_frame, text="Delete Video",
+                                   command=lambda: self.save_vid(delete=True), width=14)
+        self.release_vid2.grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
+        Hovertip(self.release_vid2, "Delete video if not needed")
+    
+        self.display_stats_button = Button(record_video_frame, text="Display stats", command=self.display_recorded_stats, width=10)
+        self.display_stats_button.grid(sticky="nsew", row=2, column=2, columnspan=1, padx=5, pady=3)
+        Hovertip(self.display_stats_button, "Display stats of recorded videos")
+
+        
         
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
         cur_row += 2
@@ -1735,7 +1760,7 @@ class CamGUI(object):
         Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
 
         self.toggle_calibration_capture_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration_capture,
-                                                background="red", state="disabled", width=14)
+                                                            background="red", state="disabled", width=14)
         self.toggle_calibration_capture_button.\
             grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
         Hovertip(self.toggle_calibration_capture_button, "Press this button to start capturing frames for calibration. ")
