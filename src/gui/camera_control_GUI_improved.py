@@ -81,7 +81,7 @@ class CamGUI(object):
             from src.camera_control.ic_camera import ICCam
             print('Forced import camera library')
 
-        if self.toggle_video_recording_status:
+        if self.toggle_video_recording_status == 1:
             setup_window.destroy()
             cam_on_window = Tk()
             Label(cam_on_window, text="Video is recording, cannot reinitialize camera!").pack()
@@ -582,7 +582,7 @@ class CamGUI(object):
         next_frame = start_time
 
         try:
-            while self.toggle_video_recording_status:
+            while self.toggle_video_recording_status == 1:
                 if time.perf_counter() >= next_frame:
                     if barrier is not None:
                         barrier.wait()
@@ -1205,14 +1205,14 @@ class CamGUI(object):
             toggle_status = self.toggle_video_recording_status
         
         if toggle_status:
-            self.toggle_video_recording_status = False
+            self.toggle_video_recording_status = 0
             self.toggle_video_recording_button.config(text="Capture Off", background="red")
             if self.toggle_continuous_mode.get() == 1:
                 for i in range(len(self.cam)):
                     self.cam[i].turn_off_continuous_mode()
         
         else: # start recording videos and change button text
-            self.toggle_video_recording_status = True
+            self.toggle_video_recording_status = 1
             self.toggle_video_recording_button.config(text="Capture On", background="green")
             
             self.vid_start_time = time.perf_counter()
