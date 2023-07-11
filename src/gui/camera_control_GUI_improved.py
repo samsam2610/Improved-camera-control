@@ -81,7 +81,7 @@ class CamGUI(object):
             from src.camera_control.ic_camera import ICCam
             print('Forced import camera library')
 
-        if self.record_on.get():
+        if self.toggle_video_recording_status:
             setup_window.destroy()
             cam_on_window = Tk()
             Label(cam_on_window, text="Video is recording, cannot reinitialize camera!").pack()
@@ -582,7 +582,7 @@ class CamGUI(object):
         next_frame = start_time
 
         try:
-            while self.record_on.get():
+            while self.toggle_video_recording_status:
                 if time.perf_counter() >= next_frame:
                     if barrier is not None:
                         barrier.wait()
@@ -1200,11 +1200,11 @@ class CamGUI(object):
     
     def toggle_video_recording(self, set_status=None):
         if set_status is not None:
-            toggle_staus = not set_status
+            toggle_status = not set_status
         else:
-            toggle_staus = self.toggle_video_recording_status
+            toggle_status = self.toggle_video_recording_status
         
-        if toggle_staus:
+        if toggle_status:
             self.toggle_video_recording_status = False
             self.toggle_video_recording_button.config(text="Capture Off", background="red")
             if self.toggle_continuous_mode.get() == 1:
@@ -1742,8 +1742,6 @@ class CamGUI(object):
         self.display_stats_button.grid(sticky="nsew", row=2, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.display_stats_button, "Display stats of recorded videos")
 
-        
-        
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
         cur_row += 2
         
