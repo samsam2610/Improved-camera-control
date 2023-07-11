@@ -1202,7 +1202,7 @@ class CamGUI(object):
         if set_status is not None:
             toggle_status = not set_status
         else:
-            toggle_status = self.toggle_video_recording_status
+            toggle_status = bool(self.toggle_video_recording_status.get())
         
         if toggle_status:
             self.toggle_video_recording_status = 0
@@ -1250,7 +1250,7 @@ class CamGUI(object):
     def save_vid(self, compress=False, delete=False):
         self.toggle_video_recording(set_status='False')
         self.toggle_video_recording_button['state'] = 'disabled'
-        self.toggle_video_recording_button['text'] = 'Capture Disabled'
+        self.toggle_video_recording_button.config(text="Capture Disabled", background="red")
         
         saved_files = []
         for num in range(len(self.cam)):
