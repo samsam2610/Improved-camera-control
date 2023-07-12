@@ -792,6 +792,8 @@ class CamGUI(object):
                 return
             
             print('Starting threads to record calibration frames...')
+            self.calibration_capture_toggle_status = True
+            self.recording_threads = []
             # Sync camera capture time using threading.Barrier
             barrier = threading.Barrier(len(self.cam))
             
@@ -806,7 +808,7 @@ class CamGUI(object):
             self.current_all_rows = []
             for i in range(len(self.cam)):
                 self.current_all_rows.append([])
-            self.calibration_capture_toggle_status = True
+            
             
             self.toggle_calibration_capture_button.config(text="Capture On", background="green")
             self.calibration_duration_entry['state'] = 'disabled'
