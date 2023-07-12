@@ -949,7 +949,7 @@ class CamGUI(object):
                         with open(self.rows_fname, 'wb') as file:
                             pickle.dump(self.all_rows, file)
                         self.rows_fname_available = True
-
+                        print('Dumped rows into detections.pickle')
                         # Clear the processed frames from the group
                         frame_groups = {}
                         frame_count = {}
@@ -975,6 +975,7 @@ class CamGUI(object):
             self.recalibrate_status = True
             self.update_calibration_status = False
             self.calibration_toggle_status = True
+            print(f'Recalibration status: {self.recalibrate_status}, Update calibration status: {self.update_calibration_status}, Calibration toggle status: {self.calibration_toggle_status}')
     
     def update_calibration(self):
         """

@@ -319,8 +319,7 @@ class TIS_GrabberDLL(object):
     # ############################################################################
     GetWindowPosition = __tisgrabber.IC_GetWindowPosition
     GetWindowPosition.restype = C.c_int
-    GetWindowPosition.argtypes = (GrabberHandlePtr,
-                                    C.POINTER(C.c_int), C.POINTER(C.c_int), C.POINTER(C.c_int), C.POINTER(C.c_int),)
+    GetWindowPosition.argtypes = (GrabberHandlePtr, C.POINTER(C.c_int), C.POINTER(C.c_int), C.POINTER(C.c_int), C.POINTER(C.c_int),)
     
     SetWindowPosition = __tisgrabber.IC_SetWindowPosition
     SetWindowPosition.restype = C.c_int
