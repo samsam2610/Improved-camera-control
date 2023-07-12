@@ -861,6 +861,7 @@ class CamGUI(object):
         start_time = time.perf_counter()
         next_frame = start_time
         while True:
+            print('Thread is running...')
             try:
                 capture_start_time = time.perf_counter()
                 while self.calibration_capture_toggle_status and (time.perf_counter()-capture_start_time < self.calibration_duration):
@@ -925,6 +926,7 @@ class CamGUI(object):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         while True:
+            print('Process marker thread is running...')
             try:
                 while self.calibration_capture_toggle_status or self.frame_queue.qsize() > 0:
                     # Retrieve frame information from the queue
