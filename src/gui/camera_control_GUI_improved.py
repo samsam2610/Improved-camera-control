@@ -716,11 +716,6 @@ class CamGUI(object):
 
             # Boolean for detections.pickle is updated
             self.detection_update = False
-            
-            # Sync camera capture time using threading.Barrier
-            barrier = threading.Barrier(len(self.cam))
-            
-            self.pause_thread = threading.Event()
 
             # create output file names
             self.vid_file = []
@@ -751,18 +746,9 @@ class CamGUI(object):
             self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
             self.calibration_process_stats['text'] = 'Prepping done. Starting calibration...'
             self.vid_start_time = time.perf_counter()
-            t = []
-
-            for i in range(len(self.cam)):
-                t.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i, barrier)))
-                t[-1].daemon = True
-                t[-1].start()
-            t.append(threading.Thread(target=self.process_marker_on_thread))
-            t[-1].daemon = True
-            t[-1].start()
-            t.append(threading.Thread(target=self.calibrate_on_thread))
-            t[-1].daemon = True
-            t[-1].start()
+           
+            self.recording_threads = []
+            self.calibrating_thread = None
 
     def toggle_calibration_capture(self):
         """
@@ -786,8 +772,13 @@ class CamGUI(object):
         """
         if self.calibration_capture_toggle_status:
             self.calibration_capture_toggle_status = False
-            self.pause_thread.set()
-            print('Paused calibration and processing threads')
+            
+            print('Waiting for all the frames are done processing...')
+            for t in self.recording_threads:
+                t.join()
+                
+            print('All frames are done processing.')
+            
             self.toggle_calibration_capture_button.config(text="Capture Off", background="red")
             self.calibration_duration_entry['state'] = 'normal'
             self.added_board_value.set(f'{len(self.current_all_rows[0])}')
@@ -798,12 +789,23 @@ class CamGUI(object):
             if result == 0:
                 return
             
+            print('Starting threads to record calibration frames...')
+            # Sync camera capture time using threading.Barrier
+            barrier = threading.Barrier(len(self.cam))
+            
+            for i in range(len(self.cam)):
+                self.recording_threads.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i, barrier)))
+                self.recording_threads[-1].daemon = True
+                self.recording_threads[-1].start()
+            self.recording_threads.append(threading.Thread(target=self.process_marker_on_thread))
+            self.recording_threads[-1].daemon = True
+            self.recording_threads[-1].start()
+
             self.current_all_rows = []
             for i in range(len(self.cam)):
                 self.current_all_rows.append([])
             self.calibration_capture_toggle_status = True
-            self.pause_thread.clear()
-            print('Resumed calibration and processing threads')
+            
             self.toggle_calibration_capture_button.config(text="Capture On", background="green")
             self.calibration_duration_entry['state'] = 'disabled'
             self.plot_calibration_error_button['state'] = 'disabled'
@@ -867,10 +869,6 @@ class CamGUI(object):
         start_time = time.perf_counter()
         next_frame = start_time
         while True:
-            if self.pause_thread.is_set():
-                print('Recording calibration paused')
-                self.pause_thread.wait()
-                
             try:
                 capture_start_time = time.perf_counter()
                 while self.calibration_capture_toggle_status and (time.perf_counter()-capture_start_time < self.calibration_duration):
@@ -935,9 +933,6 @@ class CamGUI(object):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         while True:
-            if self.pause_thread.is_set() and self.frame_queue.qsize() == 0:
-                print('Processing paused')
-                self.pause_thread.wait()
             try:
                 while self.calibration_capture_toggle_status:
                     # Retrieve frame information from the queue
@@ -955,14 +950,11 @@ class CamGUI(object):
                     # Process the frame group (frames with the same thread_id)
                     # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
                     if all(count >= self.frame_process_threshold for count in frame_counts.values()):
-                        # self.calibration_process_stats['text'] = f'More than {self.frame_process_threshold} ' \
-                        #                                          f'frames acquired from each camera,' \
-                        #                                          f' detecting the markers...'
-                        
                         with open(self.rows_fname, 'wb') as file:
                             pickle.dump(self.all_rows, file)
                         self.rows_fname_available = True
                         print('Dumped rows into detections.pickle')
+                        
                         # Clear the processed frames from the group
                         frame_groups = {}
                         frame_count = {}
@@ -989,7 +981,14 @@ class CamGUI(object):
             self.update_calibration_status = False
             self.calibration_toggle_status = True
             print(f'Recalibration status: {self.recalibrate_status}, Update calibration status: {self.update_calibration_status}, Calibration toggle status: {self.calibration_toggle_status}')
-    
+            
+            if self.calibrating_thread is not None and self.calibrating_thread.is_alive():
+                self.calibrating_thread.join()
+            else:
+                self.calibrating_thread = threading.Thread(target=self.calibrate_on_thread)
+                self.calibrating_thread.daemon = True
+                self.calibrating_thread.start()
+ 
     def update_calibration(self):
         """
          Updates the calibration status.
@@ -1007,6 +1006,13 @@ class CamGUI(object):
             self.update_calibration_status = True
             self.recalibrate_status = False
             self.calibration_toggle_status = True
+           
+            if self.calibrating_thread is not None and self.calibrating_thread.is_alive():
+                self.calibrating_thread.join()
+            else:
+                self.calibrating_thread = threading.Thread(target=self.calibrate_on_thread)
+                self.calibrating_thread.daemon = True
+                self.calibrating_thread.start()
     
     def calibrate_on_thread(self):
         """
@@ -1020,56 +1026,55 @@ class CamGUI(object):
         """
         self.calibration_error = float('inf')
         print(f'Current error: {self.calibration_error}')
-        while True:
-            try:
-                if self.calibration_toggle_status:
+        try:
+            if self.calibration_toggle_status:
+                
+                self.calibration_process_stats['text'] = 'Calibrating...'
+                print(f'Current error: {self.calibration_error}')
+                if self.recalibrate_status:
+                    with open(self.rows_fname, 'rb') as f:
+                        all_rows = pickle.load(f)
+                    print('Loaded rows from detections.pickle')
+                
+                if self.update_calibration_status:
+                    all_rows = copy.deepcopy(self.current_all_rows)
+                    print('Loaded rows from current_all_rows')
+                
+                if self.calibration_error is None or self.calibration_error > 0.1:
+                    init_matrix = True
+                    print('Force init_matrix to True')
+                else:
+                    init_matrix = bool(self.init_matrix_check.get())
+                    print(f'init_matrix: {init_matrix}')
                     
-                    self.calibration_process_stats['text'] = 'Calibrating...'
-                    print(f'Current error: {self.calibration_error}')
-                    if self.recalibrate_status:
-                        with open(self.rows_fname, 'rb') as f:
-                            all_rows = pickle.load(f)
-                        print('Loaded rows from detections.pickle')
+                # all_rows = [row[-100:] if len(row) >= 100 else row for row in all_rows]
+                self.calibration_error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
+                                                                    init_intrinsics=init_matrix,
+                                                                    init_extrinsics=init_matrix,
+                                                                    max_nfev=200, n_iters=6,
+                                                                    n_samp_iter=200, n_samp_full=1000,
+                                                                    verbose=True)
+                
+                # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
+                self.cgroup.metadata['adjusted'] = False
+                if self.calibration_error is not None:
+                    self.cgroup.metadata['error'] = float(self.calibration_error)
+                    self.calibration_error_value.set(f'{self.calibration_error:.5f}')
+                    self.error_list.append(self.calibration_error)
+                    print(f'Calibration error: {self.calibration_error}')
+                else:
+                    print('Failed to calibrate')
                     
-                    if self.update_calibration_status:
-                        all_rows = copy.deepcopy(self.current_all_rows)
-                        print('Loaded rows from current_all_rows')
-                    
-                    if self.calibration_error is None or self.calibration_error > 0.1:
-                        init_matrix = True
-                        print('Force init_matrix to True')
-                    else:
-                        init_matrix = bool(self.init_matrix_check.get())
-                        print(f'init_matrix: {init_matrix}')
-                        
-                    # all_rows = [row[-100:] if len(row) >= 100 else row for row in all_rows]
-                    self.calibration_error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
-                                                                        init_intrinsics=init_matrix,
-                                                                        init_extrinsics=init_matrix,
-                                                                        max_nfev=200, n_iters=6,
-                                                                        n_samp_iter=200, n_samp_full=1000,
-                                                                        verbose=True)
-                    
-                    # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
-                    self.cgroup.metadata['adjusted'] = False
-                    if self.calibration_error is not None:
-                        self.cgroup.metadata['error'] = float(self.calibration_error)
-                        self.calibration_error_value.set(f'{self.calibration_error:.5f}')
-                        self.error_list.append(self.calibration_error)
-                        print(f'Calibration error: {self.calibration_error}')
-                    else:
-                        print('Failed to calibrate')
-                        
-                    print('Calibration completed')
-                    self.cgroup.dump(self.calibration_out)
-                    print('Calibration result dumped')
-                    
-                    self.rows_fname_available = False
-                    self.calibration_toggle_status = False
+                print('Calibration completed')
+                self.cgroup.dump(self.calibration_out)
+                print('Calibration result dumped')
+                
+                self.rows_fname_available = False
+                self.calibration_toggle_status = False
 
-            except Exception as e:
-                print("Exception occurred:", type(e).__name__, "| Exception value:", e,
-                      ''.join(traceback.format_tb(e.__traceback__)))
+        except Exception as e:
+            print("Exception occurred:", type(e).__name__, "| Exception value:", e,
+                  ''.join(traceback.format_tb(e.__traceback__)))
 
     def plot_calibration_error(self):
         """
