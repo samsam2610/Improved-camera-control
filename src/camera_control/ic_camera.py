@@ -44,6 +44,7 @@ class ICCam(object):
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
+        self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
         self.add_filters()
 
     def add_filters(self):
@@ -166,19 +167,39 @@ class ICCam(object):
         self.cam.GetPropertySwitch("Trigger", "Polarity", Value=polarity)
         return polarity[0]
    
+    def get_window_position(self):
+        err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'] = self.cam.GetWindowPosition()
+        if err != 1:
+            print("Error getting window position")
+            
+    def set_window_position(self, x=None, y=None, width=None, height=None):
+        self.windowPos['x'] = x if x is not None else self.windowPos['x']
+        self.windowPos['y'] = y if y is not None else self.windowPos['y']
+        self.windowPos['width'] = width if width is not None else self.windowPos['width']
+        self.windowPos['height'] = height if height is not None else self.windowPos['height']
+        self.cam.SetWindowPosition(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
+    
     def turn_off_continuous_mode(self):
+        self.get_window_position()
         self.cam.StopLive()
         self.cam.SetContinuousMode(0)
         self.cam.StartLive()
+        self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
         
     def turn_on_continuous_mode(self):
+        self.get_window_position()
         self.cam.StopLive()
         self.cam.SetContinuousMode(1)
         self.cam.StartLive()
+        self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
         
     def start(self, show_display=1):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive(show_display)
+        if self.windowPos['x'] is not None:
+            self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
 
     def close(self):
+        self.get_window_position()
         self.cam.StopLive()
+        
