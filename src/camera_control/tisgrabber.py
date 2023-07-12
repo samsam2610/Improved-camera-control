@@ -327,6 +327,10 @@ class TIS_GrabberDLL(object):
     SetWindowPosition.argtypes = (GrabberHandlePtr,
                                   C.c_int, C.c_int, C.c_int, C.c_int,)
     
+    SetDefaultWindowPosition = __tisgrabber.IC_SetDefaultWindowPosition
+    SetDefaultWindowPosition.restype = C.c_int
+    SetDefaultWindowPosition.argtypes = (GrabberHandlePtr, C.c_int,)
+    
     
     # ############################################################################
     ShowDeviceSelectionDialog = __tisgrabber.IC_ShowDeviceSelectionDialog
@@ -869,4 +873,12 @@ class TIS_CAM(object):
                 raise Exception("No device opened, but HGRABBER is valid.")
             elif err == -3:
                 raise Exception("device has been opened, but is is not in live mode.")
+        return err
+    
+    def SetDefaultWindowPosition(self, default):
+        err = TIS_GrabberDLL.SetDefaultWindowPosition(self._handle, default)
+        if err != 1:
+            print("Error in SetDefaultWindowPosition")
+            if err == 0:
+                raise Exception("Wrong device handle")
         return err

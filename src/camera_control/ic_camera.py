@@ -196,6 +196,7 @@ class ICCam(object):
     def start(self, show_display=1, setPosition=False):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive(show_display)
+        self.cam.SetDefaultWindowPosition(default=0)
         if setPosition:
             if self.windowPos['x'] is not None:
                 self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
