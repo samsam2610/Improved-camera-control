@@ -775,7 +775,8 @@ class CamGUI(object):
             
             print('Waiting for all the frames are done processing...')
             for t in self.recording_threads:
-                t.join()
+                if t.is_alive():
+                    t.join()
                 
             print('All frames are done processing.')
             
