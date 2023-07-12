@@ -868,47 +868,46 @@ class CamGUI(object):
         fps = int(self.fps.get())
         start_time = time.perf_counter()
         next_frame = start_time
-        while True:
-            try:
-                capture_start_time = time.perf_counter()
-                while self.calibration_capture_toggle_status and (time.perf_counter()-capture_start_time < self.calibration_duration):
-                    if time.perf_counter() >= next_frame:
-                        barrier.wait()
-                        self.frame_times[num].append(time.perf_counter())
-                        self.frame_count[num] += 1
-                        frame_current = self.cam[num].get_image()
-                        
-                        # detect the marker as the frame is acquired
-                        corners, ids = self.board_calibration.detect_image(frame_current)
-                        if corners is not None:
-                            key = self.frame_count[num]
-                            row = {
-                                'framenum': key,
-                                'corners': corners,
-                                'ids': ids
-                            }
-
-                            row = self.board_calibration.fill_points_rows([row])
-                            self.all_rows[num].extend(row)
-                            self.current_all_rows[num].extend(row)
-                            self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
-                        
-                        # putting frame into the frame queue along with following information
-                        self.frame_queue.put((frame_current,  # the frame itself
-                                              num,  # the id of the capturing camera
-                                              self.frame_count[num],  # the current frame count
-                                              self.frame_times[num][-1]))  # captured time
-
-                        next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
-                
-                if time.perf_counter() - capture_start_time > self.calibration_duration and self.calibration_capture_toggle_status:
-                    self.calibration_capture_toggle_status = False
-                    self.toggle_calibration_capture()
+        try:
+            capture_start_time = time.perf_counter()
+            while self.calibration_capture_toggle_status and (time.perf_counter()-start_time < self.calibration_duration):
+                if time.perf_counter() >= next_frame:
+                    barrier.wait()
+                    self.frame_times[num].append(time.perf_counter())
+                    self.frame_count[num] += 1
+                    frame_current = self.cam[num].get_image()
                     
-            except Exception as e:
-                print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
-                      "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1],
-                      "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
+                    # detect the marker as the frame is acquired
+                    corners, ids = self.board_calibration.detect_image(frame_current)
+                    if corners is not None:
+                        key = self.frame_count[num]
+                        row = {
+                            'framenum': key,
+                            'corners': corners,
+                            'ids': ids
+                        }
+
+                        row = self.board_calibration.fill_points_rows([row])
+                        self.all_rows[num].extend(row)
+                        self.current_all_rows[num].extend(row)
+                        self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
+                    
+                    # putting frame into the frame queue along with following information
+                    self.frame_queue.put((frame_current,  # the frame itself
+                                          num,  # the id of the capturing camera
+                                          self.frame_count[num],  # the current frame count
+                                          self.frame_times[num][-1]))  # captured time
+
+                    next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
+            
+            if time.perf_counter() - capture_start_time > self.calibration_duration and self.calibration_capture_toggle_status:
+                self.calibration_capture_toggle_status = False
+                self.toggle_calibration_capture()
+                
+        except Exception as e:
+            print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
+                  "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1],
+                  "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
 
     def process_marker_on_thread(self):
         """
@@ -932,37 +931,36 @@ class CamGUI(object):
         """
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
-        while True:
-            try:
-                while self.calibration_capture_toggle_status:
-                    # Retrieve frame information from the queue
-                    frame, thread_id, frame_count, capture_time = self.frame_queue.get()
-                    if thread_id not in frame_groups:
-                        frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
-                        frame_counts[thread_id] = 0
+        try:
+            while self.calibration_capture_toggle_status and not self.frame_queue.empty():
+                # Retrieve frame information from the queue
+                frame, thread_id, frame_count, capture_time = self.frame_queue.get()
+                if thread_id not in frame_groups:
+                    frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
+                    frame_counts[thread_id] = 0
 
-                    # Append frame information to the corresponding group
-                    frame_groups[thread_id].append((frame, frame_count, capture_time))
-                    frame_counts[thread_id] += 1
-                    self.frame_acquired_count_label[thread_id]['text'] = f'{frame_count}'
-                    self.vid_out[thread_id].write(frame)
+                # Append frame information to the corresponding group
+                frame_groups[thread_id].append((frame, frame_count, capture_time))
+                frame_counts[thread_id] += 1
+                self.frame_acquired_count_label[thread_id]['text'] = f'{frame_count}'
+                self.vid_out[thread_id].write(frame)
+                
+                # Process the frame group (frames with the same thread_id)
+                # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
+                if all(count >= self.frame_process_threshold for count in frame_counts.values()):
+                    with open(self.rows_fname, 'wb') as file:
+                        pickle.dump(self.all_rows, file)
+                    self.rows_fname_available = True
+                    print('Dumped rows into detections.pickle')
                     
-                    # Process the frame group (frames with the same thread_id)
-                    # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
-                    if all(count >= self.frame_process_threshold for count in frame_counts.values()):
-                        with open(self.rows_fname, 'wb') as file:
-                            pickle.dump(self.all_rows, file)
-                        self.rows_fname_available = True
-                        print('Dumped rows into detections.pickle')
-                        
-                        # Clear the processed frames from the group
-                        frame_groups = {}
-                        frame_count = {}
+                    # Clear the processed frames from the group
+                    frame_groups = {}
+                    frame_count = {}
 
-            except Exception as e:
-                print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id,
-                      "| Frame count:", frame_count, "| Capture time:", capture_time, "| Traceback:",
-                      ''.join(traceback.format_tb(e.__traceback__)))
+        except Exception as e:
+            print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id,
+                  "| Frame count:", frame_count, "| Capture time:", capture_time, "| Traceback:",
+                  ''.join(traceback.format_tb(e.__traceback__)))
 
     def recalibrate(self):
         """
