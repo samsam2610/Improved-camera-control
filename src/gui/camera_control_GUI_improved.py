@@ -105,7 +105,7 @@ class CamGUI(object):
         self.cam[num] = ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get())
         
         # self.cam[num].start()
-        self.set_frame_rate(num, framerate=100)
+        self.set_frame_rate(num, framerate=100, initCamera=True)
 
         # set gain and exposure using the values from the json
         self.cam[num].set_exposure(float(self.cam_details[str(num)]['exposure']))
@@ -361,7 +361,7 @@ class CamGUI(object):
         self.current_framerate[num].set(int(current_frame_rate))
         return current_frame_rate
         
-    def set_frame_rate(self, num, framerate=None):
+    def set_frame_rate(self, num, framerate=None, initCamera=False):
         if self.is_camera_set_up(num) is False:
             self.show_camera_error()
             return
@@ -370,13 +370,16 @@ class CamGUI(object):
             selected_frame_rate = self.framerate_list[num].get()
         else:
             selected_frame_rate = framerate
-        
-        self.cam[num].close()
-        result = self.cam[num].set_frame_rate(int(selected_frame_rate))
-        self.framerate[num].set(selected_frame_rate)
-        current_framerate = self.get_current_frame_rate(num)
-        self.cam[num].start()
-        print(f'Selected: {selected_frame_rate }. Frame rate set to {current_framerate} fps. Result: {result}')
+        if initCamera:
+            result = self.cam[num].set_frame_rate(int(selected_frame_rate))
+            self.framerate[num].set(selected_frame_rate)
+        else:
+            self.cam[num].close(getPosition=True)
+            result = self.cam[num].set_frame_rate(int(selected_frame_rate))
+            self.framerate[num].set(selected_frame_rate)
+            current_framerate = self.get_current_frame_rate(num)
+            self.cam[num].start(getPosition=True)
+            print(f'Selected: {selected_frame_rate }. Frame rate set to {current_framerate} fps. Result: {result}')
         
     def release_trigger(self):
         for num in range(len(self.cam)):
