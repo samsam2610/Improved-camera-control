@@ -786,6 +786,8 @@ class CamGUI(object):
         """
         if self.calibration_capture_toggle_status:
             self.calibration_capture_toggle_status = False
+            self.pause_thread.set()
+            print('Paused calibration and processing threads')
             self.toggle_calibration_capture_button.config(text="Capture Off", background="red")
             self.calibration_duration_entry['state'] = 'normal'
             self.added_board_value.set(f'{len(self.current_all_rows[0])}')
@@ -800,6 +802,8 @@ class CamGUI(object):
             for i in range(len(self.cam)):
                 self.current_all_rows.append([])
             self.calibration_capture_toggle_status = True
+            self.pause_thread.clear()
+            print('Resumed calibration and processing threads')
             self.toggle_calibration_capture_button.config(text="Capture On", background="green")
             self.calibration_duration_entry['state'] = 'disabled'
             self.plot_calibration_error_button['state'] = 'disabled'
@@ -932,6 +936,7 @@ class CamGUI(object):
         while True:
             if self.pause_thread.is_set() and self.frame_queue.qsize() == 0:
                 print('Processing paused')
+                self.pause_thread.wait()
             try:
                 while self.calibration_capture_toggle_status:
                     # Retrieve frame information from the queue
@@ -1017,7 +1022,7 @@ class CamGUI(object):
         while True:
             try:
                 if self.calibration_toggle_status:
-                    self.pause_thread.set()
+                    
                     self.calibration_process_stats['text'] = 'Calibrating...'
                     print(f'Current error: {self.calibration_error}')
                     if self.recalibrate_status:
@@ -1060,7 +1065,6 @@ class CamGUI(object):
                     
                     self.rows_fname_available = False
                     self.calibration_toggle_status = False
-                    self.pause_thread.clear()
 
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e,
