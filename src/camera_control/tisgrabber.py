@@ -735,8 +735,16 @@ class TIS_CAM(object):
         return error
     
     def SetPropertyAbsoluteValue(self, Property, Element, Value):
-        error = TIS_GrabberDLL.SetPropertyAbsoluteValue(self._handle, self.s(Property), self.s(Element), Value)
-        return error
+        err = TIS_GrabberDLL.SetPropertyAbsoluteValue(self._handle, self.s(Property), self.s(Element), Value)
+        if err != 1:
+            print("Error in setting property absolute value")
+            if err == 0:
+                raise Exception("Wrong device handle")
+            elif err == -2:
+                raise Exception("No device opened, but HGRABBER is valid.")
+            elif err == -3:
+                raise Exception("device has been opened, but is is not in live mode.")
+        return err
     
     def GetPropertyAbsoluteValue(self, Property, Element, Value):
         """ Get a property value of absolute values interface, e.g. seconds or dB.
@@ -751,9 +759,17 @@ class TIS_CAM(object):
             :returns: 0 on success
             """
         lValue = C.c_float()
-        error = TIS_GrabberDLL.GetPropertyAbsoluteValue(self._handle, self.s(Property), self.s(Element), lValue)
+        err = TIS_GrabberDLL.GetPropertyAbsoluteValue(self._handle, self.s(Property), self.s(Element), lValue)
+        if err != 1:
+            print("Error in get property absolute value")
+            if err == 0:
+                raise Exception("Wrong device handle")
+            elif err == -2:
+                raise Exception("No device opened, but HGRABBER is valid.")
+            elif err == -3:
+                raise Exception("device has been opened, but is is not in live mode.")
         Value[0] = lValue.value
-        return error
+        return err
     
     def SaveImage(self, FileName, FileType, Quality=75):
         ''' Saves the last snapped image. Can by of type BMP or JPEG.
@@ -776,23 +792,54 @@ class TIS_CAM(object):
         
         err = TIS_GrabberDLL.CreateFrameFilter(C.c_char_p(name), C.byref(frame_filter_handle))
         if err != 1:
-            raise Exception("ERROR CREATING FILTER")
+            print("Error in CreateFrameFilter")
+            if err == 0:
+                raise Exception("Wrong device handle")
+            elif err == -2:
+                raise Exception("No device opened, but HGRABBER is valid.")
+            elif err == -3:
+                raise Exception("device has been opened, but is is not in live mode.")
+            
         return frame_filter_handle
     
     def AddFrameFilter(self, frame_filter_handle):
         err = TIS_GrabberDLL.AddFrameFilter(self._handle, frame_filter_handle)
+        if err != 1:
+            print("Error in AddFrameFilter")
+            if err == 0:
+                raise Exception("Wrong device handle")
+            elif err == -2:
+                raise Exception("No device opened, but HGRABBER is valid.")
+            elif err == -3:
+                raise Exception("device has been opened, but is is not in live mode.")
         return err
     
     def FilterGetParameter(self, frame_filter_handle, parameter_name):
         data = C.c_int()
         
         err = TIS_GrabberDLL.FilterGetParameter(frame_filter_handle, parameter_name, C.byref(data))
+        if err != 1:
+            print("Error in FilterGetParameter")
+            if err == 0:
+                raise Exception("Wrong device handle")
+            elif err == -2:
+                raise Exception("No device opened, but HGRABBER is valid.")
+            elif err == -3:
+                raise Exception("device has been opened, but is is not in live mode.")
         return err
     
     def FilterSetParameter(self, frame_filter_handle, parameter_name, data):
         if type(data) is int:
             err = TIS_GrabberDLL.FilterSetParameter(frame_filter_handle, C.c_char_p(parameter_name), C.c_int(data))
-            return err
+            if err != 1:
+                print("Error in FilterSetParameter")
+                if err == 0:
+                    raise Exception("Wrong device handle")
+                elif err == -2:
+                    raise Exception("No device opened, but HGRABBER is valid.")
+                elif err == -3:
+                    raise Exception("device has been opened, but is is not in live mode.")
+                return err
         else:
             raise Exception('Unknown set parameter type')
         
@@ -802,8 +849,24 @@ class TIS_CAM(object):
         width = C.c_int()
         height = C.c_int()
         err = TIS_GrabberDLL.GetWindowPosition(self._handle, x, y, width, height)
+        if err != 1:
+            print("Error in GetWindowPosition")
+            if err == 0:
+                raise Exception("Wrong device handle")
+            elif err == -2:
+                raise Exception("No device opened, but HGRABBER is valid.")
+            elif err == -3:
+                raise Exception("device has been opened, but is is not in live mode.")
         return err, x.value, y.value, width.value, height.value
     
     def SetWindowPosition(self, x, y, width, height):
         err = TIS_GrabberDLL.SetWindowPosition(self._handle, x, y, width, height)
+        if err != 1:
+            print("Error in SetWindowPosition")
+            if err == 0:
+                raise Exception("Wrong device handle")
+            elif err == -2:
+                raise Exception("No device opened, but HGRABBER is valid.")
+            elif err == -3:
+                raise Exception("device has been opened, but is is not in live mode.")
         return err
