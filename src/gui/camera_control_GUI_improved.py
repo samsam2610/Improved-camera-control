@@ -719,6 +719,8 @@ class CamGUI(object):
             
             # Sync camera capture time using threading.Barrier
             barrier = threading.Barrier(len(self.cam))
+            
+            self.pause_thread = threading.Event()
 
             # create output file names
             self.vid_file = []
@@ -861,7 +863,9 @@ class CamGUI(object):
         start_time = time.perf_counter()
         next_frame = start_time
         while True:
-            print('Thread is running...')
+            if self.pause_thread.is_set():
+                print('Recording calibration paused')
+                
             try:
                 capture_start_time = time.perf_counter()
                 while self.calibration_capture_toggle_status and (time.perf_counter()-capture_start_time < self.calibration_duration):
@@ -926,9 +930,10 @@ class CamGUI(object):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         while True:
-            print('Process marker thread is running...')
+            if self.pause_thread.is_set() and self.frame_queue.qsize() == 0:
+                print('Processing paused')
             try:
-                while self.calibration_capture_toggle_status or self.frame_queue.qsize() > 0:
+                while self.calibration_capture_toggle_status:
                     # Retrieve frame information from the queue
                     frame, thread_id, frame_count, capture_time = self.frame_queue.get()
                     if thread_id not in frame_groups:
@@ -1012,6 +1017,8 @@ class CamGUI(object):
         while True:
             try:
                 if self.calibration_toggle_status:
+                    self.pause_thread.set()
+                    self.calibration_process_stats['text'] = 'Calibrating...'
                     print(f'Current error: {self.calibration_error}')
                     if self.recalibrate_status:
                         with open(self.rows_fname, 'rb') as f:
@@ -1053,6 +1060,7 @@ class CamGUI(object):
                     
                     self.rows_fname_available = False
                     self.calibration_toggle_status = False
+                    self.pause_thread.clear()
 
             except Exception as e:
                 print("Exception occurred:", type(e).__name__, "| Exception value:", e,
