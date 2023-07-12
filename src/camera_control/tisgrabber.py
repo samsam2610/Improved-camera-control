@@ -811,11 +811,11 @@ class TIS_CAM(object):
         if err != 1:
             print("Error in AddFrameFilter")
             if err == 0:
-                raise Exception("Wrong device handle")
+                print("Wrong device handle")
             elif err == -2:
-                raise Exception("No device opened, but HGRABBER is valid.")
+                print("No device opened, but HGRABBER is valid.")
             elif err == -3:
-                raise Exception("device has been opened, but is is not in live mode.")
+                print("device has been opened, but is is not in live mode.")
         return err
     
     def FilterGetParameter(self, frame_filter_handle, parameter_name):
@@ -825,11 +825,11 @@ class TIS_CAM(object):
         if err != 1:
             print("Error in FilterGetParameter")
             if err == 0:
-                raise Exception("Wrong device handle")
+                print("Wrong device handle")
             elif err == -2:
-                raise Exception("No device opened, but HGRABBER is valid.")
+                print("No device opened, but HGRABBER is valid.")
             elif err == -3:
-                raise Exception("device has been opened, but is is not in live mode.")
+                print("device has been opened, but is is not in live mode.")
         return err
     
     def FilterSetParameter(self, frame_filter_handle, parameter_name, data):
@@ -838,11 +838,11 @@ class TIS_CAM(object):
             if err != 1:
                 print("Error in FilterSetParameter")
                 if err == 0:
-                    raise Exception("Wrong device handle")
+                    print("Wrong device handle")
                 elif err == -2:
-                    raise Exception("No device opened, but HGRABBER is valid.")
+                    print("No device opened, but HGRABBER is valid.")
                 elif err == -3:
-                    raise Exception("device has been opened, but is is not in live mode.")
+                    print("device has been opened, but is is not in live mode.")
                 return err
         else:
             raise Exception('Unknown set parameter type')
@@ -856,11 +856,11 @@ class TIS_CAM(object):
         if err != 1:
             print("Error in GetWindowPosition")
             if err == 0:
-                raise Exception("Wrong device handle")
+                print("Wrong device handle")
             elif err == -2:
-                raise Exception("No device opened, but HGRABBER is valid.")
+                print("No device opened, but HGRABBER is valid.")
             elif err == -3:
-                raise Exception("device has been opened, but is is not in live mode.")
+                print("device has been opened, but is is not in live mode.")
         return err, x.value, y.value, width.value, height.value
     
     def SetWindowPosition(self, x, y, width, height):
@@ -868,11 +868,11 @@ class TIS_CAM(object):
         if err != 1:
             print("Error in SetWindowPosition")
             if err == 0:
-                raise Exception("Wrong device handle")
+                print("Wrong device handle")
             elif err == -2:
-                raise Exception("No device opened, but HGRABBER is valid.")
+                print("No device opened, but HGRABBER is valid.")
             elif err == -3:
-                raise Exception("device has been opened, but is is not in live mode.")
+                print("device has been opened, but is is not in live mode.")
         return err
     
     def SetDefaultWindowPosition(self, default):
@@ -880,5 +880,5 @@ class TIS_CAM(object):
         if err != 1:
             print("Error in SetDefaultWindowPosition")
             if err == 0:
-                raise Exception("Wrong device handle")
+                print("Wrong device handle")
         return err
