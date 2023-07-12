@@ -852,7 +852,11 @@ class TIS_CAM(object):
         y = C.c_int()
         width = C.c_int()
         height = C.c_int()
-        err = TIS_GrabberDLL.GetWindowPosition(self._handle, x, y, width, height)
+        try:
+            err = TIS_GrabberDLL.GetWindowPosition(self._handle, x, y, width, height)
+        except Exception as e:
+            print(f"Error in GetWindowPosition: {e}")
+        
         if err != 1:
             print("Error in GetWindowPosition")
             if err == 0:
