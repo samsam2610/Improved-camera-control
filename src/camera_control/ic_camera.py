@@ -198,6 +198,8 @@ class ICCam(object):
         self.cam.StartLive(show_display)
         if self.windowPos['x'] is not None:
             self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
+        else:
+            self.get_window_position()
 
     def close(self):
         if self.windowPos['x'] is not None:
