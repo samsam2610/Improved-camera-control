@@ -193,16 +193,18 @@ class ICCam(object):
         self.cam.StartLive()
         self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
         
-    def start(self, show_display=1):
+    def start(self, show_display=1, getPosition=False):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive(show_display)
-        if self.windowPos['x'] is not None:
-            self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
-        else:
-            self.get_window_position()
+        if getPosition:
+            if self.windowPos['x'] is not None:
+                self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
+            else:
+                self.get_window_position()
 
-    def close(self):
-        if self.windowPos['x'] is not None:
-            self.get_window_position()
+    def close(self, getPosition=False):
+        if getPosition:
+            if self.windowPos['x'] is not None:
+                self.get_window_position()
         self.cam.StopLive()
         
