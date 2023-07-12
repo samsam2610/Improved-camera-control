@@ -750,7 +750,7 @@ class CamGUI(object):
             self.recording_threads = []
             self.calibrating_thread = None
 
-    def toggle_calibration_capture(self):
+    def toggle_calibration_capture(self, termination=False):
         """
         Toggles the calibration capture on or off.
 
@@ -770,12 +770,13 @@ class CamGUI(object):
         The method then initializes an empty list `self.current_all_rows` and sets `self.calibration_capture_toggle_status` to True.
         It updates the GUI elements to reflect the changes and disables certain buttons.
         """
-        if self.calibration_capture_toggle_status:
+        if self.calibration_capture_toggle_status or termination:
             self.calibration_capture_toggle_status = False
             
             print('Waiting for all the frames are done processing...')
+            current_thread = threading.currentThread()
             for t in self.recording_threads:
-                if t.is_alive():
+                if t is not current_thread:
                     t.join()
                 
             print('All frames are done processing.')
@@ -902,7 +903,7 @@ class CamGUI(object):
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
             
             if time.perf_counter() - capture_start_time > self.calibration_duration and self.calibration_capture_toggle_status:
-                self.toggle_calibration_capture()
+                self.toggle_calibration_capture(termination=True)
                 
         except Exception as e:
             print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
