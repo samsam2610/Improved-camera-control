@@ -200,6 +200,7 @@ class ICCam(object):
             self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
 
     def close(self):
-        self.get_window_position()
+        if self.windowPos['x'] is not None:
+            self.get_window_position()
         self.cam.StopLive()
         
