@@ -1014,11 +1014,19 @@ class CamGUI(object):
                     if self.recalibrate_status:
                         with open(self.rows_fname, 'rb') as f:
                             all_rows = pickle.load(f)
+                        print('Loaded rows from detections.pickle')
                     
                     if self.update_calibration_status:
                         all_rows = copy.deepcopy(self.current_all_rows)
-                     
-                    init_matrix = bool(self.init_matrix_check.get())
+                        print('Loaded rows from current_all_rows')
+                    
+                    if self.calibration_error is None or self.calibration_error > 0.1:
+                        init_matrix = True
+                        print('Force init_matrix to True')
+                    else:
+                        init_matrix = bool(self.init_matrix_check.get())
+                        print(f'init_matrix: {init_matrix}')
+                        
                     # all_rows = [row[-100:] if len(row) >= 100 else row for row in all_rows]
                     self.calibration_error = self.cgroup.calibrate_rows(all_rows, self.board_calibration,
                                                                         init_intrinsics=init_matrix,
@@ -1026,15 +1034,21 @@ class CamGUI(object):
                                                                         max_nfev=200, n_iters=6,
                                                                         n_samp_iter=200, n_samp_full=1000,
                                                                         verbose=True)
-
+                    
                     # self.calibration_error_stats['text'] = f'Current error: {self.calibration_error}'
                     self.cgroup.metadata['adjusted'] = False
                     if self.calibration_error is not None:
                         self.cgroup.metadata['error'] = float(self.calibration_error)
                         self.calibration_error_value.set(f'{self.calibration_error:.5f}')
                         self.error_list.append(self.calibration_error)
+                        print(f'Calibration error: {self.calibration_error}')
+                    else:
+                        print('Failed to calibrate')
                         
+                    print('Calibration completed')
                     self.cgroup.dump(self.calibration_out)
+                    print('Calibration result dumped')
+                    
                     self.rows_fname_available = False
                     self.calibration_toggle_status = False
 
