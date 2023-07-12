@@ -869,6 +869,7 @@ class CamGUI(object):
         while True:
             if self.pause_thread.is_set():
                 print('Recording calibration paused')
+                self.pause_thread.wait()
                 
             try:
                 capture_start_time = time.perf_counter()
