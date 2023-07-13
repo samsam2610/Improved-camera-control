@@ -1306,6 +1306,8 @@ class CamGUI(object):
                                                 board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
                 if drawn_frame is not None:
                     cv2.imshow(window_name, drawn_frame)
+                else:
+                    cv2.imshow(window_name, frame_current)
     
     @staticmethod
     def draw_axis(frame, camera_matrix, dist_coeff, board, aruco_dict, params, verbose=True):
