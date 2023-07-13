@@ -1241,7 +1241,7 @@ class CamGUI(object):
             frame_current = self.cam[num].get_image()
             if frame_current is not None:
                 drawn_frame = self.draw_axis(frame_current, camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
-                                                dist_coeff=self.cgroup_test.cameras[num].get_distortion(),
+                                                dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
                                                 board=self.board_calibration, aruco_dict=aruco_dict, params=params)
                 cv2.imshow(window_name, drawn_frame)
     
