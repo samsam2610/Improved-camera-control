@@ -908,7 +908,7 @@ class CamGUI(object):
                 barrier.wait()
                 print("Calibration capture duration exceeded or toggle status is True. Terminating thread.")
                 self.calibration_capture_toggle_status = False
-                self.toggle_calibration_capture(termination=True)
+                # self.toggle_calibration_capture(termination=True)
                 
         except Exception as e:
             print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
