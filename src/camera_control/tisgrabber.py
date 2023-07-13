@@ -17,6 +17,7 @@ import os
 import sys
 import numpy as np
 import time
+from typing import Callable
 
 
 class SinkFormats(Enum):
@@ -461,12 +462,13 @@ class TIS_CAM(object):
             return strin
         return strin.encode("utf-8")
     
-    def GetCallbackFunc(self):
+    def GetCallbackFunc(self, FrameCallBack: Callable=None):
         handle_ptr = self._handle
         
-        def FrameCallBack(handle_ptr, pBuffer, frame_num, pData):
-            self._frame['ready'] = True
-            self._frame['num'] = frame_num
+        if FrameCallBack is None:
+            def FrameCallBack(handle_ptr, pBuffer, frame_num, pData):
+                self._frame['ready'] = True
+                self._frame['num'] = frame_num
         
         return TIS_GrabberDLL.FRAMEREADYCALLBACK(FrameCallBack)
     

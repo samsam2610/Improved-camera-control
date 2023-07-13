@@ -9,6 +9,7 @@ camera class for imaging source cameras - helps load correct settings
 """
 
 import src.camera_control.tisgrabber as ic
+import ctypes
 import numpy as np
 from pathlib import Path
 import os
@@ -22,7 +23,7 @@ dets_file = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_deta
 cam_details = json.load(open(dets_file, 'r'))
 
 
-class ICCam(object):
+class ICCam(ctypes.Structure):
 
     def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats='Y800 (1024x768)'):
         '''
@@ -166,7 +167,11 @@ class ICCam(object):
         polarity = [0]
         self.cam.GetPropertySwitch("Trigger", "Polarity", Value=polarity)
         return polarity[0]
-   
+
+    def set_up_video_trigger(self, video_file, fps, dim):
+        self.vid_out = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
+        return self.vid_out
+    
     def get_window_position(self):
         err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'] = self.cam.GetWindowPosition()
         if err != 1:
