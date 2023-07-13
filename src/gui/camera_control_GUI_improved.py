@@ -1491,6 +1491,7 @@ class CamGUI(object):
         numberOfScreenUnits = 100
         self.camera = []
         self.camera_entry = []
+        self.camera_init_button = []
         self.current_exposure = []
         self.exposure = []
         self.exposure_entry = []
@@ -1559,8 +1560,8 @@ class CamGUI(object):
             self.camera_entry[i].grid(row=0, column=1, padx=5, pady=3)
 
             # initialize camera button
-            Button(init_camera_frame, text=f"Initialize Camera {i+1}", command=lambda index_cam=i: self.init_cam(index_cam), width=14).\
-                grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+            self.camera_init_button.append(Button(init_camera_frame, text=f"Initialize Camera {i+1}", command=lambda index_cam=i: self.init_cam(index_cam), width=14))
+            self.camera_init_button[i].grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
 
             # format
             Label(init_camera_frame, text="Format: ", width=10, justify="left", anchor="w").\
@@ -2014,6 +2015,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--debug", action="store_true", dest='debug_mode', help="Enable debug mode")
     parser.add_argument("-ni", "--no-init-cam", action="store_false", dest="init_cam_bool",
                         help="Disable camera initialization")
+    parser.add_argument("-t", "--test", action="store_true", dest="test_mode", help="Enable test mode")
 
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -2025,7 +2027,13 @@ if __name__ == "__main__":
         print("Error creating CamGUI instance: %s" % str(e))
         exit(1)
     try:
-        cam_gui.runGUI()
+        if args.test_mode:
+            gui_thread = threading.Thread(target=cam_gui.runGUI)
+            gui_thread.start()
+            from testscript_GUI import auto_initialize
+            auto_initialize(cam_gui)
+        else:
+            cam_gui.runGUI()
     except Exception as e:
         print("Error running CamGUI: %s" % str(e))
         exit(1)
