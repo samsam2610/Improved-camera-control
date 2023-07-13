@@ -17,7 +17,7 @@ class CamGUI_Tests(CamGUI):
         print("Initialize camera in test mode")
         
         self.window.after(2000, self.init_cams)
-        self.window.after(2000, self.show_calibration_live)
+        self.window.after(4000, self.show_calibration_live)
         self.window.mainloop()
  
 
