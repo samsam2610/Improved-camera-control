@@ -12,7 +12,7 @@ class CamGUI_Tests(CamGUI):
     def auto_init_cam(self):
         print("Initialize camera in test mode")
         
-        self.window.after(1000, self.init_cams)
+        self.window.after(5000, self.init_cams)
         self.window.mainloop()
  
 
