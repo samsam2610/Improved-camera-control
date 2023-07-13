@@ -666,10 +666,10 @@ class CamGUI(object):
         Return Type:
         - None
         """
-        self.calibration_process_stats['text'] = 'Initializing calibration process...'
+        self.calibration_process_stats.set('Initializing calibration process...')
         from src.gui.utils import load_config, get_calibration_board
         if self.running_config['debug_mode']:
-            self.calibration_process_stats['text'] = 'Looking for config.toml directory ...'
+            self.calibration_process_stats.set('Looking for config.toml directory ...')
             path = Path(os.path.realpath(__file__))
             # Navigate to the outer parent directory and join the filename
             config_toml_path = os.path.normpath(str(path.parents[2] / 'config-files' / 'config.toml'))
@@ -678,15 +678,15 @@ class CamGUI(object):
                 'text'] = 'Successfully found and loaded config. Determining calibration board ...'
             self.board_calibration = get_calibration_board(config=config_anipose)
 
-            self.calibration_process_stats['text'] = 'Loaded calibration board. ' \
-                                                     'Initializing camera calibration objects ...'
+            self.calibration_process_stats.set('Loaded calibration board. '
+                                               'Initializing camera calibration objects ...')
             from src.aniposelib.cameras import CameraGroup
             self.cgroup = CameraGroup.from_names(self.cam_names)
-            self.calibration_process_stats['text'] = 'Initialized camera object.'
+            self.calibration_process_stats.set('Initialized camera object.')
             self.frame_count = []
             self.all_rows = []
 
-            self.calibration_process_stats['text'] = 'Cameras found. Recording the frame sizes'
+            self.calibration_process_stats.set('Cameras found. Recording the frame sizes')
             self.set_calibration_buttons_group(state='normal')
             
             self.calibration_capture_toggle_status = False
@@ -742,9 +742,9 @@ class CamGUI(object):
             self.create_video_files(overwrite=True)
             self.create_output_files(subject_name='Sam')
 
-            self.calibration_process_stats['text'] = 'Setting the frame sizes...'
+            self.calibration_process_stats.set('Setting the frame sizes...')
             self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
-            self.calibration_process_stats['text'] = 'Prepping done. Starting calibration...'
+            self.calibration_process_stats.set('Prepping done. Starting calibration...')
             self.vid_start_time = time.perf_counter()
            
             self.recording_threads = []
@@ -878,7 +878,6 @@ class CamGUI(object):
         start_time = time.perf_counter()
         next_frame = start_time
         try:
-            capture_start_time = time.perf_counter()
             while self.calibration_capture_toggle_status and (time.perf_counter()-start_time < self.calibration_duration):
                 if time.perf_counter() >= next_frame:
                     barrier.wait()
@@ -900,6 +899,8 @@ class CamGUI(object):
                         self.all_rows[num].extend(row)
                         self.current_all_rows[num].extend(row)
                         self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
+                        if num == 0:
+                            self.calibration_current_duration_value.set(f'{time.perf_counter()-start_time:.2f}')
                     
                     # putting frame into the frame queue along with following information
                     self.frame_queue.put((frame_current,  # the frame itself
@@ -909,7 +910,7 @@ class CamGUI(object):
 
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
             
-            if time.perf_counter() - capture_start_time > self.calibration_duration or self.calibration_capture_toggle_status:
+            if (time.perf_counter() - start_time) > self.calibration_duration or self.calibration_capture_toggle_status:
                 barrier.wait()
                 print(f"Calibration capture on cam {num}: duration exceeded or toggle status is True. Terminating thread.")
                 self.recording_threads_status[num] = False
@@ -1068,7 +1069,7 @@ class CamGUI(object):
         try:
             if self.calibration_toggle_status:
                 
-                self.calibration_process_stats['text'] = 'Calibrating...'
+                self.calibration_process_stats.set('Calibrating...')
                 print(f'Current error: {self.calibration_error}')
                 if self.recalibrate_status:
                     with open(self.rows_fname, 'rb') as f:
@@ -1858,13 +1859,13 @@ class CamGUI(object):
         
         self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled")
         self.update_calibration_button.\
-            grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
         
-        self.recalibrate_button = Button(calibration_frame, text="Recalibrate", command=self.recalibrate, state="disabled")
+        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="disabled")
         self.recalibrate_button.\
-            grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
-        Hovertip(self.recalibrate_button, "Press this button to recalibrate using all the frames. ")
+            grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
+        Hovertip(self.recalibrate_button, "Press this button to calibrate using all the frames. ")
         
         self.init_matrix_check = IntVar(value=0)
         self.init_matrix_checkbutton = Checkbutton(calibration_frame, text="Re-Init Matrix", variable=self.init_matrix_check,
@@ -1892,15 +1893,30 @@ class CamGUI(object):
         calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
         
         # calibration result
-        calibration_result_label = Label(self.window, text="Calibration Result: ", font=("Arial", 12, "bold"))
+        calibration_result_label = Label(self.window, text="Calibration Stats: ", font=("Arial", 12, "bold"))
         calibration_result_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
         
         calibration_result_frame = Frame(self.window)
+        
+        # label for calibration process status text
+        Label(calibration_result_frame, text="Calibration status: ")\
+            .grid(sticky="wn", row=0, column=0, columnspan=1, padx=0, pady=0)
+        self.calibration_process_stats = StringVar()
+        self.calibration_process_label = Label(calibration_result_frame, textvariable=self.calibration_process_stats)
+        self.calibration_process_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
+
         Label(calibration_result_frame, text="Calibration Error: ").\
-            grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
+            grid(sticky="wn", row=1, column=0, columnspan=1, padx=0, pady=0)
         self.calibration_error_value = StringVar()
         self.calibration_error_label = Label(calibration_result_frame, textvariable=self.calibration_error_value)
-        self.calibration_error_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
+        self.calibration_error_label.grid(sticky="nsew", row=1, column=1, columnspan=1, padx=0, pady=0)
+        
+        Label(calibration_result_frame, text="Current Duration (s): ").\
+            grid(sticky="wn", row=2, column=0, columnspan=1, padx=0, pady=0)
+        self.calibration_current_duration_value = StringVar()
+        self.calibration_current_duration_label = Label(calibration_result_frame, textvariable=self.calibration_current_duration_value)
+        self.calibration_current_duration_label.grid(sticky="nsew", row=2, column=1, columnspan=1, padx=0, pady=0)
+        
         calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         cur_row += 1
 
@@ -1916,10 +1932,7 @@ class CamGUI(object):
         self.received_pulse_label.grid(row=cur_row, column=1, sticky="w")
         cur_row += 1
 
-        # label for calibration process status text
-        Label(self.window, text="Calibration status: ").grid(row=cur_row, column=0, sticky="w")
-        self.calibration_process_stats = Label(self.window, text='')
-        self.calibration_process_stats.grid(row=cur_row, column=1, columnspan=4, sticky="w")
+
         cur_row += 1
 
         # label for calibration process status text
