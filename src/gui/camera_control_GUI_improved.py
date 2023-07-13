@@ -2023,7 +2023,7 @@ if __name__ == "__main__":
         if args.test_mode:
             from testscript_GUI import CamGUI_Tests
             cam_gui_auto = CamGUI_Tests(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
-            cam_gui_auto.runGUI()
+            # cam_gui_auto.runGUI()
             cam_gui_auto.auto_init_cam()
             
         else:
