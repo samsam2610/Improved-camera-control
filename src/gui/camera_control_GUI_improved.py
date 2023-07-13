@@ -905,6 +905,8 @@ class CamGUI(object):
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
             
             if time.perf_counter() - capture_start_time > self.calibration_duration or self.calibration_capture_toggle_status:
+                barrier.wait()
+                self.calibration_capture_toggle_status = False
                 self.toggle_calibration_capture(termination=True)
                 
         except Exception as e:
@@ -959,6 +961,27 @@ class CamGUI(object):
                     # Clear the processed frames from the group
                     frame_groups = {}
                     frame_count = {}
+            
+            # Process the remaining frames in the queue
+            while not self.frame_queue.empty():
+                frame, thread_id, frame_count, capture_time = self.frame_queue.get()
+                if thread_id not in frame_groups:
+                    frame_groups[thread_id] = []
+                    frame_counts[thread_id] = 0
+                frame_groups[thread_id].append((frame, frame_count, capture_time))
+                frame_counts[thread_id] += 1
+                self.frame_acquired_count_label[thread_id]['text'] = f'{frame_count}'
+                self.vid_out[thread_id].write(frame)
+                
+                if all(count >= self.frame_process_threshold for count in frame_counts.values()):
+                    with open(self.rows_fname, 'wb') as file:
+                        pickle.dump(self.all_rows, file)
+                    self.rows_fname_available = True
+                    print('Dumped rows into detections.pickle')
+                    
+                    frame_groups = {}
+                    frame_count = {}
+                    
 
         except Exception as e:
             print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id,
