@@ -893,7 +893,11 @@ class CamGUI(object):
         try:
             while self.calibration_capture_toggle_status and (time.perf_counter()-start_time < self.calibration_duration):
                 if time.perf_counter() >= next_frame:
-                    barrier.wait()
+                    try:
+                        barrier.wait(timeout=1)
+                    except threading.BrokenBarrierError:
+                        print(f'Barrier broken for cam {num}. Proceeding...')
+                        
                     self.frame_times[num].append(time.perf_counter())
                     self.frame_count[num] += 1
                     frame_current = self.cam[num].get_image()
