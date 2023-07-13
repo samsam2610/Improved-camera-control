@@ -1196,7 +1196,7 @@ class CamGUI(object):
         cv2.resizeWindow(window_name, 640, 480)
         from utils import aruco_dict
         from cv2 import aruco
-        params = aruco.DetectorParameters_create()
+        params = aruco.DetectorParameters()
         params.cornerRefinementMethod = aruco.CORNER_REFINE_CONTOUR
         params.adaptiveThreshWinSizeMin = 100
         params.adaptiveThreshWinSizeMax = 1000
