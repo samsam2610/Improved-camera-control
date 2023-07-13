@@ -897,6 +897,7 @@ class CamGUI(object):
                         barrier.wait(timeout=1)
                     except threading.BrokenBarrierError:
                         print(f'Barrier broken for cam {num}. Proceeding...')
+                        break
                         
                     self.frame_times[num].append(time.perf_counter())
                     self.frame_count[num] += 1
