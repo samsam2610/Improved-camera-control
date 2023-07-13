@@ -737,7 +737,7 @@ class CamGUI(object):
         self.calibration_process_stats.set('Initializing calibration process...')
         from src.gui.utils import load_config, get_calibration_board
         if self.running_config['debug_mode']:
-            self.get_calibration_settings()
+            self.load_calibration_settings()
             
             self.calibration_process_stats.set('Initializing camera calibration objects ...')
             from src.aniposelib.cameras import CameraGroup
