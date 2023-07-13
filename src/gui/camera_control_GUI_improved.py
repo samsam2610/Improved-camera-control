@@ -922,8 +922,8 @@ class CamGUI(object):
                                           self.frame_times[num][-1]))  # captured time
 
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
+                    barrier.wait()
             
-            barrier.wait()
             if (time.perf_counter() - start_time) > self.calibration_duration or self.calibration_capture_toggle_status:
                 print(f"Calibration capture on cam {num}: duration exceeded or toggle status is True")
                 self.recording_threads_status[num] = False
