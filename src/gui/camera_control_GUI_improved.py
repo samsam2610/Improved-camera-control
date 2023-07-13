@@ -1303,8 +1303,8 @@ class CamGUI(object):
             #     print('Rotation is not usable')
             #     return None
 
-            cv2.drawFrameAxes(image=frame, cameraMatrix=camera_matrix, distCoeffs=dist_coeff,
-                               rvec=p_rvec, tvec=p_tvec, length=20)
+            # cv2.aruco.drawAxis(image=frame, cameraMatrix=camera_matrix, distCoeffs=dist_coeff,
+            #                    rvec=p_rvec, tvec=p_tvec, length=20)
 
             cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, c_ids)
             cv2.aruco.drawDetectedMarkers(frame, corners, ids)
