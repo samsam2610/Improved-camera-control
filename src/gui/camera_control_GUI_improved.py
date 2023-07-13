@@ -1288,7 +1288,6 @@ class CamGUI(object):
 
             n_corners = c_corners.size // 2
             reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
-            print('')
 
             #
             # ret, p_rvec, p_tvec = cv2.aruco.estimatePoseCharucoBoard(reshape_corners,
