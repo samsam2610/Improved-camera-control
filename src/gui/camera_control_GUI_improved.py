@@ -911,7 +911,7 @@ class CamGUI(object):
             
             if time.perf_counter() - capture_start_time > self.calibration_duration or self.calibration_capture_toggle_status:
                 barrier.wait()
-                print("Calibration capture duration exceeded or toggle status is True. Terminating thread.")
+                print(f"Calibration capture on cam {num}: duration exceeded or toggle status is True. Terminating thread.")
                 self.recording_threads_status[num] = False
                 # self.toggle_calibration_capture(termination=True)
                 
@@ -943,7 +943,7 @@ class CamGUI(object):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         try:
-            while all(thread is True for thread in self.recording_threads_status):
+            while any(thread is True for thread in self.recording_threads_status):
                 print("frame queue size:", self.frame_queue.qsize())
                 # Retrieve frame information from the queue
                 frame, thread_id, frame_count, capture_time = self.frame_queue.get()
