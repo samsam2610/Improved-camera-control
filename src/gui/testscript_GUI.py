@@ -7,11 +7,11 @@ class CamGUI_Tests(CamGUI):
     def auto_init_cam(self):
         print("Initialize camera in test mode")
         delay = 1000  # Delay between invocations in milliseconds
-        self.window.mainloop()
- 
+       
         time.sleep(2)
         for i, button in enumerate(self.cam_init_button):
             self.window.after(delay * i, button.invoke)
         
-        
+        self.window.mainloop()
+ 
 
