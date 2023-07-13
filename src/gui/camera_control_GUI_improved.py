@@ -743,7 +743,7 @@ class CamGUI(object):
 
             self.calibration_process_stats.set('Setting the frame sizes...')
             self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
-            self.calibration_process_stats.set('Prepping done. Starting calibration...')
+            self.calibration_process_stats.set('Prepping done. Ready to capture calibration frames...')
             self.vid_start_time = time.perf_counter()
            
             self.recording_threads = []
@@ -773,6 +773,7 @@ class CamGUI(object):
             self.calibration_capture_toggle_status = False
             
             print('Waiting for all the frames are done processing...')
+            self.calibration_process_stats.set('Waiting for all the frames are done processing...')
             current_thread = threading.currentThread()
             for t in self.recording_threads:
                 if t is not current_thread and t.is_alive():
@@ -782,6 +783,7 @@ class CamGUI(object):
             print('All frames are done processing.')
             
             self.toggle_calibration_capture_button.config(text="Capture Off", background="red")
+            self.calibration_process_stats.set('Done capturing calibration frames. Ready to be calibrated...')
             self.calibration_duration_entry['state'] = 'normal'
             self.added_board_value.set(f'{len(self.current_all_rows[0])}')
             self.plot_calibration_error_button['state'] = 'normal'
@@ -792,9 +794,20 @@ class CamGUI(object):
                 return
             
             print('Starting threads to record calibration frames...')
+            # cleaning up previous threads
+            if not self.recording_threads:
+                print('Clearing up previous threads...')
+                for t in self.recording_threads:
+                    t.join()
+                self.recording_threads = []
+                self.recording_threads_status = []
+                self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
+            else:
+                print('Previous threads already cleared or empty.')
+            
+            # Setting capture toggle status
             self.calibration_capture_toggle_status = True
-            self.recording_threads = []
-            self.recording_threads_status = []
+            
             # Sync camera capture time using threading.Barrier
             barrier = threading.Barrier(len(self.cam))
             
@@ -813,8 +826,9 @@ class CamGUI(object):
             for i in range(len(self.cam)):
                 self.current_all_rows.append([])
             
-            
+            # GUI stuffs
             self.toggle_calibration_capture_button.config(text="Capture On", background="green")
+            self.calibration_process_stats.set('Started capturing calibration frames...')
             self.calibration_duration_entry['state'] = 'disabled'
             self.plot_calibration_error_button['state'] = 'disabled'
             self.test_calibration_live_button['state'] = 'disabled'
@@ -944,7 +958,6 @@ class CamGUI(object):
         frame_counts = {}  # array to store frame counts for each thread_id
         try:
             while any(thread is True for thread in self.recording_threads_status):
-                print("frame queue size:", self.frame_queue.qsize())
                 # Retrieve frame information from the queue
                 frame, thread_id, frame_count, capture_time = self.frame_queue.get()
                 if thread_id not in frame_groups:
@@ -963,7 +976,6 @@ class CamGUI(object):
                     with open(self.rows_fname, 'wb') as file:
                         pickle.dump(self.all_rows, file)
                     self.rows_fname_available = True
-                    print('Dumped rows into detections.pickle')
                     
                     # Clear the processed frames from the group
                     frame_groups = {}
@@ -1908,13 +1920,13 @@ class CamGUI(object):
             grid(sticky="wn", row=1, column=0, columnspan=1, padx=0, pady=0)
         self.calibration_error_value = StringVar()
         self.calibration_error_label = Label(calibration_result_frame, textvariable=self.calibration_error_value)
-        self.calibration_error_label.grid(sticky="nsew", row=1, column=1, columnspan=1, padx=0, pady=0)
+        self.calibration_error_label.grid(sticky="wn", row=1, column=1, columnspan=1, padx=0, pady=0)
         
         Label(calibration_result_frame, text="Current Duration (s): ").\
             grid(sticky="wn", row=2, column=0, columnspan=1, padx=0, pady=0)
         self.calibration_current_duration_value = StringVar()
         self.calibration_current_duration_label = Label(calibration_result_frame, textvariable=self.calibration_current_duration_value)
-        self.calibration_current_duration_label.grid(sticky="nsew", row=2, column=1, columnspan=1, padx=0, pady=0)
+        self.calibration_current_duration_label.grid(sticky="wn", row=2, column=1, columnspan=1, padx=0, pady=0)
         
         calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         cur_row += 1
