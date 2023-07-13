@@ -744,6 +744,8 @@ class CamGUI(object):
             self.calibration_process_stats.set('Setting the frame sizes...')
             self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
             self.calibration_process_stats.set('Prepping done. Ready to capture calibration frames...')
+            self.calibration_status_label['bg'] = 'yellow'
+
             self.vid_start_time = time.perf_counter()
            
             self.recording_threads = []
@@ -783,11 +785,13 @@ class CamGUI(object):
             print('All frames are done processing.')
             
             self.toggle_calibration_capture_button.config(text="Capture Off", background="red")
+            self.calibration_status_label['bg'] = 'green'
             self.calibration_process_stats.set('Done capturing calibration frames. Ready to be calibrated...')
             self.calibration_duration_entry['state'] = 'normal'
             self.added_board_value.set(f'{len(self.current_all_rows[0])}')
             self.plot_calibration_error_button['state'] = 'normal'
             self.test_calibration_live_button['state'] = 'normal'
+            self.setup_calibration_button['state'] = 'normal'
         else:
             result = self.set_calibration_duration()
             if result == 0:
@@ -828,10 +832,12 @@ class CamGUI(object):
             
             # GUI stuffs
             self.toggle_calibration_capture_button.config(text="Capture On", background="green")
+            self.calibration_status_label['bg'] = 'red'
             self.calibration_process_stats.set('Started capturing calibration frames...')
             self.calibration_duration_entry['state'] = 'disabled'
             self.plot_calibration_error_button['state'] = 'disabled'
             self.test_calibration_live_button['state'] = 'disabled'
+            self.setup_calibration_button['state'] = 'disabled'
             
     def snap_calibration_frame(self):
         """
@@ -876,6 +882,8 @@ class CamGUI(object):
                 self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
                 self.frame_acquired_count_label[num]['text'] = f'{self.frame_count[num]}'
                 self.vid_out[num].write(frame_current)
+        
+        self.added_board_value.set(f'{len(self.current_all_rows[0])}')
     
     def record_calibrate_on_thread(self, num, barrier):
         """
@@ -1915,8 +1923,9 @@ class CamGUI(object):
         calibration_result_frame = Frame(self.window)
         
         # label for calibration process status text
-        Label(calibration_result_frame, text="Calibration status: ")\
-            .grid(sticky="wn", row=0, column=0, columnspan=1, padx=0, pady=0)
+        self.calibration_status_label = Label(calibration_result_frame, text="Calibration status: ", bg="gray")
+        self.calibration_status_label.grid(sticky="wn", row=0, column=0, columnspan=1, padx=0, pady=0)
+        
         self.calibration_process_stats = StringVar()
         self.calibration_process_label = Label(calibration_result_frame, textvariable=self.calibration_process_stats)
         self.calibration_process_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
