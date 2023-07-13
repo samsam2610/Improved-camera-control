@@ -2014,7 +2014,7 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--debug", action="store_true", dest='debug_mode', help="Enable debug mode")
     parser.add_argument("-ni", "--no-init-cam", action="store_false", dest="init_cam_bool",
                         help="Disable camera initialization")
-    parser.add_argument("-t", "--test", action="store_true", dest="test_mode", help="Enable test mode")
+    parser.add_argument("-t", "--test", action="store_false", dest="test_mode", help="Enable test mode")
 
     # Parse the command-line arguments
     args = parser.parse_args()
