@@ -1796,7 +1796,7 @@ class CamGUI(object):
         Hovertip(self.toggle_video_recording_button, "Start/Stop recording video")
         
         # set recording properties
-        self.force_frame_sync = IntVar(value=0)
+        self.force_frame_sync = IntVar(value=1)
         self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_frame_sync,
                                                    onvalue=1, offvalue=0, width=13)
         self.force_frame_sync_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
