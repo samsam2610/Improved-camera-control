@@ -799,10 +799,12 @@ class CamGUI(object):
             barrier = threading.Barrier(len(self.cam))
             
             for i in range(len(self.cam)):
-                self.recording_threads.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i, barrier)))
+                thread_name = f"Cam {i + 1} thread"
+                self.recording_threads.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i, barrier), name=thread_name))
                 self.recording_threads[-1].daemon = True
                 self.recording_threads[-1].start()
-            self.recording_threads.append(threading.Thread(target=self.process_marker_on_thread))
+            thread_name = f"Marker processing thread"
+            self.recording_threads.append(threading.Thread(target=self.process_marker_on_thread, name=thread_name))
             self.recording_threads[-1].daemon = True
             self.recording_threads[-1].start()
 
