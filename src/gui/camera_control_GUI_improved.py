@@ -638,7 +638,25 @@ class CamGUI(object):
                 return 0
         
         return 1
- 
+
+    def load_calibration_settings(self):
+        from src.gui.utils import load_config, get_calibration_board
+        from pathlib import Path
+        
+        self.calibration_process_stats.set('Looking for config.toml directory ...')
+        path = Path(os.path.realpath(__file__))
+        # Navigate to the outer parent directory and join the filename
+        config_toml_path = os.path.normpath(str(path.parents[2] / 'config-files' / 'config.toml'))
+        config_anipose = load_config(config_toml_path)
+        self.calibration_process_stats.set('Successfully found and loaded config. Determining calibration board ...')
+        self.board_calibration = get_calibration_board(config=config_anipose)
+
+        self.calibration_process_stats.set('Loaded calibration board.')
+
+        # Check available detection file, if file available will delete it (for now)
+        self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
+        self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml')
+        
     def setup_calibration(self):
         """
         Method: setup_calibration
@@ -669,16 +687,9 @@ class CamGUI(object):
         self.calibration_process_stats.set('Initializing calibration process...')
         from src.gui.utils import load_config, get_calibration_board
         if self.running_config['debug_mode']:
-            self.calibration_process_stats.set('Looking for config.toml directory ...')
-            path = Path(os.path.realpath(__file__))
-            # Navigate to the outer parent directory and join the filename
-            config_toml_path = os.path.normpath(str(path.parents[2] / 'config-files' / 'config.toml'))
-            config_anipose = load_config(config_toml_path)
-            self.calibration_process_stats.set('Successfully found and loaded config. Determining calibration board ...')
-            self.board_calibration = get_calibration_board(config=config_anipose)
-
-            self.calibration_process_stats.set('Loaded calibration board. '
-                                               'Initializing camera calibration objects ...')
+            self.get_calibration_settings()
+            
+            self.calibration_process_stats.set('Initializing camera calibration objects ...')
             from src.aniposelib.cameras import CameraGroup
             self.cgroup = CameraGroup.from_names(self.cam_names)
             self.calibration_process_stats.set('Initialized camera object.')
@@ -697,9 +708,8 @@ class CamGUI(object):
             self.current_frame_count = []
             self.frame_process_threshold = 2
             self.queue_frame_threshold = 1000
+            
             # Check available detection file, if file available will delete it (for now)
-            self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
-            self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml')
             self.clear_calibration_file(self.rows_fname)
             self.clear_calibration_file(self.calibration_out)
             self.rows_fname_available = False
@@ -1188,6 +1198,7 @@ class CamGUI(object):
     def test_calibration_live(self):
         print('')
         try:
+            self.load_calibration_settings()
             calibration_file = self.calibration_out
         except:
             print('Calibration is not setup. Will attempt to load calibration file.')
