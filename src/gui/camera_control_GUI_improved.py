@@ -795,7 +795,7 @@ class CamGUI(object):
             
             print('Starting threads to record calibration frames...')
             # cleaning up previous threads
-            if not self.recording_threads:
+            if not self.recording_threads == []:
                 print('Clearing up previous threads...')
                 for t in self.recording_threads:
                     t.join()
