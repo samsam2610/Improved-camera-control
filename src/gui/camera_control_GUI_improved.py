@@ -800,12 +800,12 @@ class CamGUI(object):
                 for t in self.recording_threads:
                     t.join()
                 self.recording_threads = []
-                self.recording_threads_status = []
                 self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
             else:
                 print('Previous threads already cleared or empty.')
             
             # Setting capture toggle status
+            self.recording_threads_status = []
             self.calibration_capture_toggle_status = True
             
             # Sync camera capture time using threading.Barrier
