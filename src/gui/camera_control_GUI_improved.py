@@ -1305,8 +1305,11 @@ class CamGUI(object):
                 break
             frame_current = self.cam[num].get_image()
             if frame_current is not None:
-                drawn_frame = self.draw_axis(frame_current, camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
+                drawn_frame = self.draw_axis(frame_current,
+                                                camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
                                                 dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
+                                                rotation=self.cgroup_test.cameras[num].get_rotation(),
+                                                translation=self.cgroup_test.cameras[num].get_translation(),
                                                 board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
                 if drawn_frame is not None:
                     cv2.imshow(window_name, drawn_frame)
@@ -1318,7 +1321,7 @@ class CamGUI(object):
         barrier.abort()
     
     @staticmethod
-    def draw_axis(frame, camera_matrix, dist_coeff, board, aruco_dict, params, verbose=True):
+    def draw_axis(frame, camera_matrix, dist_coeff, rotation, translation, board, aruco_dict, params, verbose=True):
         """
         """
         try:
@@ -1355,7 +1358,9 @@ class CamGUI(object):
                                                                         c_ids,
                                                                         board,
                                                                         camera_matrix,
-                                                                        dist_coeff)
+                                                                        dist_coeff,
+                                                                        rotation,
+                                                                        translation)
 
             if p_rvec is None or p_tvec is None:
                 print('Cant detect rotation!')
