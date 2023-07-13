@@ -1289,18 +1289,19 @@ class CamGUI(object):
             n_corners = c_corners.size // 2
             reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
 
-            ret, p_rvec, p_tvec = cv2.aruco.estimatePoseCharucoBoard(reshape_corners,
-                                                                        c_ids,
-                                                                        board,
-                                                                        camera_matrix,
-                                                                        dist_coeff)
-
-            if p_rvec is None or p_tvec is None:
-                print('Cant detect rotation!')
-                return None
-            if np.isnan(p_rvec).any() or np.isnan(p_tvec).any():
-                print('Rotation is not usable')
-                return None
+            #
+            # ret, p_rvec, p_tvec = cv2.aruco.estimatePoseCharucoBoard(reshape_corners,
+            #                                                             c_ids,
+            #                                                             board,
+            #                                                             camera_matrix,
+            #                                                             dist_coeff, )
+            #
+            # if p_rvec is None or p_tvec is None:
+            #     print('Cant detect rotation!')
+            #     return None
+            # if np.isnan(p_rvec).any() or np.isnan(p_tvec).any():
+            #     print('Rotation is not usable')
+            #     return None
 
             cv2.aruco.drawAxis(image=frame, cameraMatrix=camera_matrix, distCoeffs=dist_coeff,
                                rvec=p_rvec, tvec=p_tvec, length=20)
