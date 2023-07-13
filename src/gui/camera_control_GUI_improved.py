@@ -2027,8 +2027,7 @@ if __name__ == "__main__":
         exit(1)
     try:
         if args.test_mode:
-            gui_thread = threading.Thread(target=cam_gui.runGUI)
-            gui_thread.start()
+            cam_gui.runGUI()
             
             time.sleep(5)
             from testscript_GUI import CamGUI_auto
