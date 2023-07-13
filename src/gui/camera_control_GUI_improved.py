@@ -1187,7 +1187,12 @@ class CamGUI(object):
         
     def test_calibration_live(self):
         print('')
-        calibration_file = self.calibration_out
+        try:
+            calibration_file = self.calibration_out
+        except:
+            print('Calibration is not setup. Will attempt to load calibration file.')
+            calibration_file = os.path.join(self.dir_output.get(), 'calibration.toml')
+            
         if not os.path.exists(calibration_file):
             messagebox.showerror('Error', 'Calibration file not found!')
             return
