@@ -77,9 +77,7 @@ class CamGUI(object):
         setup_window = Tk()
         Label(setup_window, text="Setting up camera, please wait...").pack()
         setup_window.update()
-        if not self.running_config['init_cam_bool']:
-            from src.camera_control.ic_camera import ICCam
-            print('Forced import camera library')
+        from src.camera_control.ic_camera import ICCam
 
         if bool(self.toggle_video_recording_status.get()):
             setup_window.destroy()
