@@ -1,11 +1,12 @@
 from camera_control_GUI_improved import CamGUI
 
-
-def auto_initialize(gui_object: CamGUI):
-    try:
-        gui_object.camera_init_button[0].invoke()
-        gui_object.camera_init_button[1].invoke()
+class CamGUI_auto(object):
+    def __init__(self, CamGUI_instance: CamGUI):
+        self.CamGUI = CamGUI_instance
         
-        return 0
-    except:
-        return 1
+    def auto_init_cam(self):
+        delay = 1000  # Delay between invocations in milliseconds
+
+        for i, button in enumerate(self.CamGUI.cam_init_button):
+            self.CamGUI.window.after(delay * i, button.invoke)
+    

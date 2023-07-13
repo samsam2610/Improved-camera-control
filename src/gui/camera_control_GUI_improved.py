@@ -2002,7 +2002,6 @@ class CamGUI(object):
         self.close_button = Button(self.window, text="Close", command=self.close_window).grid(sticky="nsew",
                                                                                               row=cur_row + 2, column=0,
                                                                                               columnspan=2)
-
     def runGUI(self):
         self.window.mainloop()
 
@@ -2030,8 +2029,10 @@ if __name__ == "__main__":
         if args.test_mode:
             gui_thread = threading.Thread(target=cam_gui.runGUI)
             gui_thread.start()
-            from testscript_GUI import auto_initialize
-            auto_initialize(cam_gui)
+            from testscript_GUI import CamGUI_auto
+            cam_gui_auto = CamGUI_auto(cam_gui)
+            cam_gui_auto.auto_init_cam()
+            
         else:
             cam_gui.runGUI()
     except Exception as e:
