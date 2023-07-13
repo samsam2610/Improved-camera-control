@@ -1318,10 +1318,10 @@ class CamGUI(object):
             traceback.print_exc()
             return None
 
-        if verbose:
-            print('Translation : {0}'.format(p_tvec))
-            print('Rotation    : {0}'.format(p_rvec))
-            print('Distance from camera: {0} m'.format(np.linalg.norm(p_tvec)))
+        # if verbose:
+        #     print('Translation : {0}'.format(p_tvec))
+        #     print('Rotation    : {0}'.format(p_rvec))
+        #     print('Distance from camera: {0} m'.format(np.linalg.norm(p_tvec)))
 
         return frame
     
