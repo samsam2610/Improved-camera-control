@@ -904,7 +904,7 @@ class CamGUI(object):
 
                     next_frame = max(next_frame + 1.0/fps, self.frame_times[num][-1] + 0.5/fps)
             
-            if time.perf_counter() - capture_start_time > self.calibration_duration and self.calibration_capture_toggle_status:
+            if time.perf_counter() - capture_start_time > self.calibration_duration or self.calibration_capture_toggle_status:
                 self.toggle_calibration_capture(termination=True)
                 
         except Exception as e:
