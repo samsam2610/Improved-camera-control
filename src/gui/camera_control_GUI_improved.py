@@ -795,6 +795,7 @@ class CamGUI(object):
             print('Starting threads to record calibration frames...')
             self.calibration_capture_toggle_status = True
             self.recording_threads = []
+            self.recording_threads_status = []
             # Sync camera capture time using threading.Barrier
             barrier = threading.Barrier(len(self.cam))
             
@@ -803,8 +804,9 @@ class CamGUI(object):
                 self.recording_threads.append(threading.Thread(target=self.record_calibrate_on_thread, args=(i, barrier), name=thread_name))
                 self.recording_threads[-1].daemon = True
                 self.recording_threads[-1].start()
+                self.recording_threads_status.append(True)
             thread_name = f"Marker processing thread"
-            self.recording_threads.append(threading.Thread(target=self.process_marker_on_thread, args=(i+1, barrier), name=thread_name))
+            self.recording_threads.append(threading.Thread(target=self.process_marker_on_thread, name=thread_name))
             self.recording_threads[-1].daemon = True
             self.recording_threads[-1].start()
 
@@ -910,7 +912,7 @@ class CamGUI(object):
             if time.perf_counter() - capture_start_time > self.calibration_duration or self.calibration_capture_toggle_status:
                 barrier.wait()
                 print("Calibration capture duration exceeded or toggle status is True. Terminating thread.")
-                self.calibration_capture_toggle_status = False
+                self.recording_threads_status[num] = False
                 # self.toggle_calibration_capture(termination=True)
                 
         except Exception as e:
@@ -918,7 +920,7 @@ class CamGUI(object):
                   "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1],
                   "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
 
-    def process_marker_on_thread(self, num, barrier):
+    def process_marker_on_thread(self):
         """
         Process marker on a separate thread.
 
@@ -992,8 +994,7 @@ class CamGUI(object):
             self.frame_queue.queue.clear()
             print('Cleared frame queue')
             
-            if self.calibration_capture_toggle_status is False:
-                barrier.wait()
+            if all(thread is False for thread in self.recording_threads_status):
                 print('Terminating thread')
                 self.toggle_calibration_capture(termination=True)
                 
