@@ -1305,8 +1305,10 @@ class CamGUI(object):
                                                 dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
                                                 board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
                 if drawn_frame is not None:
+                    print('Corner detected')
                     cv2.imshow(window_name, drawn_frame)
                 else:
+                    print('No corner detected')
                     cv2.imshow(window_name, frame_current)
     
     @staticmethod
