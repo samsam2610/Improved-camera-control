@@ -5,6 +5,7 @@ class CamGUI_Tests(CamGUI):
         super().__init__(debug_mode, init_cam_bool)
         
     def auto_init_cam(self):
+        print("Initialize camera in test mode")
         delay = 1000  # Delay between invocations in milliseconds
         
         time.sleep(2)
