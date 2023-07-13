@@ -40,30 +40,6 @@ import numpy as np
 class CamGUI(object):
 
     def __init__(self, debug_mode=False, init_cam_bool=True):
-        self.running_config = {'debug_mode': debug_mode, 'init_cam_bool': init_cam_bool}
-        if self.running_config['init_cam_bool']:
-            from src.camera_control.ic_camera import ICCam
-            print('Importing camera library')
-        else:
-            print('Camera library is not import. It will be imported when you initialize the camera')
-
-        path = Path(os.path.realpath(__file__))
-        # Navigate to the outer parent directory and join the filename
-        dets_file = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.json'))
-
-        with open(dets_file) as f:
-            self.cam_details = json.load(f)
-        self.mouse_list = self.cam_details['subjects'] if 'subjects' in self.cam_details else []
-        self.cam_names = ()
-        self.output_dir = ()
-        for i in range(self.cam_details['cams']):
-            self.cam_names = self.cam_names + (self.cam_details[str(i)]['name'],)
-            self.output_dir = self.output_dir + (self.cam_details[str(i)]['output_dir'],)
-
-        self.window = None
-        self.calibration_capture_toggle_status = False
-        self.selectCams()
-        
         # GUI placeholders
         self.format_list = ['Y16 (256x4)', 'Y16 (320x240)', 'Y16 (320x480)', 'Y16 (352x240)', 'Y16 (352x288)',
                             'Y16 (384x288)', 'Y16 (640x240)', 'Y16 (640x288)', 'Y16 (640x480)', 'Y16 (704x576)',
@@ -116,6 +92,30 @@ class CamGUI(object):
         self.fov_dict = []
         self.fov_labels = ['top', 'left', 'height', 'width']
 
+        # Initialize GUI
+        self.running_config = {'debug_mode': debug_mode, 'init_cam_bool': init_cam_bool}
+        if self.running_config['init_cam_bool']:
+            from src.camera_control.ic_camera import ICCam
+            print('Importing camera library')
+        else:
+            print('Camera library is not import. It will be imported when you initialize the camera')
+
+        path = Path(os.path.realpath(__file__))
+        # Navigate to the outer parent directory and join the filename
+        dets_file = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.json'))
+
+        with open(dets_file) as f:
+            self.cam_details = json.load(f)
+        self.mouse_list = self.cam_details['subjects'] if 'subjects' in self.cam_details else []
+        self.cam_names = ()
+        self.output_dir = ()
+        for i in range(self.cam_details['cams']):
+            self.cam_names = self.cam_names + (self.cam_details[str(i)]['name'],)
+            self.output_dir = self.output_dir + (self.cam_details[str(i)]['output_dir'],)
+
+        self.window = None
+        self.calibration_capture_toggle_status = False
+        self.selectCams()
     def browse_output(self):
         filepath = filedialog.askdirectory(initialdir='/')
         self.dir_output.set(filepath)
