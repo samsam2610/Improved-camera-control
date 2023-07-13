@@ -1264,7 +1264,7 @@ class CamGUI(object):
         self.cgroup_test = CameraGroup.load(calibration_file)# cgroup_test is loaded with the calibration file
         print('Calibration file loaded')
         
-        barrier = threading.Barrier(len(self.cam))
+        barrier = threading.Barrier()
         t = []
         for i in range(len(self.cam)):
             t.append(threading.Thread(target=self.draw_calibration_on_thread, args=(i, barrier)))
@@ -1299,7 +1299,7 @@ class CamGUI(object):
         
         while cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0:
             try:
-                barrier.wait(timeout=1)
+                barrier.wait(timeout=10)
             except threading.BrokenBarrierError:
                 print(f'Barrier broken for cam {num}. Proceeding...')
                 break
