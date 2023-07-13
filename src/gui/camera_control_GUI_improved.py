@@ -1307,9 +1307,11 @@ class CamGUI(object):
                 if drawn_frame is not None:
                     print('Corner detected')
                     cv2.imshow(window_name, drawn_frame)
+                    cv2.waitKey(1)
                 else:
                     print('No corner detected')
                     cv2.imshow(window_name, frame_current)
+                    cv2.waitKey(1)
     
     @staticmethod
     def draw_axis(frame, camera_matrix, dist_coeff, board, aruco_dict, params, verbose=True):
