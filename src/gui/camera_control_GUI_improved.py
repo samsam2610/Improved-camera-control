@@ -1326,6 +1326,7 @@ class CamGUI(object):
                                                                                            dist_coeff, parameters=params)
 
             if len(corners) == 0:
+                print('No corner detected after refinement!')
                 return None
 
             ret, c_corners, c_ids = cv2.aruco.interpolateCornersCharuco(corners, ids,
