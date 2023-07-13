@@ -804,7 +804,7 @@ class CamGUI(object):
                 self.recording_threads[-1].daemon = True
                 self.recording_threads[-1].start()
             thread_name = f"Marker processing thread"
-            self.recording_threads.append(threading.Thread(target=self.process_marker_on_thread, args=barrier, name=thread_name))
+            self.recording_threads.append(threading.Thread(target=self.process_marker_on_thread, args=(i+1, barrier), name=thread_name))
             self.recording_threads[-1].daemon = True
             self.recording_threads[-1].start()
 
@@ -918,7 +918,7 @@ class CamGUI(object):
                   "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1],
                   "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
 
-    def process_marker_on_thread(self, barrier):
+    def process_marker_on_thread(self, num, barrier):
         """
         Process marker on a separate thread.
 
