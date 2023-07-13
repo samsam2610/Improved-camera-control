@@ -5,7 +5,7 @@ class CamGUI_Tests(CamGUI):
         super().__init__(debug_mode, init_cam_bool)
         
     def init_cams(self):
-        for i, button in enumerate(self.cam_init_button):
+        for i, button in enumerate(self.camera_init_button):
             time.sleep(1)
             button.invoke()
 
