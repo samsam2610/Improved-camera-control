@@ -2,7 +2,7 @@ from camera_control_GUI_improved import CamGUI
 import time
 class CamGUI_Tests(CamGUI):
     def __init__(self, debug_mode=False, init_cam_bool=True):
-        super().__init__(debug_mode, init_cam_bool)
+        super(CamGUI, self).__init__(debug_mode, init_cam_bool)
         
     def init_cams(self):
         for i, button in enumerate(self.cam_init_button):
