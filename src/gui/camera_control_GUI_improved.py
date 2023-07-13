@@ -1186,16 +1186,19 @@ class CamGUI(object):
         root.mainloop()
         
     def test_calibration_live(self):
-        
+        print('')
         calibration_file = self.calibration_out
         if not os.path.exists(calibration_file):
             messagebox.showerror('Error', 'Calibration file not found!')
             return
         
         from src.aniposelib.cameras import CameraGroup
-        self.cgroup_test = CameraGroup.load(calibration_file)# cgroup_test is loaded with the calibration file
-        barrier = threading.Barrier(len(self.cam))
         
+        # Load the calibration file
+        self.cgroup_test = CameraGroup.load(calibration_file)# cgroup_test is loaded with the calibration file
+        print('Calibration file loaded')
+        
+        barrier = threading.Barrier(len(self.cam))
         t = []
         for i in range(len(self.cam)):
             t.append(threading.Thread(target=self.draw_calibration_on_thread, args=(i, barrier)))
@@ -1910,7 +1913,7 @@ class CamGUI(object):
             grid(sticky="nsew", row=0, column=4, columnspan=1, padx=5, pady=3)
         Hovertip(self.plot_calibration_error_button, "Press this button to plot the calibration error. ")
         
-        self.test_calibration_live_button = Button(calibration_frame, text="Test Calibration Live", command=self.test_calibration_live, state="disabled")
+        self.test_calibration_live_button = Button(calibration_frame, text="Test Calibration Live", command=self.test_calibration_live, state="normal")
         self.test_calibration_live_button.\
             grid(sticky="nsew", row=1, column=4, columnspan=1, padx=5, pady=3)
         
