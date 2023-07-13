@@ -389,14 +389,14 @@ class CamGUI(object):
         for num in range(len(self.cam)):
             self.cam[num].get_image()
 
-    def create_video_files(self):
+    def create_video_files(self, overwrite=False):
         if not os.path.isdir(os.path.normpath(self.dir_output.get())):
             os.makedirs(os.path.normpath(self.dir_output.get()))
 
         # check if file exists, ask to overwrite or change attempt number if it does
         for i in range(len(self.cam)):
             if i == 0:
-                self.overwrite = False
+                self.overwrite = overwrite
                 if os.path.isfile(self.vid_file[i]):
                     self.ask_overwrite = Tk()
 
@@ -739,7 +739,7 @@ class CamGUI(object):
                 self.current_frame_count.append(0)
 
             # check if file exists, ask to overwrite or change attempt number if it does
-            self.create_video_files()
+            self.create_video_files(overwrite=True)
             self.create_output_files(subject_name='Sam')
 
             self.calibration_process_stats['text'] = 'Setting the frame sizes...'
@@ -777,6 +777,7 @@ class CamGUI(object):
             current_thread = threading.currentThread()
             for t in self.recording_threads:
                 if t is not current_thread and t.is_alive():
+                    print('Waiting for thread {} to finish...'.format(t.name))
                     t.join()
                 
             print('All frames are done processing.')
