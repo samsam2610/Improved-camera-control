@@ -674,8 +674,7 @@ class CamGUI(object):
             # Navigate to the outer parent directory and join the filename
             config_toml_path = os.path.normpath(str(path.parents[2] / 'config-files' / 'config.toml'))
             config_anipose = load_config(config_toml_path)
-            self.calibration_process_stats[
-                'text'] = 'Successfully found and loaded config. Determining calibration board ...'
+            self.calibration_process_stats.set('Successfully found and loaded config. Determining calibration board ...')
             self.board_calibration = get_calibration_board(config=config_anipose)
 
             self.calibration_process_stats.set('Loaded calibration board. '
