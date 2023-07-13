@@ -1239,7 +1239,7 @@ class CamGUI(object):
         while cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0:
             barrier.wait()
             frame_current = self.cam[num].get_image()
-            if frame_current is None:
+            if frame_current is not None:
                 drawn_frame = self.draw_axis(frame_current, camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
                                                 dist_coeff=self.cgroup_test.cameras[num].get_distortion(),
                                                 board=self.board_calibration, aruco_dict=aruco_dict, params=params)
