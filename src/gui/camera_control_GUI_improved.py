@@ -906,6 +906,7 @@ class CamGUI(object):
             
             if time.perf_counter() - capture_start_time > self.calibration_duration or self.calibration_capture_toggle_status:
                 barrier.wait()
+                print("Calibration capture duration exceeded or toggle status is True. Terminating thread.")
                 self.calibration_capture_toggle_status = False
                 self.toggle_calibration_capture(termination=True)
                 
@@ -983,6 +984,14 @@ class CamGUI(object):
                     
                     frame_groups = {}
                     frame_count = {}
+            
+            # Clear the frame queue
+            self.frame_queue.queue.clear()
+            print('Cleared frame queue')
+            
+            if self.calibration_capture_toggle_status is False:
+                print('Terminating thread')
+                self.toggle_calibration_capture(termination=True)
                     
 
         except Exception as e:
