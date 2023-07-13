@@ -1298,20 +1298,24 @@ class CamGUI(object):
         params.adaptiveThreshConstant = 0
         
         while cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0:
-            barrier.wait()
+            try:
+                barrier.wait(timeout=1)
+            except threading.BrokenBarrierError:
+                print(f'Barrier broken for cam {num}. Proceeding...')
+                break
             frame_current = self.cam[num].get_image()
             if frame_current is not None:
                 drawn_frame = self.draw_axis(frame_current, camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
                                                 dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
                                                 board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
                 if drawn_frame is not None:
-                    print('Corner detected')
                     cv2.imshow(window_name, drawn_frame)
                     cv2.waitKey(1)
                 else:
-                    print('No corner detected')
                     cv2.imshow(window_name, frame_current)
                     cv2.waitKey(1)
+        
+        barrier.abort()
     
     @staticmethod
     def draw_axis(frame, camera_matrix, dist_coeff, board, aruco_dict, params, verbose=True):
