@@ -938,6 +938,7 @@ class CamGUI(object):
         frame_counts = {}  # array to store frame counts for each thread_id
         try:
             while self.calibration_capture_toggle_status:
+                print("frame queue size:", self.frame_queue.qsize())
                 # Retrieve frame information from the queue
                 frame, thread_id, frame_count, capture_time = self.frame_queue.get()
                 if thread_id not in frame_groups:
@@ -964,6 +965,7 @@ class CamGUI(object):
             
             # Process the remaining frames in the queue
             while not self.frame_queue.empty():
+                print('Processing remaining frames in the queue')
                 frame, thread_id, frame_count, capture_time = self.frame_queue.get()
                 if thread_id not in frame_groups:
                     frame_groups[thread_id] = []
