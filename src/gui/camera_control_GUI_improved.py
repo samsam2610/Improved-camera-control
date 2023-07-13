@@ -943,7 +943,7 @@ class CamGUI(object):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         try:
-            while self.calibration_capture_toggle_status:
+            while all(thread is True for thread in self.recording_threads_status):
                 print("frame queue size:", self.frame_queue.qsize())
                 # Retrieve frame information from the queue
                 frame, thread_id, frame_count, capture_time = self.frame_queue.get()
