@@ -63,6 +63,58 @@ class CamGUI(object):
         self.window = None
         self.calibration_capture_toggle_status = False
         self.selectCams()
+        
+        # GUI placeholders
+        self.format_list = ['Y16 (256x4)', 'Y16 (320x240)', 'Y16 (320x480)', 'Y16 (352x240)', 'Y16 (352x288)',
+                            'Y16 (384x288)', 'Y16 (640x240)', 'Y16 (640x288)', 'Y16 (640x480)', 'Y16 (704x576)',
+                            'Y16 (720x240)', 'Y16 (720x288)', 'Y16 (720x480)', 'Y16 (720x540)', 'Y16 (720x576)',
+                            'Y16 (768x576)', 'Y16 (1024x768)', 'Y16 (1280x960)', 'Y16 (1280x1024)', 'Y16 (1440x1080)',
+                            'Y800 (256x4)', 'Y800 (320x240)', 'Y800 (320x480)', 'Y800 (352x240)', 'Y800 (352x288)',
+                            'Y800 (384x288)', 'Y800 (640x240)', 'Y800 (640x288)', 'Y800 (640x480)', 'Y800 (704x576)',
+                            'Y800 (720x240)', 'Y800 (720x288)', 'Y800 (720x480)', 'Y800 (720x540)', 'Y800 (720x576)',
+                            'Y800 (768x576)', 'Y800 (1024x768)', 'Y800 (1280x960)', 'Y800 (1280x1024)',
+                            'Y800 (1440x1080)', 'RGB24 (256x4)', 'RGB24 (320x240)', 'RGB24 (320x480)',
+                            'RGB24 (352x240)', 'RGB24 (352x288)', 'RGB24 (384x288)', 'RGB24 (640x240)',
+                            'RGB24 (640x288)', 'RGB24 (640x480)', 'RGB24 (704x576)', 'RGB24 (720x240)',
+                            'RGB24 (720x288)', 'RGB24 (720x480)', 'RGB24 (720x540)', 'RGB24 (720x576)',
+                            'RGB24 (768x576)', 'RGB24 (1024x768)', 'RGB24 (1280x960)', 'RGB24 (1280x1024)',
+                            'RGB24 (1440x1080)']
+        self.fourcc_codes = ["DIVX", "XVID", "Y800"]
+        self.camera = []
+        self.camera_entry = []
+        self.camera_init_button = []
+        self.current_exposure = []
+        self.exposure = []
+        self.exposure_entry = []
+        self.gain = []
+        self.gain_entry = []
+
+        self.formats = []
+        self.format_entry = []
+
+        self.framerate = []
+        self.framerate_list = []
+        self.current_framerate = []
+
+        self.x_offset_value = []
+        self.x_offset_scale = []
+        self.x_offset_spinbox = []
+
+        self.y_offset_value = []
+        self.y_offset_scale = []
+        self.y_offset_spinbox = []
+
+        self.auto_center = []
+        self.frame_acquired_count_label = []
+        self.board_detected_count_label = []
+
+        self.polarity = []
+
+        self.trigger_status_indicator = []
+        self.trigger_status_label = []
+
+        self.fov_dict = []
+        self.fov_labels = ['top', 'left', 'height', 'width']
 
     def browse_output(self):
         filepath = filedialog.askdirectory(initialdir='/')
@@ -1489,55 +1541,8 @@ class CamGUI(object):
 
         cur_row = 0
         numberOfScreenUnits = 100
-        self.camera = []
-        self.camera_entry = []
-        self.camera_init_button = []
-        self.current_exposure = []
-        self.exposure = []
-        self.exposure_entry = []
-        self.gain = []
-        self.gain_entry = []
-        self.format_list = ['Y16 (256x4)', 'Y16 (320x240)', 'Y16 (320x480)', 'Y16 (352x240)', 'Y16 (352x288)',
-                            'Y16 (384x288)', 'Y16 (640x240)', 'Y16 (640x288)', 'Y16 (640x480)', 'Y16 (704x576)',
-                            'Y16 (720x240)', 'Y16 (720x288)', 'Y16 (720x480)', 'Y16 (720x540)', 'Y16 (720x576)',
-                            'Y16 (768x576)', 'Y16 (1024x768)', 'Y16 (1280x960)', 'Y16 (1280x1024)', 'Y16 (1440x1080)',
-                            'Y800 (256x4)', 'Y800 (320x240)', 'Y800 (320x480)', 'Y800 (352x240)', 'Y800 (352x288)',
-                            'Y800 (384x288)', 'Y800 (640x240)', 'Y800 (640x288)', 'Y800 (640x480)', 'Y800 (704x576)',
-                            'Y800 (720x240)', 'Y800 (720x288)', 'Y800 (720x480)', 'Y800 (720x540)', 'Y800 (720x576)',
-                            'Y800 (768x576)', 'Y800 (1024x768)', 'Y800 (1280x960)', 'Y800 (1280x1024)',
-                            'Y800 (1440x1080)', 'RGB24 (256x4)', 'RGB24 (320x240)', 'RGB24 (320x480)',
-                            'RGB24 (352x240)', 'RGB24 (352x288)', 'RGB24 (384x288)', 'RGB24 (640x240)',
-                            'RGB24 (640x288)', 'RGB24 (640x480)', 'RGB24 (704x576)', 'RGB24 (720x240)',
-                            'RGB24 (720x288)', 'RGB24 (720x480)', 'RGB24 (720x540)', 'RGB24 (720x576)',
-                            'RGB24 (768x576)', 'RGB24 (1024x768)', 'RGB24 (1280x960)', 'RGB24 (1280x1024)',
-                            'RGB24 (1440x1080)']
-        self.fourcc_codes = ["DIVX", "XVID", "Y800"]
-        self.formats = []
-        self.format_entry = []
+
         
-        self.framerate = []
-        self.framerate_list = []
-        self.current_framerate = []
-        
-        self.x_offset_value = []
-        self.x_offset_scale = []
-        self.x_offset_spinbox = []
-        
-        self.y_offset_value = []
-        self.y_offset_scale = []
-        self.y_offset_spinbox = []
-        
-        self.auto_center = []
-        self.frame_acquired_count_label = []
-        self.board_detected_count_label = []
-        
-        self.polarity = []
-        
-        self.trigger_status_indicator = []
-        self.trigger_status_label = []
-        
-        self.fov_dict = []
-        self.fov_labels = ['top', 'left', 'height', 'width']
 
         if not isinstance(self.number_of_cams, int):
             self.number_of_cams = int(self.number_of_cams.get())
