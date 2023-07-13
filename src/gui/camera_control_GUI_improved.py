@@ -2019,22 +2019,21 @@ if __name__ == "__main__":
     # Parse the command-line arguments
     args = parser.parse_args()
 
-    # Create an instance of the CamGUI class with the parsed arguments
-    try:
-        cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
-    except Exception as e:
-        print("Error creating CamGUI instance: %s" % str(e))
-        exit(1)
     try:
         if args.test_mode:
-            cam_gui.runGUI()
-            
-            from testscript_GUI import CamGUI_auto
-            cam_gui_auto = CamGUI_auto(cam_gui)
+            from testscript_GUI import CamGUI_Tests
+            cam_gui_auto = CamGUI_Tests(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
+            cam_gui_auto.runGUI()
             cam_gui_auto.auto_init_cam()
             
         else:
-            cam_gui.runGUI()
+            # Create an instance of the CamGUI class with the parsed arguments
+            try:
+                cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
+            except Exception as e:
+                print("Error creating CamGUI instance: %s" % str(e))
+                exit(1)
+
     except Exception as e:
         print("Error running CamGUI: %s" % str(e))
         exit(1)
