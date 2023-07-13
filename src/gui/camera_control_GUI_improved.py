@@ -397,7 +397,7 @@ class CamGUI(object):
         for i in range(len(self.cam)):
             if i == 0:
                 self.overwrite = overwrite
-                if os.path.isfile(self.vid_file[i]):
+                if os.path.isfile(self.vid_file[i]) and not self.overwrite:
                     self.ask_overwrite = Tk()
 
                     def quit_overwrite(ow):
@@ -804,7 +804,7 @@ class CamGUI(object):
                 self.recording_threads[-1].daemon = True
                 self.recording_threads[-1].start()
             thread_name = f"Marker processing thread"
-            self.recording_threads.append(threading.Thread(target=self.process_marker_on_thread, name=thread_name))
+            self.recording_threads.append(threading.Thread(target=self.process_marker_on_thread, args=barrier, name=thread_name))
             self.recording_threads[-1].daemon = True
             self.recording_threads[-1].start()
 
@@ -918,7 +918,7 @@ class CamGUI(object):
                   "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1],
                   "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
 
-    def process_marker_on_thread(self):
+    def process_marker_on_thread(self, barrier):
         """
         Process marker on a separate thread.
 
@@ -993,10 +993,10 @@ class CamGUI(object):
             print('Cleared frame queue')
             
             if self.calibration_capture_toggle_status is False:
+                barrier.wait()
                 print('Terminating thread')
                 self.toggle_calibration_capture(termination=True)
-                    
-
+                
         except Exception as e:
             print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id,
                   "| Frame count:", frame_count, "| Capture time:", capture_time, "| Traceback:",
