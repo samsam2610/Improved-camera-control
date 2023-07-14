@@ -1452,10 +1452,11 @@ class CamGUI(object):
         from src.aniposelib.boards import merge_rows, extract_points
         from utils import aruco_dict
         from cv2 import aruco
+        import copy
 
         window_name = f'Reprojection'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(window_name, 1100, 900)
+        cv2.resizeWindow(window_name, 1800, 1100)
         
         self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
         try:
@@ -1508,8 +1509,13 @@ class CamGUI(object):
                         
                         n_corners = c_corners.size // 2
                         reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
-                        frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids))
-                    
+                        cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids)
+                   
+                        p_corners = p2ds[num]
+                        n_corners = p_corners.size // 2
+                        reshape_corners = np.reshape(p_corners, (n_corners, 1, 2))
+                        frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids, line_color=(0, 0, 255)))
+                        
                     out = cv2.hconcat(frames)
                     cv2.imshow(window_name, out)
                     cv2.waitKey(1)
