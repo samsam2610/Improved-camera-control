@@ -1060,8 +1060,10 @@ class CamGUI(object):
                     reverse_imgp = reverse_extract_points(imgp, extras)
                     reverse_merged_rows = reverse_merge_rows(reverse_imgp)
                     
+                    print('Printing rows')
                     print(self.all_rows)
-                    print('')
+                    print('###################################')
+                    print('Reverse merged rows')
                     print(reverse_merged_rows)
                     # Clear the processed frames from the group
                     frame_groups = {}
