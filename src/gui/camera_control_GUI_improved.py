@@ -1526,7 +1526,7 @@ class CamGUI(object):
                         # Define the font settings
                         font = cv2.FONT_HERSHEY_SIMPLEX
                         font_scale = 1.5
-                        thickness = 1.5
+                        thickness = 1
 
                         # Add the text to the frame
                         cv2.putText(frame, 'Detection', (30, 50), font, font_scale, (0, 255, 0), thickness)
