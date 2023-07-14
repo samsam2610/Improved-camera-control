@@ -1454,7 +1454,11 @@ class CamGUI(object):
                     p3ds = self.cgroup_test.triangulate(imgp, undistort=False)
                     if len(p3ds.shape) == 1:
                         p3ds = p3ds.reshape(1, 3)
-                    p2ds = self.cgroup_test.project(p3ds)
+                    try:
+                        p2ds = self.cgroup_test.project(p3ds)
+                    except Exception as e:
+                        print(e)
+                        print(p3ds)
                     
                     print('#########')
                     print('p3ds', p3ds)
