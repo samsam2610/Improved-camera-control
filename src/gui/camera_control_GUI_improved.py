@@ -1456,7 +1456,7 @@ class CamGUI(object):
 
         window_name = f'Reprojection'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(window_name, 1300, 812)
+        cv2.resizeWindow(window_name, 2160, 660)
         
         self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
         try:
