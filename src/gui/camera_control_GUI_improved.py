@@ -1500,7 +1500,7 @@ class CamGUI(object):
                     
                     frames = []
                     for index, (frame, frame_count) in enumerate(frame_groups[thread_id]):
-                        c_corners = all_rows[0][index]['corners']
+                        c_corners = all_rows[index][0]['corners']
                         n_corners = c_corners.size // 2
                         reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
                         
