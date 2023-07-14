@@ -1276,15 +1276,22 @@ class CamGUI(object):
         self.all_rows_test = [[] for _ in range(len(self.cam))]
         self.frame_count_test = [0] * len(self.cam)
         
-        for i in range(len(self.cam)):
-            t.append(threading.Thread(target=self.draw_calibration_on_thread, args=(i, barrier)))
-            t[-1].daemon = True
-            t[-1].start()
         if self.reprojection_check.get():
+            self.reproject_window_status = True
+            for i in range(len(self.cam)):
+                t.append(threading.Thread(target=self.detect_markers_on_thread, args=(i, barrier)))
+                t[-1].daemon = True
+                t[-1].start()
+
             t.append(threading.Thread(target=self.draw_reprojection_on_thread))
             t[-1].daemon = True
             t[-1].start()
-            
+        else:
+            for i in range(len(self.cam)):
+                t.append(threading.Thread(target=self.draw_calibration_on_thread, args=(i, barrier)))
+                t[-1].daemon = True
+                t[-1].start()
+                
     def draw_calibration_on_thread(self, num, barrier):
         """
         Draws calibration on a separate thread for a given camera.
@@ -1319,38 +1326,19 @@ class CamGUI(object):
                 break
             frame_current = self.cam[num].get_image()
             if frame_current is not None:
-                if not self.reprojection_check.get():
-                    drawn_frame = self.draw_axis(frame_current,
-                                                    camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
-                                                    dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
-                                                    rotation=self.cgroup_test.cameras[num].get_rotation(),
-                                                    translation=self.cgroup_test.cameras[num].get_translation(),
-                                                    board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
-                    if drawn_frame is not None:
-                        cv2.imshow(window_name, drawn_frame)
-                        cv2.waitKey(1)
-                    else:
-                        cv2.imshow(window_name, frame_current)
-                        cv2.waitKey(1)
+                drawn_frame = self.draw_axis(frame_current,
+                                                camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
+                                                dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
+                                                rotation=self.cgroup_test.cameras[num].get_rotation(),
+                                                translation=self.cgroup_test.cameras[num].get_translation(),
+                                                board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
+                if drawn_frame is not None:
+                    cv2.imshow(window_name, drawn_frame)
+                    cv2.waitKey(1)
                 else:
-                    self.frame_count_test[num] += 1
-                    frame_current = self.cam[num].get_image()
-                    
-                    # detect the marker as the frame is acquired
-                    corners, ids = self.board_calibration.detect_image(frame_current)
-                    if corners is not None:
-                        key = self.frame_count_test[num]
-                        row = {
-                            'framenum': key,
-                            'corners': corners,
-                            'ids': ids
-                        }
-
-                        row = self.board_calibration.fill_points_rows([row])
-                        self.all_rows_test[num].extend(row)
-                    
-                    # putting frame into the frame queue along with following information
-                    self.frame_queue.put((frame_current, num, self.frame_count_test[num]))  # the id of the capturing camera
+                    cv2.imshow(window_name, frame_current)
+                    cv2.waitKey(1)
+            
         barrier.abort()
         self.recording_threads_status[num] = False
     
@@ -1429,13 +1417,49 @@ class CamGUI(object):
 
         return frame
         
+    def detect_markers_on_thread(self, num, barrier):
+        while self.reproject_window_status:
+            try:
+                barrier.wait(timeout=15)
+            except threading.BrokenBarrierError:
+                print(f'Barrier broken for cam {num}. Proceeding...')
+                break
+            
+            self.frame_count_test[num] += 1
+            frame_current = self.cam[num].get_image()
+
+            # detect the marker as the frame is acquired
+            corners, ids = self.board_calibration.detect_image(frame_current)
+            if corners is not None:
+                key = self.frame_count_test[num]
+                row = {
+                    'framenum': key,
+                    'corners': corners,
+                    'ids': ids
+                }
+
+                row = self.board_calibration.fill_points_rows([row])
+                self.all_rows_test[num].extend(row)
+
+            # putting frame into the frame queue along with following information
+            self.frame_queue.put((frame_current, num, self.frame_count_test[num]))  # the id of the capturing camera
+
+            frame_current = self.cam[num].get_image()
+            
     def draw_reprojection_on_thread(self):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         from src.aniposelib.boards import merge_rows, extract_points
+        from utils import aruco_dict
+        from cv2 import aruco
+
+        window_name = f'Reprojection'
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(window_name, 640, 480)
         
+        self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
         try:
-            while any(thread is True for thread in self.recording_threads_status):
+            while self.reproject_window_status:
                 # Retrieve frame information from the queue
                 frame, thread_id, frame_count,  = self.frame_queue.get()
                 if thread_id not in frame_groups:
