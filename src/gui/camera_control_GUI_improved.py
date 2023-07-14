@@ -1222,7 +1222,7 @@ class CamGUI(object):
                 t[-1].daemon = True
                 t[-1].start()
 
-            t.append(threading.Thread(target=draw_reprojection_on_thread, args=self))
+            t.append(threading.Thread(target=draw_reprojection_on_thread, args=(self, i)))
             t[-1].daemon = True
             t[-1].start()
         else:

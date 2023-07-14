@@ -161,7 +161,7 @@ def detect_markers_on_thread(self, num, barrier):
         frame_current = self.cam[num].get_image()
         
         
-def draw_reprojection_on_thread(self):
+def draw_reprojection_on_thread(self, num):
     frame_groups = {}  # Dictionary to store frame groups by thread_id
     frame_counts = {}  # array to store frame counts for each thread_id
     from src.aniposelib.boards import merge_rows, extract_points
