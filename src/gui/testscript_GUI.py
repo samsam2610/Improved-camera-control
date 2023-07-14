@@ -12,8 +12,8 @@ class CamGUI_Tests(CamGUI):
     def show_calibration_live(self):
         time.sleep(1)
         self.reprojection_checkbutton.invoke()
-        time.sleep(1)
-        self.test_calibration_live_button.invoke()
+        # time.sleep(1)
+        # self.test_calibration_live_button.invoke()
         
     def auto_init_cam(self):
         print("Initialize camera in test mode")

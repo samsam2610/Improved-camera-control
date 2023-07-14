@@ -1452,6 +1452,8 @@ class CamGUI(object):
                     merged = merge_rows(self.all_rows_test)
                     imgp, extra = extract_points(merged, self.board_calibration, min_cameras=2)
                     p3ds = self.cgroup_test.triangulate(imgp, undistort=False)
+                    if len(p3ds.shape) == 1:
+                        p3ds = p3ds.reshape(1, 3)
                     p2ds = self.cgroup_test.project(p3ds)
                     
                     print('#########')
