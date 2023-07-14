@@ -1506,7 +1506,7 @@ class CamGUI(object):
                         print('c_corners', c_corners)
                         nan_corners = np.isnan(c_corners[:, 0])
                         print('nan_corners', nan_corners)
-                        c_corners = c_corners[~nan_corners, :]
+                        c_corners = c_corners[~nan_corners[:][0], :]
                         ids = all_rows[num][0]['ids']
                         ids = ids[~nan_corners]
                         n_corners = c_corners.size // 2
