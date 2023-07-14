@@ -1499,12 +1499,13 @@ class CamGUI(object):
                             print('#########')
                     
                     frames = []
-                    for index, (frame, frame_count) in enumerate(frame_groups[thread_id]):
-                        c_corners = all_rows[index][0]['corners']
-                        ids = all_rows[index][0]['ids']
-                        n_corners = c_corners.size // 2
-                        reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
-                        frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids))
+                    for thread_id, group in frame_groups.items():
+                        for index, (frame, frame_count) in enumerate(group):
+                            c_corners = all_rows[index][0]['corners']
+                            ids = all_rows[index][0]['ids']
+                            n_corners = c_corners.size // 2
+                            reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
+                            frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids))
                     
                     out = cv2.hconcat(frames)
                     cv2.imshow(window_name, out)
