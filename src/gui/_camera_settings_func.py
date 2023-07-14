@@ -139,13 +139,13 @@ def toggle_polarity(self, num):
     
     
 def set_partial_scan_limit(self, num):
-    frame_dimension = self.get_frame_dimensions(num)
+    frame_dimension = get_frame_dimensions(self, (num))
     self.x_offset_scale[num].config(to=frame_dimension[0])
     self.x_offset_spinbox[num].config(to=frame_dimension[0])
     self.y_offset_scale[num].config(to=frame_dimension[1])
     self.y_offset_spinbox[num].config(to=frame_dimension[1])
     
-    
+
 def get_frame_rate_list(self, num):
     frame_rate_list = self.cam[num].get_frame_rate_list()
     self.framerate_list[num]['values'] = frame_rate_list
