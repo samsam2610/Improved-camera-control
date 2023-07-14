@@ -581,6 +581,8 @@ class CamGUI(object):
                     self.frame_times[num].append(time.perf_counter())
                     self.vid_out[num].write(self.cam[num].get_image())
                     next_frame = max(next_frame + 1.0 / fps, self.frame_times[num][-1] + 0.5 / fps)
+            
+            print(f"Recording stopped for camera {num}")
         except Exception as e:
             print(f"Traceback: \n {traceback.format_exc()}")
 
