@@ -1052,7 +1052,17 @@ class CamGUI(object):
                     with open(self.rows_fname, 'wb') as file:
                         pickle.dump(self.all_rows, file)
                     self.rows_fname_available = True
+                    print('Producing imgp and extras')
+                    merged_rows = merge_rows(self.all_rows)
+                    imgp, extras = extract_points(merged_rows, board=self.board_calibration, min_cameras=2)
                     
+                    print('Reverse extracting points')
+                    reverse_imgp, reverse_extras = reverse_extract_points(imgp, extras)
+                    reverse_merged_rows = reverse_merge_rows(reverse_imgp)
+                    
+                    print(self.all_rows)
+                    print('')
+                    print(reverse_merged_rows)
                     # Clear the processed frames from the group
                     frame_groups = {}
                     frame_count = {}
@@ -1074,17 +1084,6 @@ class CamGUI(object):
                         pickle.dump(self.all_rows, file)
                     self.rows_fname_available = True
                     print('Dumped rows into detections.pickle')
-                    print('Producing imgp and extras')
-                    merged_rows = merge_rows(self.all_rows)
-                    imgp, extras = extract_points(merged_rows, board=self.board_calibration, min_cameras=2)
-                    
-                    print('Reverse extracting points')
-                    reverse_imgp, reverse_extras = reverse_extract_points(imgp, extras)
-                    reverse_merged_rows = reverse_merge_rows(reverse_imgp)
-                    
-                    print(self.all_rows)
-                    print('')
-                    print(reverse_merged_rows)
                     
                     frame_groups = {}
                     frame_count = {}
