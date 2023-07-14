@@ -1481,13 +1481,10 @@ class CamGUI(object):
             print("Exception occurred:", type(e).__name__, "| Exception value:", e,
                   ''.join(traceback.format_tb(e.__traceback__)))
                 
-    def toggle_video_recording(self, set_status=None):
-        if set_status is not None:
-            toggle_status = not set_status
-        else:
-            toggle_status = bool(self.toggle_video_recording_status.get())
+    def toggle_video_recording(self, force_termination=False):
+        toggle_status = bool(self.toggle_video_recording_status.get())
         
-        if toggle_status:
+        if toggle_status or force_termination:
             self.toggle_video_recording_status = IntVar(value=0)
             self.toggle_video_recording_button.config(text="Capture Off", background="red")
             if self.toggle_continuous_mode.get() == 1:

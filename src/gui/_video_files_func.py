@@ -69,7 +69,7 @@ def create_output_files(self, subject_name='Sam'):
 
 
 def save_vid(self, compress=False, delete=False):
-    self.toggle_video_recording(set_status='False')
+    self.toggle_video_recording(force_termination=True)
     self.toggle_video_recording_button['state'] = 'disabled'
     self.toggle_video_recording_button.config(text="Capture Disabled", background="red")
     
