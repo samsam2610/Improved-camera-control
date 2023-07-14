@@ -1514,7 +1514,7 @@ class CamGUI(object):
                         p_corners = p2ds[num]
                         n_corners = p_corners.size // 2
                         reshape_corners = np.reshape(p_corners, (n_corners, 1, 2))
-                        frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids, line_color=(0, 0, 255)))
+                        frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids, cornerColor=(0, 0, 255)))
                         
                     out = cv2.hconcat(frames)
                     cv2.imshow(window_name, out)
