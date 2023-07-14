@@ -1455,7 +1455,7 @@ class CamGUI(object):
 
         window_name = f'Reprojection'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(window_name, 640, 480)
+        cv2.resizeWindow(window_name, 1280, 480)
         
         self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
         try:
@@ -1497,6 +1497,12 @@ class CamGUI(object):
                         except:
                             print('Failed')
                             print('#########')
+                    
+                    frames = []
+                    for index, (frame, frame_count) in enumerate(frame_groups[thread_id]):
+                        c_corners = all_rows[0][index]['corners']
+                        n_corners = c_corners.size // 2
+                        reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
                         
                     # print('#########')
                     # print('p3ds', p3ds)
