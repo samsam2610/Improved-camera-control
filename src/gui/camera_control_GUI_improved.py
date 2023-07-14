@@ -1455,11 +1455,15 @@ class CamGUI(object):
                     if len(p3ds.shape) == 1:
                         p3ds = p3ds.reshape(1, 3)
                     
-                    if p3ds is not []:
-                        p2ds = self.cgroup_test.project(p3ds)
-                    else:
+                    if p3ds == []:
                         print('p3ds is empty')
-                    
+                    else:
+                        print('p3ds', p3ds)
+                        try:
+                            p2ds = self.cgroup_test.project(p3ds)
+                        except:
+                            print('Failed')
+                        
                     print('#########')
                     print('p3ds', p3ds)
                     print('#########')
