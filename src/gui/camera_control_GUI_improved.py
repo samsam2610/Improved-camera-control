@@ -1961,13 +1961,13 @@ class CamGUI(object):
         Hovertip(self.plot_calibration_error_button, "Press this button to plot the calibration error. ")
         
         test_calibration_frame = Frame(calibration_frame)
-        self.test_calibration_live_button = Button(test_calibration_frame, text="Try Calibrate", command=self.test_calibration_live, state="normal", width=8)
+        self.test_calibration_live_button = Button(test_calibration_frame, text="Try Calibrate", command=self.test_calibration_live, state="normal", width=9)
         self.test_calibration_live_button.\
             grid(sticky="nw", row=0, column=0, columnspan=1, padx=0, pady=0)
         
         self.reprojection_check = IntVar(value=0)
-        self.reprojection_checkbutton = Checkbutton(test_calibration_frame, text="Triangulate", variable=self.reprojection_check,
-                                                onvalue=1, offvalue=0, width=9)
+        self.reprojection_checkbutton = Checkbutton(test_calibration_frame, text="Reproject", variable=self.reprojection_check,
+                                                onvalue=1, offvalue=0, width=8)
         self.reprojection_checkbutton.grid(sticky="nw", row=0, column=1, padx=0, pady=0)
         
         test_calibration_frame.grid(row=1, column=4, padx=5, pady=3, sticky="nsew")
