@@ -1360,7 +1360,7 @@ class CamGUI(object):
         """
         try:
             corners, ids, rejected_points = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=params)
-
+            print(f'Corners:', corners)
             if corners is None or ids is None:
                 print('No corner detected')
                 return None
@@ -1449,7 +1449,7 @@ class CamGUI(object):
                 # Process the frame group (frames with the same thread_id)
                 # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
                 if all(count >= 2 for count in frame_counts.values()):
-                    all_rows = [ [row[-1]] for row in self.all_rows_test]
+                    all_rows = [[row[-1]] for row in self.all_rows_test]
                     for i, (row, cam) in enumerate(zip(all_rows, self.cgroup_test.cameras)):
                         all_rows[i] = self.board_calibration.estimate_pose_rows(cam, row)
                         
