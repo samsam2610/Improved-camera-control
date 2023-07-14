@@ -34,7 +34,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import cv2
 import ffmpy
 import numpy as np
-
+from _video_files_func import create_video_files, create_output_files
 
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
 class CamGUI(object):
@@ -439,70 +439,70 @@ class CamGUI(object):
         for num in range(len(self.cam)):
             self.cam[num].get_image()
 
-    def create_video_files(self, overwrite=False):
-        if not os.path.isdir(os.path.normpath(self.dir_output.get())):
-            os.makedirs(os.path.normpath(self.dir_output.get()))
-
-        # check if file exists, ask to overwrite or change attempt number if it does
-        for i in range(len(self.cam)):
-            if i == 0:
-                self.overwrite = overwrite
-                if os.path.isfile(self.vid_file[i]) and not self.overwrite:
-                    self.ask_overwrite = Tk()
-
-                    def quit_overwrite(ow):
-                        self.overwrite = ow
-                        self.ask_overwrite.quit()
-
-                    Label(self.ask_overwrite,
-                          text="File already exists with attempt number = " +
-                               self.attempt.get() +
-                               ".\nWould you like to overwrite the file? ").pack()
-                    Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
-                    Button(self.ask_overwrite, text="Cancel & pick new attempt number",
-                           command=lambda: quit_overwrite(False)).pack()
-                    self.ask_overwrite.mainloop()
-                    self.ask_overwrite.destroy()
-
-                    if self.overwrite:
-                        self.vid_file[i] = os.path.normpath(self.dir_output.get() + '/' +
-                                                            self.base_name[i] +
-                                                            self.attempt.get() +
-                                                            '.avi')
-                    else:
-                        return
-            else:
-                # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
-                print('')
-
-            # create video writer
-            dim = self.cam[i].get_image_dimensions()
-            fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
-            if len(self.vid_out) >= i + 1:
-                self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
-            else:
-                self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
-                
-            self.toggle_video_recording_button['state'] = 'normal'
-            self.toggle_video_recording_button['text'] = 'Click to start recording'
-
-    def create_output_files(self, subject_name='Sam'):
-        # create output file names
-        self.ts_file = []
-        self.ts_file_csv = []
-        self.frame_times = []
-
-        for i in range(len(self.cam)):
-            self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
-            self.ts_file[i] = self.ts_file[i].replace(self.cam_name_no_space[i], 'TIMESTAMPS_' + self.cam_name_no_space[i])
-            self.ts_file_csv.append(self.vid_file[i].replace('.avi', '.csv'))
-            self.ts_file_csv[i] = self.ts_file_csv[i].replace(self.cam_name_no_space[i],
-                                                              'TIMESTAMPS_' + self.cam_name_no_space[i])
-            self.current_file_label['text'] = subject_name
-            self.frame_times.append([])
-        
-        # empty out the video's stat message
-        self.save_msg = ""
+    # def create_video_files(self, overwrite=False):
+    #     if not os.path.isdir(os.path.normpath(self.dir_output.get())):
+    #         os.makedirs(os.path.normpath(self.dir_output.get()))
+    #
+    #     # check if file exists, ask to overwrite or change attempt number if it does
+    #     for i in range(len(self.cam)):
+    #         if i == 0:
+    #             self.overwrite = overwrite
+    #             if os.path.isfile(self.vid_file[i]) and not self.overwrite:
+    #                 self.ask_overwrite = Tk()
+    #
+    #                 def quit_overwrite(ow):
+    #                     self.overwrite = ow
+    #                     self.ask_overwrite.quit()
+    #
+    #                 Label(self.ask_overwrite,
+    #                       text="File already exists with attempt number = " +
+    #                            self.attempt.get() +
+    #                            ".\nWould you like to overwrite the file? ").pack()
+    #                 Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
+    #                 Button(self.ask_overwrite, text="Cancel & pick new attempt number",
+    #                        command=lambda: quit_overwrite(False)).pack()
+    #                 self.ask_overwrite.mainloop()
+    #                 self.ask_overwrite.destroy()
+    #
+    #                 if self.overwrite:
+    #                     self.vid_file[i] = os.path.normpath(self.dir_output.get() + '/' +
+    #                                                         self.base_name[i] +
+    #                                                         self.attempt.get() +
+    #                                                         '.avi')
+    #                 else:
+    #                     return
+    #         else:
+    #             # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
+    #             print('')
+    #
+    #         # create video writer
+    #         dim = self.cam[i].get_image_dimensions()
+    #         fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
+    #         if len(self.vid_out) >= i + 1:
+    #             self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
+    #         else:
+    #             self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
+    #
+    #         self.toggle_video_recording_button['state'] = 'normal'
+    #         self.toggle_video_recording_button['text'] = 'Click to start recording'
+    #
+    # def create_output_files(self, subject_name='Sam'):
+    #     # create output file names
+    #     self.ts_file = []
+    #     self.ts_file_csv = []
+    #     self.frame_times = []
+    #
+    #     for i in range(len(self.cam)):
+    #         self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
+    #         self.ts_file[i] = self.ts_file[i].replace(self.cam_name_no_space[i], 'TIMESTAMPS_' + self.cam_name_no_space[i])
+    #         self.ts_file_csv.append(self.vid_file[i].replace('.avi', '.csv'))
+    #         self.ts_file_csv[i] = self.ts_file_csv[i].replace(self.cam_name_no_space[i],
+    #                                                           'TIMESTAMPS_' + self.cam_name_no_space[i])
+    #         self.current_file_label['text'] = subject_name
+    #         self.frame_times.append([])
+    #
+    #     # empty out the video's stat message
+    #     self.save_msg = ""
      
     def sync_setup(self):
 
@@ -609,9 +609,12 @@ class CamGUI(object):
                                                   self.attempt.get() +
                                                   '.avi'))
 
-        self.create_video_files()
+        
+        # self.create_video_files()
+        create_video_files(self)
         subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
-        self.create_output_files(subject_name=subject_name)
+        # self.create_output_files(subject_name=subject_name)
+        create_output_files(self, subject_name=subject_name)
         self.setup = True
 
     def record_on_thread(self, num, barrier=None):
@@ -1616,7 +1619,7 @@ class CamGUI(object):
         for i in range(len(self.vid_out)):
             self.vid_out[i].release()
             self.vid_out[i] = None
-            if (delete) or (not frames_taken):
+            if delete or (not frames_taken):
                 os.remove(self.vid_file[i])
             else:
                 np.save(str(self.ts_file[i]), np.array(self.frame_times[i]))
