@@ -1478,7 +1478,7 @@ class CamGUI(object):
                     for i, (row, cam) in enumerate(zip(all_rows, self.cgroup_test.cameras)):
                         all_rows[i] = self.board_calibration.estimate_pose_rows(cam, row)
                         
-                    merged = merge_rows(self.all_rows_test)
+                    merged = merge_rows(all_rows)
                     imgp, extra = extract_points(merged, self.board_calibration, min_cameras=2)
                     p3ds = self.cgroup_test.triangulate(imgp)
                     
