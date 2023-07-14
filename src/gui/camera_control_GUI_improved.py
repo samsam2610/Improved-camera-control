@@ -1523,16 +1523,14 @@ class CamGUI(object):
                         frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_np_corners, p_ids, cornerColor=(0, 0, 255)))
                         # Define the text content and its position
                         
-                        position = (50, 50)  # (x, y) coordinates of the top-left corner
-
                         # Define the font settings
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        font_scale = 2.0
+                        font_scale = 0.5
                         thickness = 2
 
                         # Add the text to the frame
-                        cv2.putText(frame, 'Detection', (50, 50), font, font_scale, (0, 255, 0), thickness)
-                        cv2.putText(frame, 'Reprojection', (50, 60), font, font_scale, (0, 0, 255), thickness)
+                        cv2.putText(frame, 'Detection', (30, 50), font, font_scale, (0, 255, 0), thickness)
+                        cv2.putText(frame, 'Reprojection', (30, 100), font, font_scale, (0, 0, 255), thickness)
 
                     out = cv2.hconcat(frames)
                     cv2.imshow(window_name, out)
