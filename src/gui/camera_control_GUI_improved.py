@@ -1502,7 +1502,7 @@ class CamGUI(object):
                     for num in range(self.cgroup_test.num_cameras):
                         frame_group = frame_groups[num]
                         frame = frame_group[-1][0]
-                        c_corners = all_rows[index][0]['corners']
+                        c_corners = all_rows[num][0]['corners']
                         ids = all_rows[num][0]['ids']
                         n_corners = c_corners.size // 2
                         reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
