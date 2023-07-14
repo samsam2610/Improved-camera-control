@@ -1490,9 +1490,9 @@ class CamGUI(object):
                         try:
                             p2ds = self.cgroup_test.project(p3ds)
                             print('#'*10)
-                            print('p2ds', p2ds.shape())
+                            print('p2ds', p2ds)
                             print('#'*10)
-                            print('all_rows', all_rows.shape())
+                            print('all_rows', all_rows)
                             print('#'*10)
                         except Exception as e:
                             print('Failed')
