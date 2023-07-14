@@ -1512,7 +1512,7 @@ class CamGUI(object):
                         cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids)
                    
                         p_ids = extra['ids']
-                        p_corners = p2ds[num]
+                        p_corners = p2ds[num].astype('float32')
                         np_corners = p_corners.size // 2
                         reshape_np_corners = np.reshape(p_corners, (np_corners, 1, 2))
                         print('ids', np.size(ids))
