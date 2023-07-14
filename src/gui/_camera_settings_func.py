@@ -25,7 +25,7 @@ def is_camera_set_up(self, num):
     
     
 def set_gain(self, num):
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
         
@@ -35,7 +35,7 @@ def set_gain(self, num):
     
 def set_exposure(self, num):
     # check if camera set up
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
     
@@ -44,7 +44,7 @@ def set_exposure(self, num):
 
 
 def get_frame_dimensions(self, num):
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
     
@@ -54,7 +54,7 @@ def get_frame_dimensions(self, num):
     
 def get_formats(self, num):
     # check if camera set up
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
 
@@ -63,7 +63,7 @@ def get_formats(self, num):
 
 def set_formats(self, num):
     # check if camera set up
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
 
@@ -78,7 +78,7 @@ def get_fov(self, num):
 
 
 def set_fov(self, num):
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
     
@@ -112,7 +112,7 @@ def set_y_offset(self, i, num):
     
     
 def toggle_auto_center(self, num):
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
     
@@ -131,11 +131,12 @@ def toggle_auto_center(self, num):
    
    
 def toggle_polarity(self, num):
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
 
     self.cam[num].set_trigger_polarity(value=int(self.polarity[num].get()))
+    
     
 def set_partial_scan_limit(self, num):
     frame_dimension = self.get_frame_dimensions(num)
@@ -144,13 +145,14 @@ def set_partial_scan_limit(self, num):
     self.y_offset_scale[num].config(to=frame_dimension[1])
     self.y_offset_spinbox[num].config(to=frame_dimension[1])
     
+    
 def get_frame_rate_list(self, num):
     frame_rate_list = self.cam[num].get_frame_rate_list()
     self.framerate_list[num]['values'] = frame_rate_list
     
     
 def get_current_frame_rate(self, num):
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
     current_frame_rate = self.cam[num].get_frame_rate()
@@ -159,7 +161,7 @@ def get_current_frame_rate(self, num):
     
     
 def set_frame_rate(self, num, framerate=None, initCamera=False):
-    if self.is_camera_set_up(num) is False:
+    if is_camera_set_up(self, num) is False:
         self.show_camera_error()
         return
     

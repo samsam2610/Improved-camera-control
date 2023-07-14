@@ -37,7 +37,7 @@ import numpy as np
 from _video_files_func import create_video_files, create_output_files, save_vid
 from _calibration_func import draw_calibration_on_thread, draw_reprojection_on_thread, detect_markers_on_thread
 from _camera_settings_func import show_camera_error, show_error_window, show_video_error, \
-    is_camera_set_up, get_frame_rate_list, set_gain, set_exposure, get_frame_dimensions, get_formats, set_formats, \
+    get_frame_rate_list, set_gain, set_exposure, get_frame_dimensions, get_formats, set_formats, \
     get_fov, set_fov, set_frame_rate, get_frame_rate_list, get_current_frame_rate, \
     set_partial_scan_limit, toggle_auto_center, toggle_polarity, \
     set_x_offset, set_y_offset
@@ -123,6 +123,7 @@ class CamGUI(object):
         self.window = None
         self.calibration_capture_toggle_status = False
         self.selectCams()
+        
     def browse_output(self):
         filepath = filedialog.askdirectory(initialdir='/')
         self.dir_output.set(filepath)
