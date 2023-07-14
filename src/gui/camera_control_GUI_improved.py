@@ -1507,7 +1507,7 @@ class CamGUI(object):
                         
                         n_corners = c_corners.size // 2
                         reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
-                        cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids)
+                        cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids, cornerColor=(0, 255, 0))
                    
                         p_ids = extra['ids']
                         p_corners = p2ds[num].astype('float32')
@@ -1522,17 +1522,17 @@ class CamGUI(object):
                         print('reshape_np_corners', np.size(reshape_np_corners))
                         frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_np_corners, p_ids, cornerColor=(0, 0, 255)))
                         # Define the text content and its position
-                        text = 'Hello, World!'
+                        
                         position = (50, 50)  # (x, y) coordinates of the top-left corner
 
                         # Define the font settings
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        font_scale = 1.0
-                        font_color = (255, 255, 255)  # BGR format
+                        font_scale = 2.0
                         thickness = 2
 
                         # Add the text to the frame
-                        cv2.putText(frame, text, position, font, font_scale, font_color, thickness)
+                        cv2.putText(frame, 'Detection', (50, 50), font, font_scale, (0, 255, 0), thickness)
+                        cv2.putText(frame, 'Reprojection', (50, 60), font, font_scale, (0, 0, 255), thickness)
 
                     out = cv2.hconcat(frames)
                     cv2.imshow(window_name, out)
