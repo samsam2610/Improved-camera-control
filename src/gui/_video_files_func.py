@@ -1,6 +1,7 @@
 import os
 from tkinter import Entry, Label, Button, Tk
-
+import numpy as np
+import threading
 import cv2
 
 
@@ -65,3 +66,67 @@ def create_output_files(self, subject_name='Sam'):
     
     # empty out the video's stat message
     self.save_msg = ""
+
+
+def save_vid(self, compress=False, delete=False):
+    self.toggle_video_recording(set_status='False')
+    self.toggle_video_recording_button['state'] = 'disabled'
+    self.toggle_video_recording_button.config(text="Capture Disabled", background="red")
+    
+    saved_files = []
+    for num in range(len(self.cam)):
+        self.trigger_status_label[num]['text'] = 'Disabled'
+        self.trigger_status_indicator[num]['bg'] = 'gray'
+    
+    # check that videos have been initialized
+    if len(self.vid_out) == 0:
+        self.show_video_error()
+        return
+    
+    # check for frames before saving. if any video has not taken frames, delete all videos
+    frames_taken = all([len(i) > 0 for i in self.frame_times])
+    
+    # release video writer (saves file).
+    # if no frames taken or delete specified,
+    # delete the file and do not save timestamp files; otherwise, save timestamp files.
+    for i in range(len(self.vid_out)):
+        self.vid_out[i].release()
+        self.vid_out[i] = None
+        if delete or (not frames_taken):
+            os.remove(self.vid_file[i])
+        else:
+            np.save(str(self.ts_file[i]), np.array(self.frame_times[i]))
+            np.savetxt(str(self.ts_file_csv[i]), np.array(self.frame_times[i]), delimiter=",")
+            saved_files.append(self.vid_file[i])
+            saved_files.append(self.ts_file[i])
+            if compress:
+                threading.Thread(target=lambda: self.compress_vid(i)).start()
+    
+    if len(saved_files) > 0:
+        if len(self.frame_times) > 1:
+            cam0_times = np.array(self.frame_times[0])
+            cam1_times = np.array(self.frame_times[1])
+            fps = int(self.fps.get())
+            check_frame_text = self.check_frame(cam0_times, cam1_times, fps)
+            for texty in check_frame_text:
+                self.save_msg += texty + '\n'
+        self.save_msg += "The following files have been saved:"
+        for i in saved_files:
+            self.save_msg += "\n" + i
+        
+        self.attempt.set(str(int(self.attempt.get()) + 1))
+    
+    elif delete:
+        self.save_msg = "Video has been deleted, please set up a new video to take another recording."
+    elif not frames_taken:
+        self.save_msg = 'Video was initialized but no frames were recorded.\n' \
+                        'Video has been deleted, please set up a new video to take another recording.'
+    
+    if self.save_msg:
+        self.display_recorded_stats()
+    
+    self.vid_out = []
+    self.frame_times = []
+    self.current_file_label['text'] = ""
+    self.received_pulse_label['text'] = ""
+    self.set_calibration_buttons_group(state='disabled')
