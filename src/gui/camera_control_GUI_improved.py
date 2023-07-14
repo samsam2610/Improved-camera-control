@@ -1465,6 +1465,8 @@ class CamGUI(object):
                         print('p3ds', p3ds)
                         try:
                             p2ds = self.cgroup_test.project(p3ds)
+                            print('#'*10)
+                            print('p2ds', p2ds)
                         except:
                             print('Failed')
                             print('#########')
