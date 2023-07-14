@@ -1057,7 +1057,7 @@ class CamGUI(object):
                     imgp, extras = extract_points(merged_rows, board=self.board_calibration, min_cameras=2)
                     
                     print('Reverse extracting points')
-                    reverse_imgp, reverse_extras = reverse_extract_points(imgp, extras)
+                    reverse_imgp = reverse_extract_points(imgp, extras)
                     reverse_merged_rows = reverse_merge_rows(reverse_imgp)
                     
                     print(self.all_rows)
