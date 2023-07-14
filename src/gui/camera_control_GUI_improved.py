@@ -1272,7 +1272,7 @@ class CamGUI(object):
         t = []
         # recording_threads_status is a list of False with length of number of cameras
         self.frame_queue = queue.Queue(maxsize=10)
-        self.recording_threads_status = [False] * len(self.cam)
+        self.recording_threads_status = [True] * len(self.cam)
         self.all_rows_test = [[] for _ in range(len(self.cam))]
         self.frame_count_test = [0] * len(self.cam)
         
