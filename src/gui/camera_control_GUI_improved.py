@@ -1456,7 +1456,7 @@ class CamGUI(object):
 
         window_name = f'Reprojection'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(window_name, 1800, 1100)
+        cv2.resizeWindow(window_name, 900, 550)
         
         self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
         try:
@@ -1517,7 +1517,7 @@ class CamGUI(object):
                         print('reshape_corners', reshape_np_corners)
                         print('*'*10)
                         print('reshape_np_corners', reshape_np_corners)
-                        frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids, cornerColor=(0, 0, 255)))
+                        frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_np_corners, ids, cornerColor=(0, 0, 255)))
                         
                     out = cv2.hconcat(frames)
                     cv2.imshow(window_name, out)
