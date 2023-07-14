@@ -3,6 +3,7 @@ from tkinter import Entry, Label, Button, Tk
 import numpy as np
 import threading
 import cv2
+import ffmpy
 
 
 def create_video_files(self, overwrite=False):
@@ -100,14 +101,14 @@ def save_vid(self, compress=False, delete=False):
             saved_files.append(self.vid_file[i])
             saved_files.append(self.ts_file[i])
             if compress:
-                threading.Thread(target=lambda: self.compress_vid(i)).start()
+                threading.Thread(target=lambda: compress_vid(self, i)).start()
     
     if len(saved_files) > 0:
         if len(self.frame_times) > 1:
             cam0_times = np.array(self.frame_times[0])
             cam1_times = np.array(self.frame_times[1])
             fps = int(self.fps.get())
-            check_frame_text = self.check_frame(cam0_times, cam1_times, fps)
+            check_frame_text = check_frame(cam0_times, cam1_times, fps)
             for texty in check_frame_text:
                 self.save_msg += texty + '\n'
         self.save_msg += "The following files have been saved:"
@@ -130,3 +131,110 @@ def save_vid(self, compress=False, delete=False):
     self.current_file_label['text'] = ""
     self.received_pulse_label['text'] = ""
     self.set_calibration_buttons_group(state='disabled')
+
+
+def compress_vid(self, ind):
+    ff_input = dict()
+    ff_input[self.vid_file[ind]] = None
+    ff_output = dict()
+    out_file = self.vid_file[ind].replace('avi', 'mp4')
+    ff_output[out_file] = '-c:v libx264 -crf 17'
+    ff = ffmpy.FFmpeg(inputs=ff_input, outputs=ff_output)
+    ff.run()
+
+
+def display_recorded_stats(self):
+    save_window = Tk()
+    Label(save_window, text=self.save_msg).pack()
+    Button(save_window, text="Close", command=lambda: save_window.quit()).pack()
+    save_window.mainloop()
+    save_window.destroy()
+    
+    
+def check_frame(timeStampFile1, timeStampFile2, frameRate):
+    # Timestamps should be in seconds
+    return_text = []
+    frameRate = float(frameRate)
+    cam1 = timeStampFile1
+    cam2 = timeStampFile2
+
+    # Need to do this only when we're doing sync with synapse
+    cam1 = cam1[1:]
+    cam2 = cam2[1:]
+
+    # Normalize
+    cam1 = cam1 - cam1[0]
+    cam2 = cam2 - cam2[0]
+
+    # Find how many frames belong in both videos based on the longer one
+    # One shorter video indicates frame drops
+    numFrames = np.maximum(np.size(cam1), np.size(cam2))
+
+    # Number of missing frames
+    frameDiff = abs(np.size(cam1) - np.size(cam2))
+    if frameDiff > 0:  # if there are missing frames
+
+        temp_text = "Missing" + str(frameDiff) + "frames\n"
+        return_text.append(temp_text)
+
+    elif frameDiff == 0:  # if there are same frames in both videos, check jitter
+        jitter1 = np.diff(cam1)
+        jitter2 = np.diff(cam2)
+        temp_text = 'No missing frames'
+        return_text.append(temp_text)
+        
+        tolerance = (1 / frameRate) * 0.5
+        
+        # Find frames that are too long or short
+        droppedFrames1 = np.where(
+            np.logical_or(jitter1 < 1 / frameRate - tolerance, jitter1 > 1 / frameRate + tolerance))
+        droppedFrames2 = np.where(
+            np.logical_or(jitter2 < 1 / frameRate - tolerance, jitter2 > 1 / frameRate + tolerance))
+        
+        if np.size(droppedFrames1) > 0:
+            temp_text = "These frames may not be exactly synchronized (jitter1): " + str(droppedFrames1)
+        else:
+            temp_text = "Frames cam 1 are synced!"
+        return_text.append(temp_text)
+        
+        if np.size(droppedFrames2) > 0:
+            temp_text = "These frames may not be exactly synchronized (jitter2): " + str(droppedFrames2)
+        else:
+            temp_text = "Frames from cam 2 are synced!"
+        return_text.append(temp_text)
+        
+        mean_jitter1 = np.mean(jitter1)
+        median_jitter1 = np.median(jitter1)
+        std_jitter1 = np.std(jitter1)
+        outliers_jitter1 = np.where(
+            np.logical_or(jitter1 < mean_jitter1 - 2 * std_jitter1, jitter1 > mean_jitter1 + 2 * std_jitter1))
+        
+        mean_jitter2 = np.mean(jitter2)
+        median_jitter2 = np.median(jitter2)
+        std_jitter2 = np.std(jitter2)
+        outliers_jitter2 = np.where(
+            np.logical_or(jitter2 < mean_jitter2 - 2 * std_jitter2, jitter2 > mean_jitter2 + 2 * std_jitter2))
+        
+        temp_text = "Cam 1: Mean={:.6f}s, Median={:.6f}s, Std={:.6f}s".format(
+            mean_jitter1, median_jitter1, std_jitter1)
+        return_text.append(temp_text)
+        
+        temp_text = "Cam 2: Mean={:.6f}s, Median={:.6f}s, Std={:.6f}s".format(
+            mean_jitter2, median_jitter2, std_jitter2)
+        return_text.append(temp_text)
+        
+        # Calculate differences between cam_time_1 and cam_time_2
+        cam_time_1_diff = cam1 - cam1[0]
+        cam_time_2_diff = cam2 - cam2[0]
+        
+        # Calculate mean, mode, median, and standard deviation of the differences
+        mean_diff = np.mean(cam_time_1_diff - cam_time_2_diff)
+        median_diff = np.median(cam_time_1_diff - cam_time_2_diff)
+        std_diff = np.std(cam_time_1_diff - cam_time_2_diff)
+        
+        temp_text = "Difference: Mean={:.6f}, Median={:.6f}, Std={:.6f}".format(
+            mean_diff, median_diff, std_diff)
+        return_text.append(temp_text)
+
+    return return_text
+

@@ -34,13 +34,13 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import cv2
 import ffmpy
 import numpy as np
-from _video_files_func import create_video_files, create_output_files, save_vid
+from _video_files_func import create_video_files, create_output_files, save_vid, display_recorded_stats
 from _calibration_func import draw_calibration_on_thread, draw_reprojection_on_thread, detect_markers_on_thread
-from _camera_settings_func import show_camera_error, show_error_window, show_video_error, \
-    get_frame_rate_list, set_gain, set_exposure, get_frame_dimensions, get_formats, set_formats, \
+from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, get_frame_dimensions, get_formats, set_formats, \
     get_fov, set_fov, set_frame_rate, get_current_frame_rate, \
     set_partial_scan_limit, toggle_auto_center, toggle_polarity, \
-    set_x_offset, set_y_offset
+    set_x_offset, set_y_offset, \
+    show_camera_error
 
 
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
@@ -192,94 +192,6 @@ class CamGUI(object):
         self.dir_output.set(self.output_entry['values'][cam_num])
         setup_window.destroy()
 
-    @staticmethod
-    def check_frame(timeStampFile1, timeStampFile2, frameRate):
-        # Timestamps should be in seconds
-        return_text = []
-        frameRate = float(frameRate)
-        cam1 = timeStampFile1
-        cam2 = timeStampFile2
-
-        # Need to do this only when we're doing sync with synapse
-        cam1 = cam1[1:]
-        cam2 = cam2[1:]
-
-        # Normalize
-        cam1 = cam1 - cam1[0]
-        cam2 = cam2 - cam2[0]
-
-        # Find how many frames belong in both videos based on the longer one
-        # One shorter video indicates frame drops
-        numFrames = np.maximum(np.size(cam1), np.size(cam2))
-
-        # Number of missing frames
-        frameDiff = abs(np.size(cam1) - np.size(cam2))
-        if frameDiff > 0:  # if there are missing frames
-
-            temp_text = "Missing" + str(frameDiff) + "frames\n"
-            return_text.append(temp_text)
-
-        elif frameDiff == 0:  # if there are same frames in both videos, check jitter
-            jitter1 = np.diff(cam1)
-            jitter2 = np.diff(cam2)
-            temp_text = 'No missing frames'
-            return_text.append(temp_text)
-            
-            tolerance = (1 / frameRate) * 0.5
-            
-            # Find frames that are too long or short
-            droppedFrames1 = np.where(
-                np.logical_or(jitter1 < 1 / frameRate - tolerance, jitter1 > 1 / frameRate + tolerance))
-            droppedFrames2 = np.where(
-                np.logical_or(jitter2 < 1 / frameRate - tolerance, jitter2 > 1 / frameRate + tolerance))
-            
-            if np.size(droppedFrames1) > 0:
-                temp_text = "These frames may not be exactly synchronized (jitter1): " + str(droppedFrames1)
-            else:
-                temp_text = "Frames cam 1 are synced!"
-            return_text.append(temp_text)
-            
-            if np.size(droppedFrames2) > 0:
-                temp_text = "These frames may not be exactly synchronized (jitter2): " + str(droppedFrames2)
-            else:
-                temp_text = "Frames from cam 2 are synced!"
-            return_text.append(temp_text)
-            
-            mean_jitter1 = np.mean(jitter1)
-            median_jitter1 = np.median(jitter1)
-            std_jitter1 = np.std(jitter1)
-            outliers_jitter1 = np.where(
-                np.logical_or(jitter1 < mean_jitter1 - 2 * std_jitter1, jitter1 > mean_jitter1 + 2 * std_jitter1))
-            
-            mean_jitter2 = np.mean(jitter2)
-            median_jitter2 = np.median(jitter2)
-            std_jitter2 = np.std(jitter2)
-            outliers_jitter2 = np.where(
-                np.logical_or(jitter2 < mean_jitter2 - 2 * std_jitter2, jitter2 > mean_jitter2 + 2 * std_jitter2))
-            
-            temp_text = "Cam 1: Mean={:.6f}s, Median={:.6f}s, Std={:.6f}s".format(
-                mean_jitter1, median_jitter1, std_jitter1)
-            return_text.append(temp_text)
-            
-            temp_text = "Cam 2: Mean={:.6f}s, Median={:.6f}s, Std={:.6f}s".format(
-                mean_jitter2, median_jitter2, std_jitter2)
-            return_text.append(temp_text)
-            
-            # Calculate differences between cam_time_1 and cam_time_2
-            cam_time_1_diff = cam1 - cam1[0]
-            cam_time_2_diff = cam2 - cam2[0]
-            
-            # Calculate mean, mode, median, and standard deviation of the differences
-            mean_diff = np.mean(cam_time_1_diff - cam_time_2_diff)
-            median_diff = np.median(cam_time_1_diff - cam_time_2_diff)
-            std_diff = np.std(cam_time_1_diff - cam_time_2_diff)
-            
-            temp_text = "Difference: Mean={:.6f}, Median={:.6f}, Std={:.6f}".format(
-                mean_diff, median_diff, std_diff)
-            return_text.append(temp_text)
-
-        return return_text
-       
     def release_trigger(self):
         for num in range(len(self.cam)):
             self.cam[num].disable_trigger()
@@ -304,7 +216,7 @@ class CamGUI(object):
 
         # check if camera set up
         if len(self.cam) == 0:
-            self.show_camera_error()
+            show_camera_error(self)
             return
         
         self.trigger_on = 1
@@ -363,7 +275,7 @@ class CamGUI(object):
 
         # check if camera set up
         if len(self.cam) == 0:
-            self.show_camera_error()
+            show_camera_error(self)
             return
         
         self.trigger_on = 0
@@ -585,8 +497,8 @@ class CamGUI(object):
                 self.current_frame_count.append(0)
 
             # check if file exists, ask to overwrite or change attempt number if it does
-            self.create_video_files(overwrite=True)
-            self.create_output_files(subject_name='Sam')
+            create_video_files(self, overwrite=True)
+            create_output_files(self, subject_name='Sam')
 
             self.calibration_process_stats.set('Setting the frame sizes...')
             self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
@@ -1109,22 +1021,6 @@ class CamGUI(object):
                 t[-1].daemon = True
                 t[-1].start()
 
-    def compress_vid(self, ind):
-        ff_input = dict()
-        ff_input[self.vid_file[ind]] = None
-        ff_output = dict()
-        out_file = self.vid_file[ind].replace('avi', 'mp4')
-        ff_output[out_file] = '-c:v libx264 -crf 17'
-        ff = ffmpy.FFmpeg(inputs=ff_input, outputs=ff_output)
-        ff.run()
-
-    def display_recorded_stats(self):
-        save_window = Tk()
-        Label(save_window, text=self.save_msg).pack()
-        Button(save_window, text="Close", command=lambda: save_window.quit()).pack()
-        save_window.mainloop()
-        save_window.destroy()
-        
     def close_window(self):
 
         if not self.setup:
@@ -1179,9 +1075,7 @@ class CamGUI(object):
 
         cur_row = 0
         numberOfScreenUnits = 100
-
         
-
         if not isinstance(self.number_of_cams, int):
             self.number_of_cams = int(self.number_of_cams.get())
 
@@ -1507,7 +1401,7 @@ class CamGUI(object):
         self.release_vid2.grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
         Hovertip(self.release_vid2, "Delete video if not needed")
     
-        self.display_stats_button = Button(record_video_frame, text="Display stats", command=self.display_recorded_stats, width=10)
+        self.display_stats_button = Button(record_video_frame, text="Display stats", command=lambda: display_recorded_stats(self), width=10)
         self.display_stats_button.grid(sticky="nsew", row=2, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.display_stats_button, "Display stats of recorded videos")
 
