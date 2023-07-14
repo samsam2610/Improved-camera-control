@@ -1274,6 +1274,7 @@ class CamGUI(object):
         self.frame_queue = queue.Queue(maxsize=10)
         self.recording_threads_status = [False] * len(self.cam)
         self.all_rows_test = [[] for _ in range(len(self.cam))]
+        self.frame_count_test = [0] * len(self.cam)
         
         for i in range(len(self.cam)):
             t.append(threading.Thread(target=self.draw_calibration_on_thread, args=(i, barrier)))
@@ -1332,13 +1333,13 @@ class CamGUI(object):
                         cv2.imshow(window_name, frame_current)
                         cv2.waitKey(1)
                 else:
-                    self.frame_count[num] += 1
+                    self.frame_count_test[num] += 1
                     frame_current = self.cam[num].get_image()
                     
                     # detect the marker as the frame is acquired
                     corners, ids = self.board_calibration.detect_image(frame_current)
                     if corners is not None:
-                        key = self.frame_count[num]
+                        key = self.frame_count_test[num]
                         row = {
                             'framenum': key,
                             'corners': corners,
