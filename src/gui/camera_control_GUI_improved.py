@@ -1481,19 +1481,17 @@ class CamGUI(object):
                     merged = merge_rows(self.all_rows_test)
                     imgp, extra = extract_points(merged, self.board_calibration, min_cameras=2)
                     p3ds = self.cgroup_test.triangulate(imgp)
-                    # if len(p3ds.shape) == 1:
-                    #     p3ds = p3ds.reshape(1, 3)
                     
                     if p3ds == []:
                         print('p3ds is empty')
                     else:
-                        print('p3ds', p3ds)
+                        print('p3ds', np.size(p3ds))
                         try:
                             p2ds = self.cgroup_test.project(p3ds)
                             print('#'*10)
-                            print('p2ds', p2ds)
+                            print('p2ds', np.size(p2ds))
                             print('#'*10)
-                            print('all_rows', all_rows)
+                            print('all_rows', np.size(all_rows))
                             print('#'*10)
                         except Exception as e:
                             print('Failed')
