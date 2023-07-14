@@ -1499,10 +1499,11 @@ class CamGUI(object):
                             print('#########')
                     
                     frames = []
-                    for index, (thread_id, group) in enumerate(frame_groups.items()):
-                        frame = group[-1][0]
+                    for num in range(self.cgroup_test.num_cameras):
+                        frame_group = frame_groups[num]
+                        frame = frame_group[-1][0]
                         c_corners = all_rows[index][0]['corners']
-                        ids = all_rows[index][0]['ids']
+                        ids = all_rows[num][0]['ids']
                         n_corners = c_corners.size // 2
                         reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
                         frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids))
