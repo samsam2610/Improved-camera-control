@@ -1450,9 +1450,6 @@ class CamGUI(object):
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
         from src.aniposelib.boards import merge_rows, extract_points
-        from utils import aruco_dict
-        from cv2 import aruco
-        import copy
 
         window_name = f'Reprojection'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
@@ -1493,7 +1490,6 @@ class CamGUI(object):
                             p2ds = self.cgroup_test.project(p3ds)
                         except Exception as e:
                             print("Exception occurred:", type(e).__name__, "| Exception value:", e,
-                                  ''.join(traceback.format_tb(e.__traceback__)))print("Exception occurred:", type(e).__name__, "| Exception value:", e,
                                   ''.join(traceback.format_tb(e.__traceback__)))
                             print('#########')
                         
