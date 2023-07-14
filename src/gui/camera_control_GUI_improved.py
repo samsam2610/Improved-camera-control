@@ -1514,6 +1514,8 @@ class CamGUI(object):
                         p_corners = p2ds[num]
                         np_corners = p_corners.size // 2
                         reshape_np_corners = np.reshape(p_corners, (np_corners, 1, 2))
+                        print('ids', np.size(ids))
+                        print('*'*10)
                         print('reshape_corners', np.size(reshape_corners))
                         print('*'*10)
                         print('reshape_np_corners', np.size(reshape_np_corners))
