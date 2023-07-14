@@ -1027,8 +1027,11 @@ class CamGUI(object):
         Example usage:
         process_marker_on_thread()
         """
+        from src.aniposelib.boards import extract_points, merge_rows, reverse_extract_points, reverse_merge_rows
+        
         frame_groups = {}  # Dictionary to store frame groups by thread_id
         frame_counts = {}  # array to store frame counts for each thread_id
+        
         try:
             while any(thread is True for thread in self.recording_threads_status):
                 # Retrieve frame information from the queue
@@ -1071,6 +1074,17 @@ class CamGUI(object):
                         pickle.dump(self.all_rows, file)
                     self.rows_fname_available = True
                     print('Dumped rows into detections.pickle')
+                    print('Producing imgp and extras')
+                    merged_rows = merge_rows(self.all_rows)
+                    imgp, extras = extract_points(merged_rows, board=self.board_calibration, min_cameras=2)
+                    
+                    print('Reverse extracting points')
+                    reverse_imgp, reverse_extras = reverse_extract_points(imgp, extras)
+                    reverse_merged_rows = reverse_merge_rows(reverse_imgp)
+                    
+                    print(self.all_rows)
+                    print('')
+                    print(reverse_merged_rows)
                     
                     frame_groups = {}
                     frame_count = {}
@@ -1378,7 +1392,7 @@ class CamGUI(object):
 
             cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, c_ids)
             cv2.aruco.drawDetectedMarkers(frame, corners, ids)
-            cv2.aruco.drawDetectedMarkers(frame, rejected_points, borderColor=(100, 0, 240))
+            # cv2.aruco.drawDetectedMarkers(frame, rejected_points, borderColor=(100, 0, 240))
 
         except cv2.error as e:
             import sys
