@@ -1487,23 +1487,17 @@ class CamGUI(object):
                         merged = merge_rows(all_rows)
                         imgp, extra = extract_points(merged, self.board_calibration, min_cameras=2)
                         p3ds = self.cgroup_test.triangulate(imgp)
+                       
+                        # Project the 3D points back to 2D
+                        try:
+                            p2ds = self.cgroup_test.project(p3ds)
+                        except Exception as e:
+                            print("Exception occurred:", type(e).__name__, "| Exception value:", e,
+                                  ''.join(traceback.format_tb(e.__traceback__)))print("Exception occurred:", type(e).__name__, "| Exception value:", e,
+                                  ''.join(traceback.format_tb(e.__traceback__)))
+                            print('#########')
                         
-                        if p3ds == []:
-                            print('p3ds is empty')
-                        else:
-                            print('p3ds', np.size(p3ds))
-                            try:
-                                p2ds = self.cgroup_test.project(p3ds)
-                                print('#'*10)
-                                print('p2ds', np.size(p2ds))
-                                print('#'*10)
-                                print('all_rows', np.size(all_rows))
-                                print('#'*10)
-                            except Exception as e:
-                                print('Failed')
-                                traceback.print_exc()
-                                print('#########')
-                        
+                        # Draw the reprojection
                         frames = []
                         for num in range(len(self.cam)):
                             frame_group = frame_groups[num]
@@ -1519,29 +1513,16 @@ class CamGUI(object):
                             p_corners = p2ds[num].astype('float32')
                             np_corners = p_corners.size // 2
                             reshape_np_corners = np.reshape(p_corners, (np_corners, 1, 2))
-                            print('ids', np.size(ids))
-                            print('*'*10)
-                            print('reshape_corners', np.size(reshape_corners))
-                            print('*'*10)
-                            print('p_ids', np.size(p_ids))
-                            print('*'*10)
-                            print('reshape_np_corners', np.size(reshape_np_corners))
                             frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_np_corners, p_ids, cornerColor=(0, 0, 255)))
-                            # Define the text content and its position
-                            
 
-                            # Add the text to the frame
-                            cv2.putText(frame, 'Detection', (30, 50), font, font_scale, (0, 255, 0), thickness)
-                            cv2.putText(frame, 'Reprojection', (30, 100), font, font_scale, (0, 0, 255), thickness)
+                        frame = cv2.hconcat(frames)
+                        
+                        # Add the text to the frame
+                        cv2.putText(frame, 'Detection', (30, 50), font, font_scale, (0, 255, 0), thickness)
+                        cv2.putText(frame, 'Reprojection', (30, 100), font, font_scale, (0, 0, 255), thickness)
 
-                        out = cv2.hconcat(frames)
-                        cv2.imshow(window_name, out)
+                        cv2.imshow(window_name, frame)
                         cv2.waitKey(1)
-                        # print('#########')
-                        # print('p3ds', p3ds)
-                        # print('#########')
-                        # print('p2ds', p2ds)
-                        #
                         
                         # Clear the processed frames from the group
                         frame_groups = {}
