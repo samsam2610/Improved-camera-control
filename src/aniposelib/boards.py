@@ -180,11 +180,10 @@ def reverse_extract_points(imgp, extra, cam_names=None):
     Optionally takes cam_names, which determines the keys for each row in the merged variable.
     Returns the merged variable.
     """
-    
     if cam_names is None:
         cam_names = list(range(imgp.shape[0]))
-    
-    n_cams, n_detects, n_points_per_detect, _ = imgp.shape
+
+    n_cams, n_detects, n_points_per_detect = imgp.shape[:3]
     
     merged = []
     
