@@ -1470,8 +1470,6 @@ class CamGUI(object):
                         except:
                             print('Failed')
                             print('#########')
-                            print(merged)
-
                         
                     # print('#########')
                     # print('p3ds', p3ds)
