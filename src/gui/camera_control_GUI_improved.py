@@ -1467,6 +1467,9 @@ class CamGUI(object):
                             p2ds = self.cgroup_test.project(p3ds)
                             print('#'*10)
                             print('p2ds', p2ds)
+                            print('#'*10)
+                            print('all_rows', all_rows)
+                            print('#'*10)
                         except:
                             print('Failed')
                             print('#########')
