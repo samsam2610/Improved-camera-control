@@ -1464,7 +1464,7 @@ class CamGUI(object):
                         except:
                             print('Failed')
                             print('#########')
-                            print(imgp)
+                            print(merged)
 
                         
                     # print('#########')
