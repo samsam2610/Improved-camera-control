@@ -1360,7 +1360,7 @@ class CamGUI(object):
         """
         try:
             corners, ids, rejected_points = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=params)
-            print(f'Corners:', corners)
+            
             if corners is None or ids is None:
                 print('No corner detected')
                 return None
@@ -1379,7 +1379,7 @@ class CamGUI(object):
             ret, c_corners, c_ids = cv2.aruco.interpolateCornersCharuco(corners, ids,
                                                                         frame, board,
                                                                         cameraMatrix=camera_matrix, distCoeffs=dist_coeff)
-
+            print(f'Corners:', c_corners)
             if c_corners is None or c_ids is None or len(c_corners) < 5:
                 print('No corner detected after interpolation!')
                 return None
