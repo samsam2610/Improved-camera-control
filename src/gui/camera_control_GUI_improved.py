@@ -1266,13 +1266,24 @@ class CamGUI(object):
         self.cgroup_test = CameraGroup.load(calibration_file)# cgroup_test is loaded with the calibration file
         print('Calibration file loaded')
         
+        self.frame_queue = queue.Queue(maxsize=10)
+        
         barrier = threading.Barrier(len(self.cam))
         t = []
+        # recording_threads_status is a list of False with length of number of cameras
+        self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
+        self.recording_threads_status = [False] * len(self.cam)
+        self.all_rows_test = [[] for _ in range(len(self.cam))]
+        
         for i in range(len(self.cam)):
             t.append(threading.Thread(target=self.draw_calibration_on_thread, args=(i, barrier)))
             t[-1].daemon = True
             t[-1].start()
-           
+        if self.reprojection_check.get():
+            t.appened(threading.Thread(target=self.draw_reprojection_on_thread))
+            t[-1].daemon = True
+            t[-1].start()
+            
     def draw_calibration_on_thread(self, num, barrier):
         """
         Draws calibration on a separate thread for a given camera.
@@ -1307,20 +1318,40 @@ class CamGUI(object):
                 break
             frame_current = self.cam[num].get_image()
             if frame_current is not None:
-                drawn_frame = self.draw_axis(frame_current,
-                                                camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
-                                                dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
-                                                rotation=self.cgroup_test.cameras[num].get_rotation(),
-                                                translation=self.cgroup_test.cameras[num].get_translation(),
-                                                board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
-                if drawn_frame is not None:
-                    cv2.imshow(window_name, drawn_frame)
-                    cv2.waitKey(1)
+                if not self.reprojection_check.get():
+                    drawn_frame = self.draw_axis(frame_current,
+                                                    camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
+                                                    dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
+                                                    rotation=self.cgroup_test.cameras[num].get_rotation(),
+                                                    translation=self.cgroup_test.cameras[num].get_translation(),
+                                                    board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
+                    if drawn_frame is not None:
+                        cv2.imshow(window_name, drawn_frame)
+                        cv2.waitKey(1)
+                    else:
+                        cv2.imshow(window_name, frame_current)
+                        cv2.waitKey(1)
                 else:
-                    cv2.imshow(window_name, frame_current)
-                    cv2.waitKey(1)
-        
+                    self.frame_count[num] += 1
+                    frame_current = self.cam[num].get_image()
+                    
+                    # detect the marker as the frame is acquired
+                    corners, ids = self.board_calibration.detect_image(frame_current)
+                    if corners is not None:
+                        key = self.frame_count[num]
+                        row = {
+                            'framenum': key,
+                            'corners': corners,
+                            'ids': ids
+                        }
+
+                        row = self.board_calibration.fill_points_rows([row])
+                        self.all_rows_test[num].extend(row)
+                    
+                    # putting frame into the frame queue along with following information
+                    self.frame_queue.put((frame_current, num))  # the id of the capturing camera
         barrier.abort()
+        self.recording_threads_status[num] = False
     
     @staticmethod
     def draw_axis(frame, camera_matrix, dist_coeff, rotation, translation, board, aruco_dict, params, verbose=True):
@@ -1397,8 +1428,47 @@ class CamGUI(object):
 
         return frame
         
-    def draw_reprojection_on_thread(self, num, barrier):
-        pass
+    def draw_reprojection_on_thread(self):
+        frame_groups = {}  # Dictionary to store frame groups by thread_id
+        frame_counts = {}  # array to store frame counts for each thread_id
+        from src.aniposelib.boards import merge_rows, extract_points
+        
+        try:
+            while any(thread is True for thread in self.recording_threads_status):
+                # Retrieve frame information from the queue
+                frame, thread_id, frame_count, capture_time = self.frame_queue.get()
+                if thread_id not in frame_groups:
+                    frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
+                    frame_counts[thread_id] = 0
+
+                # Append frame information to the corresponding group
+                frame_groups[thread_id].append((frame, frame_count, capture_time))
+                frame_counts[thread_id] += 1
+                
+                # Process the frame group (frames with the same thread_id)
+                # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
+                if all(count >= self.frame_process_threshold for count in frame_counts.values()):
+                    merged = merge_rows(self.all_rows_test)
+                    imgp, extra = extract_points(merged, self.board_calibration, min_cameras=2)
+                    p3ds = self.cgroup_test.triangulate(imgp)
+                    p2ds = self.cgroup_test.project(p3ds)
+                    
+                    print('#########')
+                    print('p3ds', p3ds)
+                    print('#########')
+                    print('p2ds', p2ds)
+                    print('#########')
+                    print(self.all_rows_test)
+                    
+                    # Clear the processed frames from the group
+                    frame_groups = {}
+                    frame_count = {}
+            
+        except Exception as e:
+            print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id,
+                  "| Frame count:", frame_count, "| Capture time:", capture_time, "| Traceback:",
+                  ''.join(traceback.format_tb(e.__traceback__)))
+                
     def toggle_video_recording(self, set_status=None):
         if set_status is not None:
             toggle_status = not set_status
