@@ -1448,7 +1448,7 @@ class CamGUI(object):
                 
                 # Process the frame group (frames with the same thread_id)
                 # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
-                if all(count >= self.frame_process_threshold for count in frame_counts.values()):
+                if all(count >= 2 for count in frame_counts.values()):
                     merged = merge_rows(self.all_rows_test)
                     imgp, extra = extract_points(merged, self.board_calibration, min_cameras=2)
                     p3ds = self.cgroup_test.triangulate(imgp)
