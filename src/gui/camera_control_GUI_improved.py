@@ -1473,77 +1473,82 @@ class CamGUI(object):
                 
                 # Process the frame group (frames with the same thread_id)
                 # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
-                if all(count >= 2 for count in frame_counts.values()):
-                    all_rows = [row[-2:] for row in self.all_rows_test]
-                    for i, (row, cam) in enumerate(zip(all_rows, self.cgroup_test.cameras)):
-                        all_rows[i] = self.board_calibration.estimate_pose_rows(cam, row)
+                try:
+                    if all(count >= 2 for count in frame_counts.values()):
+                        all_rows = [row[-2:] for row in self.all_rows_test]
+                        for i, (row, cam) in enumerate(zip(all_rows, self.cgroup_test.cameras)):
+                            all_rows[i] = self.board_calibration.estimate_pose_rows(cam, row)
+                            
+                        merged = merge_rows(all_rows)
+                        imgp, extra = extract_points(merged, self.board_calibration, min_cameras=2)
+                        p3ds = self.cgroup_test.triangulate(imgp)
                         
-                    merged = merge_rows(all_rows)
-                    imgp, extra = extract_points(merged, self.board_calibration, min_cameras=2)
-                    p3ds = self.cgroup_test.triangulate(imgp)
-                    
-                    if p3ds == []:
-                        print('p3ds is empty')
-                    else:
-                        print('p3ds', np.size(p3ds))
-                        try:
-                            p2ds = self.cgroup_test.project(p3ds)
-                            print('#'*10)
-                            print('p2ds', np.size(p2ds))
-                            print('#'*10)
-                            print('all_rows', np.size(all_rows))
-                            print('#'*10)
-                        except Exception as e:
-                            print('Failed')
-                            traceback.print_exc()
-                            print('#########')
-                    
-                    frames = []
-                    for num in range(len(self.cam)):
-                        frame_group = frame_groups[num]
-                        frame = frame_group[-1][0]
-                        c_corners = all_rows[num][0]['corners']
-                        ids = all_rows[num][0]['ids']
+                        if p3ds == []:
+                            print('p3ds is empty')
+                        else:
+                            print('p3ds', np.size(p3ds))
+                            try:
+                                p2ds = self.cgroup_test.project(p3ds)
+                                print('#'*10)
+                                print('p2ds', np.size(p2ds))
+                                print('#'*10)
+                                print('all_rows', np.size(all_rows))
+                                print('#'*10)
+                            except Exception as e:
+                                print('Failed')
+                                traceback.print_exc()
+                                print('#########')
                         
-                        n_corners = c_corners.size // 2
-                        reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
-                        cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids, cornerColor=(0, 255, 0))
-                   
-                        p_ids = extra['ids']
-                        p_corners = p2ds[num].astype('float32')
-                        np_corners = p_corners.size // 2
-                        reshape_np_corners = np.reshape(p_corners, (np_corners, 1, 2))
-                        print('ids', np.size(ids))
-                        print('*'*10)
-                        print('reshape_corners', np.size(reshape_corners))
-                        print('*'*10)
-                        print('p_ids', np.size(p_ids))
-                        print('*'*10)
-                        print('reshape_np_corners', np.size(reshape_np_corners))
-                        frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_np_corners, p_ids, cornerColor=(0, 0, 255)))
-                        # Define the text content and its position
-                        
-                        # Define the font settings
-                        font = cv2.FONT_HERSHEY_SIMPLEX
-                        font_scale = 1.5
-                        thickness = 1
+                        frames = []
+                        for num in range(len(self.cam)):
+                            frame_group = frame_groups[num]
+                            frame = frame_group[-1][0]
+                            c_corners = all_rows[num][0]['corners']
+                            ids = all_rows[num][0]['ids']
+                            
+                            n_corners = c_corners.size // 2
+                            reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
+                            cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids, cornerColor=(0, 255, 0))
+                       
+                            p_ids = extra['ids']
+                            p_corners = p2ds[num].astype('float32')
+                            np_corners = p_corners.size // 2
+                            reshape_np_corners = np.reshape(p_corners, (np_corners, 1, 2))
+                            print('ids', np.size(ids))
+                            print('*'*10)
+                            print('reshape_corners', np.size(reshape_corners))
+                            print('*'*10)
+                            print('p_ids', np.size(p_ids))
+                            print('*'*10)
+                            print('reshape_np_corners', np.size(reshape_np_corners))
+                            frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_np_corners, p_ids, cornerColor=(0, 0, 255)))
+                            # Define the text content and its position
+                            
+                            # Define the font settings
+                            font = cv2.FONT_HERSHEY_SIMPLEX
+                            font_scale = 1.5
+                            thickness = 1
 
-                        # Add the text to the frame
-                        cv2.putText(frame, 'Detection', (30, 50), font, font_scale, (0, 255, 0), thickness)
-                        cv2.putText(frame, 'Reprojection', (30, 100), font, font_scale, (0, 0, 255), thickness)
+                            # Add the text to the frame
+                            cv2.putText(frame, 'Detection', (30, 50), font, font_scale, (0, 255, 0), thickness)
+                            cv2.putText(frame, 'Reprojection', (30, 100), font, font_scale, (0, 0, 255), thickness)
 
-                    out = cv2.hconcat(frames)
-                    cv2.imshow(window_name, out)
-                    cv2.waitKey(1)
-                    # print('#########')
-                    # print('p3ds', p3ds)
-                    # print('#########')
-                    # print('p2ds', p2ds)
-                    #
-                    
-                    # Clear the processed frames from the group
-                    frame_groups = {}
-                    frame_count = {}
+                        out = cv2.hconcat(frames)
+                        cv2.imshow(window_name, out)
+                        cv2.waitKey(1)
+                        # print('#########')
+                        # print('p3ds', p3ds)
+                        # print('#########')
+                        # print('p2ds', p2ds)
+                        #
+                        
+                        # Clear the processed frames from the group
+                        frame_groups = {}
+                        frame_count = {}
+                except Exception as e:
+                    print("Exception occurred:", type(e).__name__, "| Exception value:", e,
+                          ''.join(traceback.format_tb(e.__traceback__)))
+                    print('No board detected')
                 self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
             
         except Exception as e:
