@@ -1451,7 +1451,7 @@ class CamGUI(object):
                 if all(count >= 2 for count in frame_counts.values()):
                     merged = merge_rows(self.all_rows_test)
                     imgp, extra = extract_points(merged, self.board_calibration, min_cameras=2)
-                    p3ds = self.cgroup_test.triangulate(imgp)
+                    p3ds = self.cgroup_test.triangulate(imgp, undistort=False)
                     p2ds = self.cgroup_test.project(p3ds)
                     
                     print('#########')
