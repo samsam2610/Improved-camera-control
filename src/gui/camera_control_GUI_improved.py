@@ -1052,19 +1052,6 @@ class CamGUI(object):
                     with open(self.rows_fname, 'wb') as file:
                         pickle.dump(self.all_rows, file)
                     self.rows_fname_available = True
-                    print('Producing imgp and extras')
-                    merged_rows = merge_rows(self.all_rows)
-                    imgp, extras = extract_points(merged_rows, board=self.board_calibration, min_cameras=2)
-                    
-                    print('Reverse extracting points')
-                    reverse_imgp = reverse_extract_points(imgp, extras)
-                    reverse_merged_rows = reverse_merge_rows(reverse_imgp)
-                    
-                    print('Printing rows')
-                    print(self.all_rows)
-                    print('###################################')
-                    print('Reverse merged rows')
-                    print(reverse_merged_rows)
                     # Clear the processed frames from the group
                     frame_groups = {}
                     frame_count = {}
@@ -1409,7 +1396,9 @@ class CamGUI(object):
         #     print('Distance from camera: {0} m'.format(np.linalg.norm(p_tvec)))
 
         return frame
-    
+        
+    def draw_reprojection_on_thread(self, num, barrier):
+        pass
     def toggle_video_recording(self, set_status=None):
         if set_status is not None:
             toggle_status = not set_status
@@ -1971,9 +1960,17 @@ class CamGUI(object):
             grid(sticky="nsew", row=0, column=4, columnspan=1, padx=5, pady=3)
         Hovertip(self.plot_calibration_error_button, "Press this button to plot the calibration error. ")
         
-        self.test_calibration_live_button = Button(calibration_frame, text="Test Calibration Live", command=self.test_calibration_live, state="normal")
+        test_calibration_frame = Frame(calibration_frame)
+        self.test_calibration_live_button = Button(test_calibration_frame, text="Try Calibrate", command=self.test_calibration_live, state="normal", width=8)
         self.test_calibration_live_button.\
-            grid(sticky="nsew", row=1, column=4, columnspan=1, padx=5, pady=3)
+            grid(sticky="nw", row=0, column=0, columnspan=1, padx=0, pady=0)
+        
+        self.reprojection_check = IntVar(value=0)
+        self.reprojection_checkbutton = Checkbutton(test_calibration_frame, text="Triangulate", variable=self.reprojection_check,
+                                                onvalue=1, offvalue=0, width=9)
+        self.reprojection_checkbutton.grid(sticky="nw", row=0, column=1, padx=0, pady=0)
+        
+        test_calibration_frame.grid(row=1, column=4, padx=5, pady=3, sticky="nsew")
         
         calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
         
