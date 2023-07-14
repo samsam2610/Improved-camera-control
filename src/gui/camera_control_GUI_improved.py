@@ -1458,6 +1458,11 @@ class CamGUI(object):
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(window_name, 2160, 660)
         
+        # Define the font settings
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 1.5
+        thickness = 1
+        
         self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
         try:
             while self.reproject_window_status:
@@ -1524,10 +1529,6 @@ class CamGUI(object):
                             frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_np_corners, p_ids, cornerColor=(0, 0, 255)))
                             # Define the text content and its position
                             
-                            # Define the font settings
-                            font = cv2.FONT_HERSHEY_SIMPLEX
-                            font_scale = 1.5
-                            thickness = 1
 
                             # Add the text to the frame
                             cv2.putText(frame, 'Detection', (30, 50), font, font_scale, (0, 255, 0), thickness)
@@ -1548,7 +1549,17 @@ class CamGUI(object):
                 except Exception as e:
                     print("Exception occurred:", type(e).__name__, "| Exception value:", e,
                           ''.join(traceback.format_tb(e.__traceback__)))
-                    print('No board detected')
+                    frames = []
+                    for num in range(len(self.cam)):
+                        frame_group = frame_groups[num]
+                        frame = frame_group[-1][0]
+                        frames.append(frame)
+                    
+                    frame = cv2.hconcat(frames)
+                    cv2.putText(frame, 'No board detected', (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 0, 0), 1)
+                    cv2.imshow(window_name, frame)
+                    cv2.waitKey(1)
+                    
                 self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
             
         except Exception as e:
