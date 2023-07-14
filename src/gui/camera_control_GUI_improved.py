@@ -1508,7 +1508,7 @@ class CamGUI(object):
                         print('nan_corners', nan_corners)
                         c_corners = c_corners[~nan_corners[:, 0][0], :]
                         ids = all_rows[num][0]['ids']
-                        ids = ids[~nan_corners]
+                        ids = ids[~nan_corners[:, 0][0]]
                         n_corners = c_corners.size // 2
                         reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
                         frames.append(cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, ids))
