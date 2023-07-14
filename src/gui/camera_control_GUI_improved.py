@@ -36,6 +36,12 @@ import ffmpy
 import numpy as np
 from _video_files_func import create_video_files, create_output_files, save_vid
 from _calibration_func import draw_calibration_on_thread, draw_reprojection_on_thread, detect_markers_on_thread
+from _camera_settings_func import show_camera_error, show_error_window, show_video_error, \
+    is_camera_set_up, get_frame_rate_list, set_gain, set_exposure, get_frame_dimensions, get_formats, set_formats, \
+    get_fov, set_fov, set_frame_rate, get_frame_rate_list, get_current_frame_rate, \
+    set_partial_scan_limit, toggle_auto_center, toggle_polarity, \
+    set_x_offset, set_y_offset
+
 
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
 class CamGUI(object):
@@ -156,21 +162,22 @@ class CamGUI(object):
         self.cam[num] = ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get())
         
         # self.cam[num].start()
-        self.set_frame_rate(num, framerate=100, initCamera=True)
+        set_frame_rate(self, num, framerate=100, initCamera=True)
 
         # set gain and exposure using the values from the json
         self.cam[num].set_exposure(float(self.cam_details[str(num)]['exposure']))
         self.cam[num].set_gain(int(self.cam_details[str(num)]['gain']))
         self.cam[num].start()
+        
         # get the gain and exposure values to reflect that onto the GUI
         self.exposure[num].set(self.cam[num].get_exposure())
         self.gain[num].set(self.cam[num].get_gain())
         
-        self.get_fov(num)
-        self.set_partial_scan_limit(num)
-        self.get_frame_rate_list(num)
+        get_fov(self, num)
+        set_partial_scan_limit(self, num)
+        get_frame_rate_list(self, num)
         
-        self.get_current_frame_rate(num)
+        get_current_frame_rate(self, num)
         self.trigger_status_label[num]['text'] = 'Disabled'
         
         [x_offset_value, y_offset_value] = self.cam[num].get_partial_scan()
@@ -271,167 +278,7 @@ class CamGUI(object):
             return_text.append(temp_text)
 
         return return_text
-
-    def show_camera_error(self):
-        error_message = "No camera is found! \nPlease initialize camera before setting gain."
-        self.show_error_window(error_message)
-        
-    def show_video_error(self):
-        error_message = "Video writer is not initialized. \nPlease set up video first."
-        self.show_error_window(error_message)
-
-    @staticmethod
-    def show_error_window(message):
-        error_window = Tk()
-        Label(error_window, text=message).pack()
-        Button(error_window, text="Ok", command=error_window.destroy).pack()
-        error_window.mainloop()
-        error_window.destroy()
-        
-    def is_camera_set_up(self, num):
-        return self.cam[num] is not None
-        
-    def set_gain(self, num):
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-            
-        self.cam[num].set_gain(int(self.gain[num].get()))
-        self.get_frame_rate_list(num)
-        
-    def set_exposure(self, num):
-        # check if camera set up
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-        
-        self.cam[num].set_exposure(float(self.exposure[num].get()))
-        self.get_frame_rate_list(num)
-
-    def get_frame_dimensions(self, num):
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-        
-        frame_dimension = self.cam[num].get_video_format()
-        return frame_dimension
-        
-    def get_formats(self, num):
-        # check if camera set up
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-
-        return self.cam[num].get_formats()
-
-    def set_formats(self, num):
-        # check if camera set up
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-
-        self.cam[num].set_formats(str(self.formats[num].get()))
-        self.get_frame_rate_list(num)
-
-    def get_fov(self, num):
-        crop_details = self.cam_details[str(num)]['crop']
-        for fov_label in self.fov_labels:
-            self.fov_dict[num][fov_label].set(crop_details[fov_label])
-
-    def set_fov(self, num):
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-        
-        for fov_label in self.fov_labels:
-            self.cam_details[str(num)]['crop'][fov_label] = self.fov_dict[num][fov_label].get()
-            
-        self.cam[num].set_crop(top=self.cam_details[str(num)]['crop']['top'],
-                               left=self.cam_details[str(num)]['crop']['left'],
-                               height=self.cam_details[str(num)]['crop']['height'],
-                               width=self.cam_details[str(num)]['crop']['width'])
-        
-        self.get_frame_rate_list(num)
-    
-    def reset_fov(self, num):
-        pass
-        
-    def set_x_offset(self, i, num):
-        self.cam[num].set_auto_center(value=self.auto_center[num].get())
-        x_offset = self.x_offset_value[num].get()
-        self.cam[num].set_partial_scan(x_offset=int(x_offset))
-        self.x_offset_value[num].set(x_offset)
-    
-    def set_y_offset(self, i, num):
-        self.cam[num].set_auto_center(value=self.auto_center[num].get())
-        y_offset = self.y_offset_value[num].get()
-        self.cam[num].set_partial_scan(y_offset=int(y_offset))
-        self.y_offset_value[num].set(y_offset)
-        
-    def toggle_auto_center(self, num):
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-        
-        current_auto_center_status = self.auto_center[num].get()
-        self.cam[num].set_auto_center(value=current_auto_center_status)
-        state = "normal" if current_auto_center_status == 0 else "disabled"
-        self.x_offset_scale[num].config(state=state)
-        self.x_offset_spinbox[num].config(state=state)
-        self.y_offset_scale[num].config(state=state)
-        self.y_offset_spinbox[num].config(state=state)
-        
-        if current_auto_center_status == 0:
-            self.set_partial_scan_limit(num)
-            self.set_x_offset(None, num)
-            self.set_y_offset(None, num)
        
-    def toggle_polarity(self, num):
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-
-        self.cam[num].set_trigger_polarity(value=int(self.polarity[num].get()))
-        
-    def set_partial_scan_limit(self, num):
-        frame_dimension = self.get_frame_dimensions(num)
-        self.x_offset_scale[num].config(to=frame_dimension[0])
-        self.x_offset_spinbox[num].config(to=frame_dimension[0])
-        self.y_offset_scale[num].config(to=frame_dimension[1])
-        self.y_offset_spinbox[num].config(to=frame_dimension[1])
-        
-    def get_frame_rate_list(self, num):
-        frame_rate_list = self.cam[num].get_frame_rate_list()
-        self.framerate_list[num]['values'] = frame_rate_list
-        
-    def get_current_frame_rate(self, num):
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-        current_frame_rate = self.cam[num].get_frame_rate()
-        self.current_framerate[num].set(int(current_frame_rate))
-        return current_frame_rate
-        
-    def set_frame_rate(self, num, framerate=None, initCamera=False):
-        if self.is_camera_set_up(num) is False:
-            self.show_camera_error()
-            return
-        
-        if framerate is None:
-            selected_frame_rate = self.framerate_list[num].get()
-        else:
-            selected_frame_rate = framerate
-        if initCamera:
-            result = self.cam[num].set_frame_rate(int(selected_frame_rate))
-            self.framerate[num].set(selected_frame_rate)
-        else:
-            self.cam[num].close(getPosition=True)
-            result = self.cam[num].set_frame_rate(int(selected_frame_rate))
-            self.framerate[num].set(selected_frame_rate)
-            current_framerate = self.get_current_frame_rate(num)
-            self.cam[num].start()
-            print(f'Selected: {selected_frame_rate }. Frame rate set to {current_framerate} fps. Result: {result}')
-        
     def release_trigger(self):
         for num in range(len(self.cam)):
             self.cam[num].disable_trigger()
@@ -1368,7 +1215,7 @@ class CamGUI(object):
             self.format_entry[i].grid(row=1, column=1, padx=5, pady=3)
 
             # Set camera format
-            Button(init_camera_frame, text="Set Format", command=lambda index_cam=i: self.set_formats(index_cam), width=14).\
+            Button(init_camera_frame, text="Set Format", command=lambda index_cam=i: set_formats(self, index_cam), width=14).\
                 grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
             
             init_camera_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
@@ -1382,7 +1229,7 @@ class CamGUI(object):
             self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=7, justify="left"))
             self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, columnspan=2, padx=5, pady=3)
 
-            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: self.set_exposure(index_cam), width=14).\
+            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: set_exposure(self, index_cam), width=14).\
                 grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
             
             # change gain
@@ -1394,7 +1241,7 @@ class CamGUI(object):
             self.gain_entry[i].\
                 grid(sticky="nsew", row=1, column=1, columnspan=2, padx=5, pady=3)
             
-            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda index_cam=i: self.set_gain(index_cam), width=14).\
+            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda index_cam=i: set_gain(self, index_cam), width=14).\
                 grid(sticky="nsew", row=1, column=3, pady=3, padx=5)
             
             capture_settings_frame.\
@@ -1426,10 +1273,10 @@ class CamGUI(object):
             Entry(fov_settings_frame, textvariable=self.fov_dict[i]['width'], width=5).\
                 grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
             
-            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: self.get_fov(index_cam), width=14)
+            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=14)
             reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
             
-            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: self.set_fov(index_cam), width=14)
+            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=14)
             set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
 
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
@@ -1473,7 +1320,7 @@ class CamGUI(object):
             self.framerate_list[i].current(0)
             self.framerate_list[i].grid(row=0, column=1, sticky="w", padx=5, pady=3)
             
-            Button(framerate_frame, text="Update Frame Rate", command=lambda index_cam=i: self.set_frame_rate(index_cam), width=14).\
+            Button(framerate_frame, text="Update Frame Rate", command=lambda index_cam=i: set_frame_rate(self, index_cam), width=14).\
                 grid(row=0, column=3, sticky="nsew", padx=3, pady=3)
            
             Label(framerate_frame, text="Current Frame Rate: ").\
@@ -1496,10 +1343,10 @@ class CamGUI(object):
                 self.x_offset_value.append(DoubleVar(current_x_offset))
             except:
                 self.x_offset_value.append(DoubleVar())
-            self.x_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, orient=HORIZONTAL, resolution=1, variable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: self.set_x_offset(index_cam, idx), width=6, length=150))
+            self.x_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, orient=HORIZONTAL, resolution=1, variable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: set_x_offset(self, index_cam, idx), width=6, length=150))
             self.x_offset_scale[i].grid(row=0, column=1, columnspan=2, sticky="new", padx=5, pady=3)
             
-            self.x_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: self.set_x_offset(index_cam, idx), width=5))
+            self.x_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: set_x_offset(self, index_cam, idx), width=5))
             self.x_offset_spinbox[i].grid(row=0, column=4, columnspan=1, sticky="w", padx=5, pady=3)
             
             Label(partial_scan_frame, text="Y Offset (px): ").\
@@ -1511,18 +1358,18 @@ class CamGUI(object):
             except:
                 self.y_offset_value.append(DoubleVar())
             self.y_offset_value.append(DoubleVar())
-            self.y_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, resolution=1, orient=HORIZONTAL, variable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: self.set_y_offset(index_cam, idx), width=6, length=150))
+            self.y_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, resolution=1, orient=HORIZONTAL, variable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: set_y_offset(self, index_cam, idx), width=6, length=150))
             self.y_offset_scale[i].grid(row=1, column=1, columnspan=2, sticky="nw", padx=5, pady=3)
             
-            self.y_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: self.set_y_offset(index_cam, idx), width=5))
+            self.y_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: set_y_offset(self, index_cam, idx), width=5))
             self.y_offset_spinbox[i].grid(row=1, column=4, columnspan=1, sticky="w", padx=5, pady=3)
             
             self.auto_center.append(IntVar())
-            Checkbutton(partial_scan_frame, text="Auto-center", variable=self.auto_center[i], command=lambda index_cam=i: self.toggle_auto_center(index_cam)).\
+            Checkbutton(partial_scan_frame, text="Auto-center", variable=self.auto_center[i], command=lambda index_cam=i: toggle_auto_center(self, index_cam)).\
                 grid(row=0, column=5, sticky="w", padx=5, pady=3)
             
             self.polarity.append(IntVar())
-            Checkbutton(partial_scan_frame, text="Polarity", variable=self.polarity[i], command=lambda index_cam=i: self.toggle_polarity(index_cam), onvalue=1, offvalue=0).\
+            Checkbutton(partial_scan_frame, text="Polarity", variable=self.polarity[i], command=lambda index_cam=i: toggle_polarity(self, index_cam), onvalue=1, offvalue=0).\
                 grid(row=1, column=5, sticky="w", padx=5, pady=3)
             
             partial_scan_frame.\
