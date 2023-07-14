@@ -1502,7 +1502,7 @@ class CamGUI(object):
                     for num in range(len(self.cam)):
                         frame_group = frame_groups[num]
                         frame = frame_group[-1][0]
-                        c_corners = all_rows[num][0]['corner']
+                        c_corners = all_rows[num][0]['corners']
                         # nan_corners = np.isnan(c_corners).any(axis=(1, 2))
                         # c_corners = c_corners[~nan_corners]
                         ids = all_rows[num][0]['ids']
