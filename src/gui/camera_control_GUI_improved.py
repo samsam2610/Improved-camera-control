@@ -1463,13 +1463,15 @@ class CamGUI(object):
                             p2ds = self.cgroup_test.project(p3ds)
                         except:
                             print('Failed')
+                            print('#########')
+                            print(self.all_rows_test)
+
                         
                     # print('#########')
                     # print('p3ds', p3ds)
                     # print('#########')
                     # print('p2ds', p2ds)
-                    # print('#########')
-                    # print(self.all_rows_test)
+                    #
                     
                     # Clear the processed frames from the group
                     frame_groups = {}
