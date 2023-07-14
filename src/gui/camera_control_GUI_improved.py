@@ -1464,7 +1464,7 @@ class CamGUI(object):
                         except:
                             print('Failed')
                             print('#########')
-                            print(self.all_rows_test)
+                            print(imgp)
 
                         
                     # print('#########')
