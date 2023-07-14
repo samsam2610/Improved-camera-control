@@ -1455,7 +1455,7 @@ class CamGUI(object):
 
         window_name = f'Reprojection'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(window_name, 1280, 900)
+        cv2.resizeWindow(window_name, 1100, 900)
         
         self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
         try:
@@ -1494,8 +1494,9 @@ class CamGUI(object):
                             print('#'*10)
                             print('all_rows', all_rows.shape())
                             print('#'*10)
-                        except:
+                        except Exception as e:
                             print('Failed')
+                            traceback.print_exc()
                             print('#########')
                     
                     frames = []
@@ -1521,6 +1522,7 @@ class CamGUI(object):
                     # Clear the processed frames from the group
                     frame_groups = {}
                     frame_count = {}
+                self.reproject_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
             
         except Exception as e:
             print("Exception occurred:", type(e).__name__, "| Exception value:", e,
