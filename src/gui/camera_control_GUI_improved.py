@@ -1499,7 +1499,7 @@ class CamGUI(object):
                             print('#########')
                     
                     frames = []
-                    for num in range(self.cgroup_test.num_cameras):
+                    for num in range(len(self.cam)):
                         frame_group = frame_groups[num]
                         frame = frame_group[-1][0]
                         c_corners = all_rows[num][0]['corners']
