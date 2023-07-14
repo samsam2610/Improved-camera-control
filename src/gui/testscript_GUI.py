@@ -11,7 +11,7 @@ class CamGUI_Tests(CamGUI):
             
     def show_calibration_live(self):
         time.sleep(1)
-        self.reprojection_checkbox.invoke()
+        self.reprojection_checkbutton.invoke()
         time.sleep(1)
         self.test_calibration_live_button.invoke()
         

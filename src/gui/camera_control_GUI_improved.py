@@ -1350,7 +1350,7 @@ class CamGUI(object):
                         self.all_rows_test[num].extend(row)
                     
                     # putting frame into the frame queue along with following information
-                    self.frame_queue.put((frame_current, num))  # the id of the capturing camera
+                    self.frame_queue.put((frame_current, num, self.frame_count_test[num]))  # the id of the capturing camera
         barrier.abort()
         self.recording_threads_status[num] = False
     
@@ -1437,13 +1437,13 @@ class CamGUI(object):
         try:
             while any(thread is True for thread in self.recording_threads_status):
                 # Retrieve frame information from the queue
-                frame, thread_id, frame_count, capture_time = self.frame_queue.get()
+                frame, thread_id, frame_count,  = self.frame_queue.get()
                 if thread_id not in frame_groups:
                     frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
                     frame_counts[thread_id] = 0
 
                 # Append frame information to the corresponding group
-                frame_groups[thread_id].append((frame, frame_count, capture_time))
+                frame_groups[thread_id].append((frame, frame_count))
                 frame_counts[thread_id] += 1
                 
                 # Process the frame group (frames with the same thread_id)
