@@ -1466,8 +1466,7 @@ class CamGUI(object):
                     frame_count = {}
             
         except Exception as e:
-            print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", thread_id,
-                  "| Frame count:", frame_count, "| Capture time:", capture_time, "| Traceback:",
+            print("Exception occurred:", type(e).__name__, "| Exception value:", e,
                   ''.join(traceback.format_tb(e.__traceback__)))
                 
     def toggle_video_recording(self, set_status=None):
