@@ -4,12 +4,12 @@ from tkinter import Label, Button, Tk
 
 def show_camera_error(self):
     error_message = "No camera is found! \nPlease initialize camera before setting gain."
-    self.show_error_window(error_message)
+    show_error_window(error_message)
     
     
 def show_video_error(self):
     error_message = "Video writer is not initialized. \nPlease set up video first."
-    self.show_error_window(error_message)
+    show_error_window(error_message)
 
 
 def show_error_window(message):
@@ -30,22 +30,22 @@ def set_gain(self, num):
         return
         
     self.cam[num].set_gain(int(self.gain[num].get()))
-    self.get_frame_rate_list(num)
+    get_frame_rate_list(self, num)
     
     
 def set_exposure(self, num):
     # check if camera set up
     if is_camera_set_up(self, num) is False:
-        self.show_camera_error()
+        show_camera_error(self)
         return
     
     self.cam[num].set_exposure(float(self.exposure[num].get()))
-    self.get_frame_rate_list(num)
+    get_frame_rate_list(self, num)
 
 
 def get_frame_dimensions(self, num):
     if is_camera_set_up(self, num) is False:
-        self.show_camera_error()
+        show_camera_error(self)
         return
     
     frame_dimension = self.cam[num].get_video_format()
@@ -55,7 +55,7 @@ def get_frame_dimensions(self, num):
 def get_formats(self, num):
     # check if camera set up
     if is_camera_set_up(self, num) is False:
-        self.show_camera_error()
+        show_camera_error(self)
         return
 
     return self.cam[num].get_formats()
@@ -64,11 +64,11 @@ def get_formats(self, num):
 def set_formats(self, num):
     # check if camera set up
     if is_camera_set_up(self, num) is False:
-        self.show_camera_error()
+        show_camera_error(self)
         return
 
     self.cam[num].set_formats(str(self.formats[num].get()))
-    self.get_frame_rate_list(num)
+    get_frame_rate_list(self, num)
 
 
 def get_fov(self, num):
@@ -79,7 +79,7 @@ def get_fov(self, num):
 
 def set_fov(self, num):
     if is_camera_set_up(self, num) is False:
-        self.show_camera_error()
+        show_camera_error(self)
         return
     
     for fov_label in self.fov_labels:
@@ -90,7 +90,7 @@ def set_fov(self, num):
                            height=self.cam_details[str(num)]['crop']['height'],
                            width=self.cam_details[str(num)]['crop']['width'])
     
-    self.get_frame_rate_list(num)
+    get_frame_rate_list(self, num)
 
 
 def reset_fov(self, num):
@@ -113,7 +113,7 @@ def set_y_offset(self, i, num):
     
 def toggle_auto_center(self, num):
     if is_camera_set_up(self, num) is False:
-        self.show_camera_error()
+        show_camera_error(self)
         return
     
     current_auto_center_status = self.auto_center[num].get()
@@ -126,8 +126,8 @@ def toggle_auto_center(self, num):
     
     if current_auto_center_status == 0:
         self.set_partial_scan_limit(num)
-        self.set_x_offset(None, num)
-        self.set_y_offset(None, num)
+        set_x_offset(self, None, num)
+        set_y_offset(self, None, num)
    
    
 def toggle_polarity(self, num):
@@ -153,7 +153,7 @@ def get_frame_rate_list(self, num):
     
 def get_current_frame_rate(self, num):
     if is_camera_set_up(self, num) is False:
-        self.show_camera_error()
+        show_camera_error(self)
         return
     current_frame_rate = self.cam[num].get_frame_rate()
     self.current_framerate[num].set(int(current_frame_rate))
@@ -162,7 +162,7 @@ def get_current_frame_rate(self, num):
     
 def set_frame_rate(self, num, framerate=None, initCamera=False):
     if is_camera_set_up(self, num) is False:
-        self.show_camera_error()
+        show_camera_error(self)
         return
     
     if framerate is None:
@@ -176,6 +176,6 @@ def set_frame_rate(self, num, framerate=None, initCamera=False):
         self.cam[num].close(getPosition=True)
         result = self.cam[num].set_frame_rate(int(selected_frame_rate))
         self.framerate[num].set(selected_frame_rate)
-        current_framerate = self.get_current_frame_rate(num)
+        current_framerate = get_current_frame_rate(self, num)
         self.cam[num].start()
         print(f'Selected: {selected_frame_rate }. Frame rate set to {current_framerate} fps. Result: {result}')
