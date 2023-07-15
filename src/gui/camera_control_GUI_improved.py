@@ -1104,7 +1104,7 @@ class CamGUI(object):
         
             dim = self.cam[i].get_image_dimensions()
             fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
-            self.cam[i].set_up_video_trigger(self.vid_file[i], fourcc, self.fps.get(), dim)
+            self.cam[i].set_up_video_trigger(self.vid_file[i], fourcc, int(self.fps.get()), dim)
             subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
             create_output_files(self, subject_name=subject_name)
             

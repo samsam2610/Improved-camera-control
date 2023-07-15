@@ -270,7 +270,7 @@ class ICCam(ctypes.Structure):
         
 
 class VideoRecordingSession():
-    def __init__(self, video_file, fourcc, fps, dim):
+    def __init__(self, video_file, fourcc: String, fps: Int, dim):
         self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
         self.frame_times = []
         self.frame_num = []
