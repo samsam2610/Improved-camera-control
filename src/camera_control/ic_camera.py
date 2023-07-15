@@ -15,7 +15,7 @@ from pathlib import Path
 import os
 import json
 import cv2
-import ctypes as C
+
 
 path = Path(os.path.realpath(__file__))
 # Navigate to the outer parent directory and join the filename
@@ -47,6 +47,7 @@ class ICCam(ctypes.Structure):
         self.cam.SetVideoFormat(Format=self.formats)
         self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
         self.add_filters()
+        self.vid_out = None
 
     def add_filters(self):
         if self.rotate != 0:
@@ -168,10 +169,52 @@ class ICCam(ctypes.Structure):
         self.cam.GetPropertySwitch("Trigger", "Polarity", Value=polarity)
         return polarity[0]
 
-    def set_up_video_trigger(self, video_file, fps, dim):
-        self.vid_out = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
+    def set_up_video_trigger(self, video_file, fourcc, fps, dim):
+        if self.vid_out is not None:
+            self.vid_out.release()
+            
+        self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
         return self.vid_out
     
+    def release_vid_file(self):
+        if self.vid_out is not None:
+            self.vid_out.release()
+            self.vid_out = None
+            
+    def create_frame_callback_video(self):
+        handle_ptr = self.cam._handle
+        pData = self.vid_out
+        def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
+            Width = ctypes.c_long()
+            Height = ctypes.c_long()
+            BitsPerPixel = ctypes.c_int()
+            colorformat = ctypes.c_int()
+            
+            # Query the image description values
+            ic.TIS_GrabberDLL.GetImageDescription(hGrabber, Width, Height, BitsPerPixel, colorformat)
+
+            # Calculate the buffer size
+            bpp = int(BitsPerPixel.value/8.0)
+            buffer_size = Width.value * Height.value * bpp
+
+            if buffer_size > 0:
+                image = ctypes.cast(pBuffer,
+                                    ctypes.POINTER(
+                                        ctypes.c_ubyte * buffer_size))
+
+                pData.write(np.ndarray(buffer=image.contents,
+                                        dtype=np.uint8,
+                                        shape=(Height.value,
+                                                Width.value,
+                                                bpp)))
+       
+        return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
+    
+    def set_frame_callback_video(self):
+        CallbackfunctionPtr = self.create_frame_callback_video()
+        self.turn_on_continuous_mode()
+        self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_out)
+        
     def get_window_position(self):
         err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'] = self.cam.GetWindowPosition()
         if err != 1:
@@ -185,18 +228,18 @@ class ICCam(ctypes.Structure):
         self.cam.SetWindowPosition(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
     
     def turn_off_continuous_mode(self):
-        self.get_window_position()
+        # self.get_window_position()
         self.cam.StopLive()
         self.cam.SetContinuousMode(0)
         self.cam.StartLive()
-        self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
+        # self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
         
     def turn_on_continuous_mode(self):
-        self.get_window_position()
+        # self.get_window_position()
         self.cam.StopLive()
         self.cam.SetContinuousMode(1)
         self.cam.StartLive()
-        self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
+        # self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
         
     def start(self, show_display=1, setPosition=False):
         self.cam.SetContinuousMode(0)

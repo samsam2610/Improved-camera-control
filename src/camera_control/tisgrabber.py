@@ -471,6 +471,9 @@ class TIS_CAM(object):
                 self._frame['num'] = frame_num
         
         return TIS_GrabberDLL.FRAMEREADYCALLBACK(FrameCallBack)
+   
+    def SetVideoRecordingCallback(self, camobject):
+        pass
     
     def SetFrameReadyCallback(self, CallbackFunctionPtr=None, data=None):
         """ Set a callback function, which is called, when a new frame arrives.
