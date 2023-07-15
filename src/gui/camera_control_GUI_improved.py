@@ -34,14 +34,13 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import cv2
 import ffmpy
 import numpy as np
-from _video_files_func import create_video_files, create_output_files, save_vid, display_recorded_stats
+from _video_files_func import create_video_files, create_output_files, save_vid, display_recorded_stats, check_frame
 from _calibration_func import draw_calibration_on_thread, draw_reprojection_on_thread, detect_markers_on_thread
 from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, get_frame_dimensions, get_formats, set_formats, \
     get_fov, set_fov, set_frame_rate, get_current_frame_rate, \
     set_partial_scan_limit, toggle_auto_center, toggle_polarity, \
     set_x_offset, set_y_offset, \
-    show_camera_error
-
+    show_video_error, show_camera_error
 
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
 class CamGUI(object):
@@ -196,6 +195,7 @@ class CamGUI(object):
         for num in range(len(self.cam)):
             self.cam[num].disable_trigger()
     
+    # region Normal recording
     def snap_image(self):
         for num in range(len(self.cam)):
             self.cam[num].get_image()
@@ -310,6 +310,36 @@ class CamGUI(object):
         subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
         create_output_files(self, subject_name=subject_name)
         self.setup = True
+       
+    def toggle_video_recording(self, force_termination=False):
+        toggle_status = bool(self.toggle_video_recording_status.get())
+        
+        if toggle_status or force_termination:
+            self.toggle_video_recording_status = IntVar(value=0)
+            self.toggle_video_recording_button.config(text="Capture Off", background="red")
+            if self.toggle_continuous_mode.get() == 1:
+                for i in range(len(self.cam)):
+                    self.cam[i].turn_off_continuous_mode()
+        
+        else: # start recording videos and change button text
+            self.toggle_video_recording_status = IntVar(value=1)
+            self.toggle_video_recording_button.config(text="Capture On", background="green")
+            
+            self.vid_start_time = time.perf_counter()
+            if int(self.force_frame_sync.get()):
+                barrier = threading.Barrier(len(self.cam))
+            else:
+                barrier = None
+                
+            if self.toggle_continuous_mode.get() == 1:
+                for i in range(len(self.cam)):
+                    self.cam[i].turn_on_continuous_mode()
+                    
+            t = []
+            for i in range(len(self.cam)):
+                t.append(threading.Thread(target=self.record_on_thread, args=(i, barrier)))
+                t[-1].daemon = True
+                t[-1].start()
 
     def record_on_thread(self, num, barrier=None):
         fps = int(self.fps.get())
@@ -347,6 +377,9 @@ class CamGUI(object):
         except Exception as e:
             print(f"Traceback: \n {traceback.format_exc()}")
 
+    # endregion Normal recording
+    
+    # region Calibration
     @staticmethod
     def clear_calibration_file(file_name):
         """_summary_
@@ -990,37 +1023,208 @@ class CamGUI(object):
                 t.append(threading.Thread(target=draw_calibration_on_thread, args=(self, i, barrier)))
                 t[-1].daemon = True
                 t[-1].start()
-       
-    def toggle_video_recording(self, force_termination=False):
-        toggle_status = bool(self.toggle_video_recording_status.get())
-        
-        if toggle_status or force_termination:
-            self.toggle_video_recording_status = IntVar(value=0)
-            self.toggle_video_recording_button.config(text="Capture Off", background="red")
-            if self.toggle_continuous_mode.get() == 1:
-                for i in range(len(self.cam)):
-                    self.cam[i].turn_off_continuous_mode()
-        
-        else: # start recording videos and change button text
-            self.toggle_video_recording_status = IntVar(value=1)
-            self.toggle_video_recording_button.config(text="Capture On", background="green")
-            
-            self.vid_start_time = time.perf_counter()
-            if int(self.force_frame_sync.get()):
-                barrier = threading.Barrier(len(self.cam))
-            else:
-                barrier = None
-                
-            if self.toggle_continuous_mode.get() == 1:
-                for i in range(len(self.cam)):
-                    self.cam[i].turn_on_continuous_mode()
-                    
-            t = []
-            for i in range(len(self.cam)):
-                t.append(threading.Thread(target=self.record_on_thread, args=(i, barrier)))
-                t[-1].daemon = True
-                t[-1].start()
 
+    # endregion Calibration
+    
+    # region Trigger recording
+    def setup_trigger_recording(self, overwrite=False):
+        if len(self.vid_out) > 0:
+            vid_open_window = Tk()
+            Label(vid_open_window,
+                  text="Video is currently open! \n"
+                       "Please release the current video (click 'Save Video', even if no frames have been recorded)"
+                       " before setting up a new one.").pack()
+            Button(vid_open_window, text="Ok", command=lambda: vid_open_window.quit()).pack()
+            vid_open_window.mainloop()
+            vid_open_window.destroy()
+            return
+
+        # check if camera set up
+        if len(self.cam) == 0:
+            show_camera_error(self)
+            return
+        
+        self.trigger_on = 0
+        da_fps = str(self.fps.get())
+        month = datetime.datetime.now().month
+        month = str(month) if month >= 10 else '0' + str(month)
+        day = datetime.datetime.now().day
+        day = str(day) if day >= 10 else '0' + str(day)
+        year = str(datetime.datetime.now().year)
+        date = year + '-' + month + '-' + day
+        
+        self.cam_name_no_space = []
+        self.vid_file = []
+        self.base_name = []
+        
+        if not os.path.isdir(os.path.normpath(self.dir_output.get())):
+            os.makedirs(os.path.normpath(self.dir_output.get()))
+            
+        for i in range(len(self.cam)):
+            temp_exposure = str(round(math.log2(1/float(self.exposure[i].get()))))
+            temp_gain = str(round(float(self.gain[i].get())))
+            self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+            self.base_name.append(self.cam_name_no_space[i] + '_'
+                                  + self.subject.get() + '_'
+                                  + date + '_'
+                                  + str(int(da_fps)) + 'f'
+                                  + temp_exposure + 'e'
+                                  + temp_gain + 'g')
+            self.vid_file.append(os.path.normpath(self.dir_output.get() + '/' +
+                                                  self.base_name[i] +
+                                                  self.attempt.get() +
+                                                  '.avi'))
+        # check if file exists, ask to overwrite or change attempt number if it does
+        for i in range(len(self.cam)):
+            if i == 0:
+                self.overwrite = overwrite
+                if os.path.isfile(self.vid_file[i]) and not self.overwrite:
+                    self.ask_overwrite = Tk()
+                    
+                    def quit_overwrite(ow):
+                        self.overwrite = ow
+                        self.ask_overwrite.quit()
+                    
+                    Label(self.ask_overwrite,
+                          text="File already exists with attempt number = " + self.attempt.get() + ".\nWould you like to overwrite the file? ").pack()
+                    Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
+                    Button(self.ask_overwrite, text="Cancel & pick new attempt number",
+                           command=lambda: quit_overwrite(False)).pack()
+                    self.ask_overwrite.mainloop()
+                    self.ask_overwrite.destroy()
+                    
+                    if self.overwrite:
+                        self.vid_file[i] = os.path.normpath(
+                            self.dir_output.get() + '/' + self.base_name[i] + self.attempt.get() + '.avi')
+                    else:
+                        return
+            else:
+                # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
+                print('')
+        
+            dim = self.cam[i].get_image_dimensions()
+            fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
+            self.cam[i].set_up_video_trigger(self.vid_file[i], fourcc, self.fps.get(), dim)
+            subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
+            create_output_files(self, subject_name=subject_name)
+            
+            # Set frame callback first
+            for num in range(len(self.cam)):
+                self.cam[num].set_frame_callback_video()
+ 
+            self.setup = True
+        
+    def toggle_trigger_recording(self, force_termination=False):
+        
+        """
+        Toggle the trigger recording status.
+
+        This method toggles the trigger recording status. If the trigger recording is enabled, the method will disable it, and vice versa.
+
+        Parameters:
+        - None
+
+        Return Type:
+        - None
+
+        Example Usage:
+        toggle_trigger_recording()
+        """
+        if self.toggle_trigger_recording_status or force_termination:
+            self.toggle_trigger_recording_status = IntVar(value=0)
+            self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
+            # Disable the trigger first
+            for num in range(len(self.cam)):
+                self.cam[num].disable_trigger()
+                
+        else:
+            if self.setup is False:
+                print('Please setup the trigger recording first!')
+                return None
+            
+            self.toggle_trigger_recording_status = IntVar(value=1)
+            self.toggle_trigger_recording_button.config(text="Capture On", background="green")
+            self.vid_start_time = time.perf_counter()
+            
+            # enable the trigger
+            for num in range(len(self.cam)):
+                self.cam[num].enable_trigger()
+            
+    def save_trigger_recording(self, compress=False, delete=False):
+        """
+        Save the trigger recording.
+
+        This method saves the trigger recording. The trigger recording is saved as a .csv file.
+
+        Parameters:
+        - None
+
+        Return Type:
+        - None
+
+        Example Usage:
+        save_trigger_recording()
+        """
+        self.toggle_trigger_recording(force_termination=True)
+        self.toggle_trigger_recording_button['state'] = 'disabled'
+        self.toggle_trigger_recording_button.config(text="Capture Disabled", background="red")
+        
+        saved_files = []
+        for num in range(len(self.cam)):
+            self.trigger_status_label[num]['text'] = 'Disabled'
+            self.trigger_status_indicator[num]['bg'] = 'gray'
+        
+        # check that videos have been initialized
+        if len(self.vid_out) == 0:
+            show_video_error(self)
+            return
+        
+        # check for frames before saving. if any video has not taken frames, delete all videos
+        frames_taken = all([len(i) > 0 for i in self.frame_times])
+        
+        # release video writer (saves file).
+        # if no frames taken or delete specified,
+        # delete the file and do not save timestamp files; otherwise, save timestamp files.
+        for i in range(len(self.vid_out)):
+            frame_times, frame_num = self.cam[i].release_video_file()
+            if delete or (not frames_taken):
+                os.remove(self.vid_file[i])
+            else:
+                np.save(str(self.ts_file[i]), np.array(frame_times))
+                np.savetxt(str(self.ts_file_csv[i]), np.array(frame_times), delimiter=",")
+                saved_files.append(self.vid_file[i])
+                saved_files.append(self.ts_file[i])
+        
+        if len(saved_files) > 0:
+            if len(frame_times) > 1:
+                cam0_times = np.array(frame_times[0])
+                cam1_times = np.array(frame_times[1])
+                fps = int(self.fps.get())
+                check_frame_text = check_frame(cam0_times, cam1_times, fps)
+                for texty in check_frame_text:
+                    self.save_msg += texty + '\n'
+            self.save_msg += "The following files have been saved:"
+            for i in saved_files:
+                self.save_msg += "\n" + i
+            
+            self.attempt.set(str(int(self.attempt.get()) + 1))
+        
+        elif delete:
+            self.save_msg = "Video has been deleted, please set up a new video to take another recording."
+        elif not frames_taken:
+            self.save_msg = 'Video was initialized but no frames were recorded.\n' \
+                            'Video has been deleted, please set up a new video to take another recording.'
+        
+        if self.save_msg:
+            display_recorded_stats(self)
+        
+        self.vid_out = []
+        self.frame_times = []
+        self.current_file_label['text'] = ""
+        self.received_pulse_label['text'] = ""
+        self.set_calibration_buttons_group(state='disabled')
+        
+    # endregion Trigger recording
     def close_window(self):
 
         if not self.setup:
@@ -1511,6 +1715,30 @@ class CamGUI(object):
         calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         cur_row += 1
 
+        # Experimental settings
+        experimental_settings_label = Label(self.window, text="Experimental settings: ", font=("Arial", 12, "bold"))
+        experimental_settings_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="nw")
+        cur_row += 1
+        
+        experimental_functions_frame = Frame(self.window)
+        self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=14, command=self.setup_trigger_recording)
+        self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
+        Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
+        
+        self.toggle_trigger_recording_status = IntVar(value=0)
+        self.toggle_trigger_recording_button = Button(experimental_functions_frame, text="Capture Disabled",
+                                                    background="red", state="disabled", width=14, command=self.toggle_trigger_recording)
+        self.toggle_trigger_recording_button.grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+        Hovertip(self.toggle_trigger_recording_button, "Start/Stop listening to trigger to capture frame")
+        
+        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Trigger", state="disabled", width=14, command=self.save_trigger_recording)
+        self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+        Hovertip(self.save_trigger_recording_button, "Save the trigger recording to file")
+        
+        experimental_functions_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
+        
+        cur_row += 1
+        
         # File status
         Label(self.window, text="Current file status: ").grid(row=cur_row, column=0, sticky="w")
         self.current_file_label = Label(self.window, text="")

@@ -7,6 +7,7 @@ https://github.com/AdaptiveMotorControlLab
 
 camera class for imaging source cameras - helps load correct settings
 """
+import time
 
 import src.camera_control.tisgrabber as ic
 import ctypes
@@ -47,7 +48,7 @@ class ICCam(ctypes.Structure):
         self.cam.SetVideoFormat(Format=self.formats)
         self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
         self.add_filters()
-        self.vid_out = None
+        self.vid_file = None
 
     def add_filters(self):
         if self.rotate != 0:
@@ -170,21 +171,32 @@ class ICCam(ctypes.Structure):
         return polarity[0]
 
     def set_up_video_trigger(self, video_file, fourcc, fps, dim):
-        if self.vid_out is not None:
-            self.vid_out.release()
-            
-        self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
-        return self.vid_out
+        if self.vid_file is not None:
+            self.vid_file.release()
+        
+        self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim)
+        return self.vid_file
     
-    def release_vid_file(self):
-        if self.vid_out is not None:
-            self.vid_out.release()
-            self.vid_out = None
+    def release_video_file(self):
+        if self.vid_file is not None:
+            self.vid_file.release()
+            frame_times = self.vid_file.frame_times
+            frame_num = self.vid_file.frame_num
+            self.vid_file = None
+            return frame_times, frame_num
+        else:
+            return None, None
+            
+    
             
     def create_frame_callback_video(self):
         handle_ptr = self.cam._handle
-        pData = self.vid_out
-        def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
+        if self.vid_file is None:
+            print('No video file set up')
+            return None
+        
+        pData = self.vid_file
+        def frame_callback_video(handle_ptr, pBuffer, framenumber, pData: VideoRecordingSession):
             Width = ctypes.c_long()
             Height = ctypes.c_long()
             BitsPerPixel = ctypes.c_int()
@@ -202,11 +214,13 @@ class ICCam(ctypes.Structure):
                                     ctypes.POINTER(
                                         ctypes.c_ubyte * buffer_size))
 
-                pData.write(np.ndarray(buffer=image.contents,
+                pData.write(frame=np.ndarray(buffer=image.contents,
                                         dtype=np.uint8,
                                         shape=(Height.value,
                                                 Width.value,
-                                                bpp)))
+                                                bpp)),
+                            time_data=time.perf_counter(),
+                            frame_number=framenumber)
        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
@@ -254,3 +268,25 @@ class ICCam(ctypes.Structure):
             self.get_window_position()
         self.cam.StopLive()
         
+
+class VideoRecordingSession():
+    def __init__(self, video_file, fourcc, fps, dim):
+        self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
+        self.frame_times = []
+        self.frame_num = []
+        
+    def reset(self):
+        self.vid_out = None
+        self.frame_times = []
+        self.frame_num = []
+        
+    def release(self):
+        self.vid_out.release()
+        self.vid_out = None
+        self.frame_times = []
+        self.frame_num = []
+        
+    def write(self, frame, time_data, frame_num):
+        self.vid_out.write(frame)
+        self.frame_times.append(time_data)
+        self.frame_num.append(frame_num)
