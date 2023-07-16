@@ -142,8 +142,10 @@ class ICCam(ctypes.Structure):
         self.cam.WaitTillFrameReady(100000)
 
     def disable_trigger(self):
-        self.cam.SetPropertySwitch("Trigger", "Enable", False)
-        # self.cam.SetFrameReadyCallback()
+        result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
+        print(f'Cam {self.cam_num} trigger disabled with result: {result}')
+        result = self.cam.SetFrameReadyCallback()
+        print(f'Cam {self.cam_num} callback reset with result: {result}')
 
     def set_auto_center(self, value):
         self.cam.SetPropertySwitch("Partial scan", "Auto-center", value)
