@@ -174,7 +174,7 @@ class ICCam(ctypes.Structure):
         if self.vid_file is not None:
             self.vid_file.release()
         buffer_size = self.cam.GetBufferSize()
-        self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim)
+        self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim, buffer_size)
         return self.vid_file
     
     def release_video_file(self):
