@@ -224,7 +224,7 @@ class ICCam(ctypes.Structure):
     
     def set_frame_callback_video(self):
         CallbackfunctionPtr = self.create_frame_callback_video()
-        self.turn_on_continuous_mode()
+        self.turn_off_continuous_mode()
         self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_file)
         print(f'Video callback set up: {self.cam.callback_registered}')
         
