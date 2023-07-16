@@ -143,6 +143,7 @@ class ICCam(ctypes.Structure):
 
     def disable_trigger(self):
         self.cam.SetPropertySwitch("Trigger", "Enable", False)
+        self.cam.SetFrameReadyCallback()
 
     def set_auto_center(self, value):
         self.cam.SetPropertySwitch("Partial scan", "Auto-center", value)
@@ -198,14 +199,17 @@ class ICCam(ctypes.Structure):
             image = ctypes.cast(pBuffer,
                                 ctypes.POINTER(
                                     ctypes.c_ubyte * pData.buffer_size))
-
-            pData.write(frame=np.ndarray(buffer=image.contents,
-                                    dtype=np.uint8,
-                                    shape=(pData.height,
-                                       pData.width,
-                                       pData.bitsperpixel)),
-                        time_data=time.perf_counter(),
-                        frame_num=framenumber)
+            np_frame = np.frombuffer(image.contents, dtype=np.uint8)
+            np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
+            pData.write(frame=np_frame, time_data=time.perf_counter(), frame_num=framenumber)
+            # np_frame = cv2.flip(np_frame, 0)
+            # pData.write(frame=np.ndarray(buffer=image.contents,
+            #                         dtype=np.uint8,
+            #                         shape=(pData.height,
+            #                            pData.width,
+            #                            pData.bitsperpixel)),
+            #             time_data=time.perf_counter(),
+            #             frame_num=framenumber)
        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
@@ -216,6 +220,8 @@ class ICCam(ctypes.Structure):
             print('Turning off continuous mode')
             self.turn_off_continuous_mode()
         
+        print('Flipping vertical')
+        self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
         print('Setting up callback')
         self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_file)
         print(f'Video callback set up: {self.cam.callback_registered}')
