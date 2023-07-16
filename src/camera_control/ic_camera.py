@@ -187,8 +187,6 @@ class ICCam(ctypes.Structure):
         else:
             return None, None
             
-    
-            
     def create_frame_callback_video(self):
         handle_ptr = self.cam._handle
         if self.vid_file is None:
@@ -270,11 +268,12 @@ class ICCam(ctypes.Structure):
         self.cam.StopLive()
         
 
-class VideoRecordingSession():
+class VideoRecordingSession(ctypes.Structure):
     def __init__(self, video_file, fourcc: str, fps: int, dim):
         self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
         self.frame_times = []
         self.frame_num = []
+        print(f'Video file set up: {self.vid_out.isOpened()}')
         
     def reset(self):
         self.vid_out = None
