@@ -1231,6 +1231,7 @@ class CamGUI(object):
         frame_time_list = []
         for i in range(len(self.vid_out)):
             frame_times, frame_num = self.cam[i].release_video_file()
+            frame_times = [value - frame_times[0] for value in frame_times]
             print(f'Cam {i} frame times size is {len(frame_times)}')
             frame_time_list.append(frame_times)
             if delete:
