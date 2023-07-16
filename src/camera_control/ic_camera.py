@@ -285,14 +285,14 @@ class ICCam(ctypes.Structure):
 class VideoRecordingSession(ctypes.Structure):
     def __init__(self, video_file, cam_num, fourcc: str, fps: int, dim, buffer_size, width, height, bitsperpixel):
         self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
-        self.vid_out.open()
+        # self.vid_out.open()
         self.frame_times = []
         self.frame_num = []
         self.buffer_size = buffer_size
         self.width = width
         self.height = height
         self.bitsperpixel = bitsperpixel
-        print(f'Video file set up: {self.vid_out.isOpened()}')
+        print(f'Cam {cam_num} video file set up: {self.vid_out.isOpened()}')
         
     def reset(self):
         self.vid_out = None
