@@ -1236,9 +1236,6 @@ class CamGUI(object):
         
         elif delete:
             self.save_msg = "Video has been deleted, please set up a new video to take another recording."
-        elif not frames_taken:
-            self.save_msg = 'Video was initialized but no frames were recorded.\n' \
-                            'Video has been deleted, please set up a new video to take another recording.'
         
         if self.save_msg:
             display_recorded_stats(self)
