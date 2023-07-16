@@ -173,8 +173,8 @@ class ICCam(ctypes.Structure):
     def set_up_video_trigger(self, video_file, fourcc, fps, dim):
         if self.vid_file is not None:
             self.vid_file.release()
-        buffer_size = self.cam.GetBufferSize()
-        self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim, buffer_size)
+        buffer_size, width, height, bpp = self.cam.GetFrameData()
+        self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim, buffer_size, width, height, bpp)
         return self.vid_file
     
     def release_video_file(self):
@@ -256,11 +256,14 @@ class ICCam(ctypes.Structure):
         
 
 class VideoRecordingSession(ctypes.Structure):
-    def __init__(self, video_file, fourcc: str, fps: int, dim, buffersize):
+    def __init__(self, video_file, fourcc: str, fps: int, dim, buffer_size, width, height, bitsperpixel):
         self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
         self.frame_times = []
         self.frame_num = []
-        self.buffer_size = buffersize
+        self.buffer_size = buffer_size
+        self.width = width
+        self.height = height
+        self.bitsperpixel = bitsperpixel
         print(f'Video file set up: {self.vid_out.isOpened()}')
         
     def reset(self):
