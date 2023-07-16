@@ -151,18 +151,12 @@ class ICCam(ctypes.Structure):
         result = self.cam.SuspendLive()
         print(f'Cam {self.cam_num} stopped with result: {result}')
         
-        # result = self.cam.StopLive()
-        # print(f'Cam {self.cam_num} stopped with result: {result}')
         result = self.cam.SetContinuousMode(1)
         print(f'Cam {self.cam_num} continuous mode set with result: {result}')
       
         #
         result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
         print(f'Cam {self.cam_num} trigger disabled with result: {result}')
-        # result = self.cam.SetFrameReadyCallback()
-        # print(f'Cam {self.cam_num} callback reset with result: {result}')
-        result = self.cam.ResetFrameReady()
-        print(f'Cam {self.cam_num} frame ready reset with result: {result}')
 
         result = self.cam.StartLive()
         print(f'Cam {self.cam_num} started again with result: {result}')
@@ -241,9 +235,9 @@ class ICCam(ctypes.Structure):
     def set_frame_callback_video(self, turn_off_continuous_mode=False):
         print(f'Setting up video callback function pointer for cam {self.cam_num}')
         CallbackfunctionPtr = self.create_frame_callback_video()
-        if turn_off_continuous_mode is not False:
-            print('Turning off continuous mode')
-            self.turn_off_continuous_mode()
+        # if turn_off_continuous_mode is not False:
+        result = self.turn_off_continuous_mode()
+        print(f'Cam {self.cam_num} mode turned off with result: {result}')
         
         print(f'Flipping vertical for {self.cam_num}')
         self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
@@ -267,16 +261,18 @@ class ICCam(ctypes.Structure):
     
     def turn_off_continuous_mode(self):
         # self.get_window_position()
-        self.cam.StopLive()
+        self.cam.SuspendLive()
         self.cam.SetContinuousMode(0)
         self.cam.StartLive()
+        return 1
         # self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
         
     def turn_on_continuous_mode(self):
         # self.get_window_position()
-        self.cam.StopLive()
+        self.cam.SuspendLive()
         self.cam.SetContinuousMode(1)
         self.cam.StartLive()
+        return 1
         # self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
         
     def start(self, show_display=1, setPosition=False):
