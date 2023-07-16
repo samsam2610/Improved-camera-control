@@ -284,6 +284,7 @@ class ICCam(ctypes.Structure):
 
 class VideoRecordingSession(ctypes.Structure):
     def __init__(self, video_file, cam_num, fourcc: str, fps: int, dim, buffer_size, width, height, bitsperpixel):
+        fourcc = cv2.VideoWriter_fourcc(*fourcc)
         self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
         # self.vid_out.open()
         self.frame_times = []
