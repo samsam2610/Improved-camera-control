@@ -1108,9 +1108,7 @@ class CamGUI(object):
             subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
             create_output_files(self, subject_name=subject_name)
             
-            # Set frame callback first
-            for num in range(len(self.cam)):
-                self.cam[num].set_frame_callback_video()
+            
  
             self.recording_trigger_toggle_status = True
             self.setup = True
@@ -1159,6 +1157,9 @@ class CamGUI(object):
             self.recording_trigger_thread = []
             self.recording_trigger_status = [True for i in range(len(self.cam))]
             self.recording_trigger_toggle_status = True
+            # Set frame callback first
+            for num in range(len(self.cam)):
+                self.cam[num].set_frame_callback_video()
             # enable the trigger
             for i in range(len(self.cam)):
                 thread_name = f"Cam {i + 1} thread"
@@ -1758,7 +1759,7 @@ class CamGUI(object):
         
         self.toggle_trigger_recording_status = IntVar(value=0)
         self.toggle_trigger_recording_button = Button(experimental_functions_frame, text="Capture Disabled",
-                                                    background="red", state="disabled", width=14, command=self.toggle_trigger_recording)
+                                                    background="red", state="enabled", width=14, command=self.toggle_trigger_recording)
         self.toggle_trigger_recording_button.grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
         Hovertip(self.toggle_trigger_recording_button, "Start/Stop listening to trigger to capture frame")
         
