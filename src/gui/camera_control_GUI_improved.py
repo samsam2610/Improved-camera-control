@@ -1132,7 +1132,6 @@ class CamGUI(object):
             for i in range(len(self.cam)):
                 self.recording_trigger_status[i] = False
                 
-            self.recording_trigger_toggle_status = False
             print('Waiting for all the frames are done processing...')
             self.calibration_process_stats.set('Waiting for all the frames are done processing...')
             current_thread = threading.currentThread()
@@ -1140,7 +1139,8 @@ class CamGUI(object):
                 if t is not current_thread and t.is_alive():
                     print('Waiting for thread {} to finish...'.format(t.name))
                     t.join()
-                
+                    
+            self.recording_trigger_toggle_status = False
             print('The camera camera stopped gracefully!')
             self.toggle_trigger_recording_status = IntVar(value=0)
             self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
