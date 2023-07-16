@@ -419,6 +419,10 @@ class TIS_GrabberDLL(object):
     OpenVideoCaptureDevice.restype = C.c_int
     OpenVideoCaptureDevice.argtypes = [C.c_void_p, C.c_char_p]
     
+    # Set Ring buffer
+    SetRingBufferSize = __tisgrabber.IC_SetRingBufferSize
+    SetRingBufferSize.restype = C.c_int
+    SetRingBufferSize.argtypes = [GrabberHandlePtr, C.c_int]
     # ############################################################################
     
     ### GK Additions - adding frame filters. Pieces copied from: https://github.com/morefigs/py-ic-imaging-control
