@@ -188,13 +188,13 @@ class ICCam(ctypes.Structure):
             return None, None
             
     def create_frame_callback_video(self):
-        handle_ptr = self.cam._handle
-        if self.vid_file is None:
-            print('No video file set up')
-            return None
+        # handle_ptr = self.cam._handle
+        # if self.vid_file is None:
+        #     print('No video file set up')
+        #     return None
         
-        pData = self.vid_file
-        def frame_callback_video(handle_ptr, pBuffer, framenumber, pData: VideoRecordingSession):
+        # pData = self.vid_file
+        def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
             Width = ctypes.c_long()
             Height = ctypes.c_long()
             BitsPerPixel = ctypes.c_int()
