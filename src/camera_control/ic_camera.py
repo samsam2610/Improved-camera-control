@@ -209,9 +209,14 @@ class ICCam(ctypes.Structure):
        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
-    def set_frame_callback_video(self):
+    def set_frame_callback_video(self, turn_off_continuous_mode=False):
+        print('Setting up video callback function pointer')
         CallbackfunctionPtr = self.create_frame_callback_video()
-        self.turn_off_continuous_mode()
+        if turn_off_continuous_mode is not False:
+            print('Turning off continuous mode')
+            self.turn_off_continuous_mode()
+        
+        print('Setting up callback')
         self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_file)
         print(f'Video callback set up: {self.cam.callback_registered}')
         
