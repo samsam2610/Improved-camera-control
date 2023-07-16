@@ -260,7 +260,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
         self.frame_times = []
         self.frame_num = []
-        self.buffersize = buffersize
+        self.buffer_size = buffersize
         print(f'Video file set up: {self.vid_out.isOpened()}')
         
     def reset(self):
