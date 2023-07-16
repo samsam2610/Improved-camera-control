@@ -1112,6 +1112,7 @@ class CamGUI(object):
             for num in range(len(self.cam)):
                 self.cam[num].set_frame_callback_video()
  
+            self.recording_trigger_toggle_status = True
             self.setup = True
         
     def toggle_trigger_recording(self, force_termination=False):
@@ -1130,13 +1131,22 @@ class CamGUI(object):
         Example Usage:
         toggle_trigger_recording()
         """
-        if self.toggle_trigger_recording_status or force_termination:
+        if self.recording_trigger_toggle_status or force_termination:
+            for i in range(len(self.cam)):
+                self.recording_trigger_status[i] = False
+                
+            self.recording_trigger_toggle_status = False
+            print('Waiting for all the frames are done processing...')
+            self.calibration_process_stats.set('Waiting for all the frames are done processing...')
+            current_thread = threading.currentThread()
+            for t in self.recording_trigger_thread:
+                if t is not current_thread and t.is_alive():
+                    print('Waiting for thread {} to finish...'.format(t.name))
+                    t.join()
+                
+            print('The camera camera stopped gracefully!')
             self.toggle_trigger_recording_status = IntVar(value=0)
             self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
-            # Disable the trigger first
-            for num in range(len(self.cam)):
-                self.cam[num].disable_trigger()
-                
         else:
             if self.setup is False:
                 print('Please setup the trigger recording first!')
@@ -1145,11 +1155,32 @@ class CamGUI(object):
             self.toggle_trigger_recording_status = IntVar(value=1)
             self.toggle_trigger_recording_button.config(text="Capture On", background="green")
             self.vid_start_time = time.perf_counter()
-            
+            barrier = threading.Barrier(len(self.cam))
+            self.recording_trigger_thread = []
+            self.recording_trigger_status = [True for i in range(len(self.cam))]
+            self.recording_trigger_toggle_status = True
             # enable the trigger
-            for num in range(len(self.cam)):
-                self.cam[num].enable_trigger()
-            
+            for i in range(len(self.cam)):
+                thread_name = f"Cam {i + 1} thread"
+                self.recording_trigger_thread.append(threading.Thread(target=self.enable_trigger_on_thread, args=(i, barrier), name=thread_name))
+                self.recording_trigger_thread[-1].daemon = True
+                self.recording_trigger_thread[-1].start()
+                self.recording_trigger_thread.append(True)
+    
+    def enable_trigger_on_thread(self, num, barrier):
+        try:
+            barrier.wait(timeout=10)
+        except threading.BrokenBarrierError:
+            print(f'Barrier broken for cam {num}. Failed to sync start the trigger. Please try again!')
+            return None
+        self.cam[num].enable_trigger()
+        
+        while self.recording_trigger_toggle_status:
+            if not self.recording_trigger_status[num]:
+                self.cam[num].disable_trigger()
+                break
+            time.sleep(0.01)
+    
     def save_trigger_recording(self, compress=False, delete=False):
         """
         Save the trigger recording.
