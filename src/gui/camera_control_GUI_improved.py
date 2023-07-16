@@ -1027,7 +1027,7 @@ class CamGUI(object):
     # endregion Calibration
     
     # region Trigger recording
-    def setup_trigger_recording(self, overwrite=False):
+    def setup_trigger_recording(self, overwrite=True):
         if len(self.vid_out) > 0:
             vid_open_window = Tk()
             Label(vid_open_window,
