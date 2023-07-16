@@ -176,9 +176,9 @@ class ICCam(ctypes.Structure):
             self.vid_file.release()
         buffer_size, width, height, bpp = self.cam.GetFrameData()
         self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim, buffer_size, width, height, bpp)
-        self.cam.StopLive()
-        self.cam.SetRingBufferSize(10)
-        self.cam.StartLive()
+        # self.cam.StopLive()
+        # self.cam.SetRingBufferSize(10)
+        # self.cam.StartLive()
         return self.vid_file
     
     def release_video_file(self):
