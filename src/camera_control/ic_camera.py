@@ -143,7 +143,7 @@ class ICCam(ctypes.Structure):
 
     def disable_trigger(self):
         self.cam.SetPropertySwitch("Trigger", "Enable", False)
-        self.cam.SetFrameReadyCallback()
+        # self.cam.SetFrameReadyCallback()
 
     def set_auto_center(self, value):
         self.cam.SetPropertySwitch("Partial scan", "Auto-center", value)
