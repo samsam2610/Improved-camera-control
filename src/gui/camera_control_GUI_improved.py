@@ -1194,6 +1194,7 @@ class CamGUI(object):
         while self.recording_trigger_toggle_status:
             if not self.recording_trigger_status[num]:
                 self.cam[num].disable_trigger()
+                print(f'Kill thread for cam {num}')
                 break
             time.sleep(0.01)
     
