@@ -133,7 +133,12 @@ class ICCam(ctypes.Structure):
         return (width, height)
 
     def enable_trigger(self):
-        self.cam.SetPropertySwitch("Trigger", "Enable", True)
+        print(f'Cam {self.cam_num} is starting. Please wait...')
+        result = self.cam.StartLive()
+        print(f'Cam {self.cam_num} started with result: {result}')
+        
+        result = self.cam.SetPropertySwitch("Trigger", "Enable", True)
+        print(f'Cam {self.cam_num} trigger enabled with result: {result}')
         if not self.cam.callback_registered:
             self.cam.SetFrameReadyCallback()
 
@@ -142,6 +147,10 @@ class ICCam(ctypes.Structure):
         self.cam.WaitTillFrameReady(100000)
 
     def disable_trigger(self):
+        print(f'Cam {self.cam_num} is stopping. Please wait...')
+        result = self.cam.StopLive()
+        print(f'Cam {self.cam_num} stopped with result: {result}')
+        
         result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
         print(f'Cam {self.cam_num} trigger disabled with result: {result}')
         result = self.cam.SetFrameReadyCallback()
