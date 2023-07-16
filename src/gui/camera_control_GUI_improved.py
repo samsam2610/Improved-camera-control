@@ -1104,13 +1104,13 @@ class CamGUI(object):
         
             dim = self.cam[i].get_image_dimensions()
             fourcc = cv2.VideoWriter_fourcc(*self.video_codec)
-            self.cam[i].set_up_video_trigger(self.vid_file[i], fourcc, int(self.fps.get()), dim)
+            self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], fourcc, int(self.fps.get()), dim))
             
-            subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
-            create_output_files(self, subject_name=subject_name)
-            
-            self.recording_trigger_toggle_status = False
-            self.setup = True
+        subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
+        create_output_files(self, subject_name=subject_name)
+        
+        self.recording_trigger_toggle_status = False
+        self.setup = True
         
     def toggle_trigger_recording(self, force_termination=False):
         
@@ -1770,7 +1770,7 @@ class CamGUI(object):
         self.toggle_trigger_recording_button.grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
         Hovertip(self.toggle_trigger_recording_button, "Start/Stop listening to trigger to capture frame")
         
-        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Trigger", state="normal", width=14, command=self.save_trigger_recording)
+        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Videos", state="normal", width=14, command=self.save_trigger_recording)
         self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
         Hovertip(self.save_trigger_recording_button, "Save the trigger recording to file")
         
