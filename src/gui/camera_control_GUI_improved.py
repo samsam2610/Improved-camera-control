@@ -1137,7 +1137,7 @@ class CamGUI(object):
             current_thread = threading.currentThread()
             for t in self.recording_trigger_thread:
                 if t is not current_thread and t.is_alive():
-                    print('Waiting for thread {} to finish...'.format(t.name))
+                    print('Waiting for {} to finish...'.format(t.name))
                     t.join()
                     
             self.recording_trigger_toggle_status = False

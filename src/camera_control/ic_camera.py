@@ -133,9 +133,9 @@ class ICCam(ctypes.Structure):
         return (width, height)
 
     def enable_trigger(self):
-        print(f'Cam {self.cam_num} is starting. Please wait...')
-        result = self.cam.StartLive()
-        print(f'Cam {self.cam_num} started with result: {result}')
+        # print(f'Cam {self.cam_num} is starting. Please wait...')
+        # result = self.cam.StartLive()
+        # print(f'Cam {self.cam_num} started with result: {result}')
         
         result = self.cam.SetPropertySwitch("Trigger", "Enable", True)
         print(f'Cam {self.cam_num} trigger enabled with result: {result}')
@@ -154,16 +154,16 @@ class ICCam(ctypes.Structure):
         result = self.cam.StopLive()
         print(f'Cam {self.cam_num} stopped with result: {result}')
         
-        result = self.cam.ResetFrameReady()
-        print(f'Cam {self.cam_num} frame ready reset with result: {result}')
-        
-        result = self.cam.StartLive()
-        print(f'Cam {self.cam_num} started again with result: {result}')
-        
-        result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
-        print(f'Cam {self.cam_num} trigger disabled with result: {result}')
-        result = self.cam.SetFrameReadyCallback()
-        print(f'Cam {self.cam_num} callback reset with result: {result}')
+        # result = self.cam.ResetFrameReady()
+        # print(f'Cam {self.cam_num} frame ready reset with result: {result}')
+        #
+        # result = self.cam.StartLive()
+        # print(f'Cam {self.cam_num} started again with result: {result}')
+        #
+        # result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
+        # print(f'Cam {self.cam_num} trigger disabled with result: {result}')
+        # result = self.cam.SetFrameReadyCallback()
+        # print(f'Cam {self.cam_num} callback reset with result: {result}')
 
     def set_auto_center(self, value):
         self.cam.SetPropertySwitch("Partial scan", "Auto-center", value)
