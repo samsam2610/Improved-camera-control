@@ -225,8 +225,10 @@ class ICCam(ctypes.Structure):
         
         print('Flipping vertical')
         self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
-        print('Setting up callback')
-        self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_file)
+        
+        result = self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_file)
+        print('Frame ready callback set up result: ', result)
+        
         print(f'Video callback set up: {self.cam.callback_registered}')
         
     def get_window_position(self):
