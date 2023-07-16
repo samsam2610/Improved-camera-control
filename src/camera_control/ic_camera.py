@@ -147,8 +147,8 @@ class ICCam(ctypes.Structure):
         self.cam.WaitTillFrameReady(100000)
 
     def disable_trigger(self):
-        print(f'Cam {self.cam_num} is stopping. Please wait...')
-        result = self.cam.StopLive()
+        print(f'Cam {self.cam_num} is being suspended. Please wait...')
+        result = self.cam.SuspendLive()
         print(f'Cam {self.cam_num} stopped with result: {result}')
         
         result = self.cam.SetPropertySwitch("Trigger", "Enable", False)

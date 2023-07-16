@@ -274,6 +274,10 @@ class TIS_GrabberDLL(object):
     StopLive = __tisgrabber.IC_StopLive
     StopLive.restype = C.c_int
     StopLive.argtypes = (GrabberHandlePtr,)
+   
+    SuspendLive = __tisgrabber.IC_SuspendLive
+    SuspendLive.restype = C.c_int
+    SuspendLive.argtypes = (GrabberHandlePtr,)
     
     SetHWND = __tisgrabber.IC_SetHWnd
     SetHWND.restype = C.c_int
@@ -643,6 +647,13 @@ class TIS_CAM(object):
             showlive: 1 : a live video is shown, 0 : the live video is not shown.
             """
         Error = TIS_GrabberDLL.StartLive(self._handle, showlive)
+        return Error
+    
+    def SuspendLive(self):
+        """
+            Stop the live video.
+            """
+        Error = TIS_GrabberDLL.SuspendLive(self._handle)
         return Error
     
     def StopLive(self):
