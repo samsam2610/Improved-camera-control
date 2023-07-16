@@ -186,6 +186,7 @@ class ICCam(ctypes.Structure):
             self.vid_file.release()
             frame_times = self.vid_file.frame_times
             frame_num = self.vid_file.frame_num
+            self.cam.SetFrameReadyCallback()
             self.vid_file = None
             return frame_times, frame_num
         else:
