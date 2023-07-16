@@ -173,7 +173,7 @@ class ICCam(ctypes.Structure):
     def set_up_video_trigger(self, video_file, fourcc, fps, dim):
         if self.vid_file is not None:
             self.vid_file.release()
-        
+        buffer_size = self.cam.GetBufferSize()
         self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim)
         return self.vid_file
     
@@ -195,30 +195,17 @@ class ICCam(ctypes.Structure):
         
         # pData = self.vid_file
         def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
-            Width = ctypes.c_long()
-            Height = ctypes.c_long()
-            BitsPerPixel = ctypes.c_int()
-            colorformat = ctypes.c_int()
-            
-            # Query the image description values
-            ic.TIS_GrabberDLL.GetImageDescription(handle_ptr, Width, Height, BitsPerPixel, colorformat)
+            image = ctypes.cast(pBuffer,
+                                ctypes.POINTER(
+                                    ctypes.c_ubyte * pData.buffer_size))
 
-            # Calculate the buffer size
-            bpp = int(BitsPerPixel.value/8.0)
-            buffer_size = Width.value * Height.value * bpp
-
-            if buffer_size > 0:
-                image = ctypes.cast(pBuffer,
-                                    ctypes.POINTER(
-                                        ctypes.c_ubyte * buffer_size))
-
-                pData.write(frame=np.ndarray(buffer=image.contents,
-                                        dtype=np.uint8,
-                                        shape=(Height.value,
-                                                Width.value,
-                                                bpp)),
-                            time_data=time.perf_counter(),
-                            frame_number=framenumber)
+            pData.write(frame=np.ndarray(buffer=image.contents,
+                                    dtype=np.uint8,
+                                    shape=(Height.value,
+                                       Width.value,
+                                       bpp)),
+                        time_data=time.perf_counter(),
+                        frame_number=framenumber)
        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
@@ -269,10 +256,11 @@ class ICCam(ctypes.Structure):
         
 
 class VideoRecordingSession(ctypes.Structure):
-    def __init__(self, video_file, fourcc: str, fps: int, dim):
+    def __init__(self, video_file, fourcc: str, fps: int, dim, buffersize):
         self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
         self.frame_times = []
         self.frame_num = []
+        self.buffersize = buffersize
         print(f'Video file set up: {self.vid_out.isOpened()}')
         
     def reset(self):

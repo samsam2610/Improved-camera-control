@@ -662,6 +662,13 @@ class TIS_CAM(object):
         
         Error = TIS_GrabberDLL.GetImageDescription(self._handle, lWidth, lHeight, iBitsPerPixel, COLORFORMAT)
         return (lWidth.value, lHeight.value, iBitsPerPixel.value, COLORFORMAT.value)
+   
+    def GetBufferSize(self):
+        width, Height, bpp,  = self.GetImageDescription()
+        # Calculate the buffer size
+        bpp = int(bpp/8.0)
+        buffer_size = width * height * bpp
+        return buffer_size
     
     def GetImagePtr(self):
         ImagePtr = TIS_GrabberDLL.GetImagePtr(self._handle)
