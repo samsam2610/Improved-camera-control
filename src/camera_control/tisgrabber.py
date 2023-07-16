@@ -785,6 +785,20 @@ class TIS_CAM(object):
                 raise Exception("device has been opened, but is is not in live mode.")
         Value[0] = lValue.value
         return err
+   
+    def GetRingBuffer(self, NumberOfImages):
+        pass
+    
+    def SetRingBufferSize(self, NumberOfImages=5):
+        ''' Sets the size of the ring buffer. The ring buffer is used to store images, that have been snapped by the
+    camera, but not yet retrieved by the application. The ring buffer is used by the GetImage method.
+    The default size is 5 images. If the ring buffer is full, the oldest image is overwritten.
+    :param NumberOfImages: Number of images in the ring buffer
+    :return: Error code
+    '''
+        count = C.c_int(value=NumberOfImages)
+        result =  TIS_GrabberDLL.SetRingBufferSize(self._handle, count)
+        print('Set ring buffer size result code ', result)
     
     def SaveImage(self, FileName, FileType, Quality=75):
         ''' Saves the last snapped image. Can by of type BMP or JPEG.
