@@ -228,6 +228,7 @@ class ICCam(ctypes.Structure):
         CallbackfunctionPtr = self.create_frame_callback_video()
         self.turn_on_continuous_mode()
         self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_file)
+        print(f'Video callback set up: {self.cam.callback_registered}')
         
     def get_window_position(self):
         err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'] = self.cam.GetWindowPosition()
