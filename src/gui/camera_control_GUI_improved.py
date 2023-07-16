@@ -1212,7 +1212,7 @@ class CamGUI(object):
         # delete the file and do not save timestamp files; otherwise, save timestamp files.
         for i in range(len(self.vid_out)):
             frame_times, frame_num = self.cam[i].release_video_file()
-            if delete or (not frames_taken):
+            if delete:
                 os.remove(self.vid_file[i])
             else:
                 np.save(str(self.ts_file[i]), np.array(frame_times))
