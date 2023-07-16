@@ -1212,9 +1212,9 @@ class CamGUI(object):
         Example Usage:
         save_trigger_recording()
         """
-        self.toggle_trigger_recording(force_termination=True)
-        self.toggle_trigger_recording_button['state'] = 'disabled'
-        self.toggle_trigger_recording_button.config(text="Capture Disabled", background="red")
+        # self.toggle_trigger_recording(force_termination=True)
+        # self.toggle_trigger_recording_button['state'] = 'disabled'
+        # self.toggle_trigger_recording_button.config(text="Capture Disabled", background="red")
         
         saved_files = []
         for num in range(len(self.cam)):
