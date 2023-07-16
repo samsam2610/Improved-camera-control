@@ -1228,20 +1228,22 @@ class CamGUI(object):
         # release video writer (saves file).
         # if no frames taken or delete specified,
         # delete the file and do not save timestamp files; otherwise, save timestamp files.
+        frame_time_list = []
         for i in range(len(self.vid_out)):
             frame_times, frame_num = self.cam[i].release_video_file()
+            frame_time_list.append(frame_times)
             if delete:
                 os.remove(self.vid_file[i])
             else:
-                np.save(str(self.ts_file[i]), np.array(frame_times))
-                np.savetxt(str(self.ts_file_csv[i]), np.array(frame_times), delimiter=",")
+                np.save(str(self.ts_file[i]), np.array(frame_time_list[i]))
+                np.savetxt(str(self.ts_file_csv[i]), np.array(frame_time_list[i]), delimiter=",")
                 saved_files.append(self.vid_file[i])
                 saved_files.append(self.ts_file[i])
         
         if len(saved_files) > 0:
             if len(frame_times) > 1:
-                cam0_times = np.array(frame_times[0])
-                cam1_times = np.array(frame_times[1])
+                cam0_times = np.array(frame_time_list[0])
+                cam1_times = np.array(frame_time_list[1])
                 fps = int(self.fps.get())
                 check_frame_text = check_frame(cam0_times, cam1_times, fps)
                 for texty in check_frame_text:
@@ -1549,7 +1551,7 @@ class CamGUI(object):
             grid(sticky="nw", row=1, column=0, padx=5, pady=3)
         self.fps = StringVar()
         self.fps_entry = Entry(video_info_frame, textvariable=self.fps, width=5)
-        self.fps_entry.insert(END, '100')
+        self.fps_entry.insert(END, '200')
         self.fps_entry.\
             grid(sticky="nw", row=1, column=1, padx=5, pady=3)
 

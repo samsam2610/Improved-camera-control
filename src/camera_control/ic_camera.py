@@ -200,7 +200,9 @@ class ICCam(ctypes.Structure):
             self.vid_file.release()
             frame_times = self.vid_file.frame_times
             frame_num = self.vid_file.frame_num
-            # self.cam.SetFrameReadyCallback()
+            print(f'Flipping vertical back for cam {self.cam_num}')
+            self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
+            
             self.vid_file = None
             print(f'Trigger capturing mode vid file is released for cam {self.cam_num}')
             return frame_times, frame_num
