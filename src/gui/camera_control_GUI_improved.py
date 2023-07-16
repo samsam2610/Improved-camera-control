@@ -1152,20 +1152,37 @@ class CamGUI(object):
             self.toggle_trigger_recording_status = IntVar(value=1)
             self.toggle_trigger_recording_button.config(text="Capture On", background="green")
             self.vid_start_time = time.perf_counter()
+            
+            # Set frame callback first
+            self.setting_callback_thread =[]
+            for num in range(len(self.cam)):
+                thread_name = f"Cam {num + 1} thread"
+                self.setting_callback_thread.append(threading.Thread(target=self.set_frame_callback_on_thread, args=(num,), name=thread_name))
+                self.setting_callback_thread[-1].daemon = True
+                self.setting_callback_thread[-1].start()
+            
+            # Wait for all the threads to finish
+            print('Waiting for all cams are properly armed...')
+            current_thread = threading.currentThread()
+            for t in self.setting_callback_thread:
+                if t is not current_thread and t.is_alive():
+                    t.join()
+                
+            # enable the trigger
             barrier = threading.Barrier(len(self.cam))
             self.recording_trigger_thread = []
             self.recording_trigger_status = [True for i in range(len(self.cam))]
             self.recording_trigger_toggle_status = True
-            # Set frame callback first
-            for num in range(len(self.cam)):
-                self.cam[num].set_frame_callback_video()
-            # enable the trigger
+
             for i in range(len(self.cam)):
                 thread_name = f"Cam {i + 1} thread"
                 self.recording_trigger_thread.append(threading.Thread(target=self.enable_trigger_on_thread, args=(i, barrier), name=thread_name))
                 self.recording_trigger_thread[-1].daemon = True
                 self.recording_trigger_thread[-1].start()
     
+    def set_frame_callback_on_thread(self, num):
+        self.cam[num].set_frame_callback_video()
+        
     def enable_trigger_on_thread(self, num, barrier):
         try:
             barrier.wait(timeout=10)
