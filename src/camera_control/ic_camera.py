@@ -101,8 +101,6 @@ class ICCam(ctypes.Structure):
     def set_gain(self, val):
         try:
             val = int(round(val))
-            # val = val if val < self.cam.gain.max - 1 else self.cam.gain.max - 1
-            # val = val if val > self.cam.gain.min else self.cam.gain.min
             self.cam.SetPropertyAbsoluteValue("Gain", "Value", val)
         except:
             pass
