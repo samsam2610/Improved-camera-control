@@ -177,7 +177,7 @@ class ICCam(ctypes.Structure):
         buffer_size, width, height, bpp = self.cam.GetFrameData()
         self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim, buffer_size, width, height, bpp)
         self.cam.StopLive()
-        self.cam.SetRingBufferSize(2)
+        self.cam.SetRingBufferSize(10)
         self.cam.StartLive()
         return self.vid_file
     
