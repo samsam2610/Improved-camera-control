@@ -186,7 +186,7 @@ class ICCam(ctypes.Structure):
             frame_num = self.vid_file.frame_num
             self.cam.SetFrameReadyCallback()
             self.vid_file = None
-            print(f'Trigger capturing mode vid file is released for {self.cam_num}'
+            print(f'Trigger capturing mode vid file is released for {self.cam_num}')
             return frame_times, frame_num
         else:
             return None, None
