@@ -664,10 +664,10 @@ class TIS_CAM(object):
         return (lWidth.value, lHeight.value, iBitsPerPixel.value, COLORFORMAT.value)
    
     def GetBufferSize(self):
-        width, Height, bpp,  = self.GetImageDescription()
+        image_description = self.GetImageDescription()
         # Calculate the buffer size
-        bpp = int(bpp/8.0)
-        buffer_size = width * height * bpp
+        bpp = int(image_description[2]/8.0)
+        buffer_size = image_description[0] * height[1] * bpp
         return buffer_size
     
     def GetImagePtr(self):
