@@ -1108,9 +1108,7 @@ class CamGUI(object):
             subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
             create_output_files(self, subject_name=subject_name)
             
-            
- 
-            self.recording_trigger_toggle_status = True
+            self.recording_trigger_toggle_status = False
             self.setup = True
         
     def toggle_trigger_recording(self, force_termination=False):
