@@ -176,9 +176,7 @@ class ICCam(ctypes.Structure):
             self.vid_file.release()
         buffer_size, width, height, bpp = self.cam.GetFrameData()
         self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim, buffer_size, width, height, bpp)
-        # self.cam.StopLive()
-        # self.cam.SetRingBufferSize(10)
-        # self.cam.StartLive()
+        print(f'Trigger capturing mode vid file is ready for {self.cam_num}')
         return self.vid_file
     
     def release_video_file(self):
@@ -188,6 +186,7 @@ class ICCam(ctypes.Structure):
             frame_num = self.vid_file.frame_num
             self.cam.SetFrameReadyCallback()
             self.vid_file = None
+            print(f'Trigger capturing mode vid file is released for {self.cam_num}'
             return frame_times, frame_num
         else:
             return None, None
@@ -218,19 +217,19 @@ class ICCam(ctypes.Structure):
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
     def set_frame_callback_video(self, turn_off_continuous_mode=False):
-        print('Setting up video callback function pointer')
+        print(f'Setting up video callback function pointer for cam {self.cam_num}')
         CallbackfunctionPtr = self.create_frame_callback_video()
         if turn_off_continuous_mode is not False:
             print('Turning off continuous mode')
             self.turn_off_continuous_mode()
         
-        print('Flipping vertical')
+        print(f'Flipping vertical for {self.cam_num}')
         self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
         
         result = self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_file)
-        print('Frame ready callback set up result: ', result)
+        print(f'Cam {self.cam_num} frame ready callback result: {result}')
         
-        print(f'Video callback set up: {self.cam.callback_registered}')
+        print(f'Cam {self.cam_num} video callback set up {self.cam.callback_registered}')
         
     def get_window_position(self):
         err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'] = self.cam.GetWindowPosition()
