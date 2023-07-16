@@ -1222,7 +1222,7 @@ class CamGUI(object):
             self.trigger_status_indicator[num]['bg'] = 'gray'
         
         # check for frames before saving. if any video has not taken frames, delete all videos
-        frames_taken = all([len(i) > 0 for i in self.frame_times])
+        # frames_taken = all([len(i) > 0 for i in self.frame_times])
         
         # release video writer (saves file).
         # if no frames taken or delete specified,
