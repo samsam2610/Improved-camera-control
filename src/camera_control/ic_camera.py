@@ -283,6 +283,6 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_num = []
         
     def write(self, frame, time_data, frame_num):
-        self.vid_out.write(frame)
+        self.vid_out.write(cv2.flip(frame, 0))
         self.frame_times.append(time_data)
         self.frame_num.append(frame_num)
