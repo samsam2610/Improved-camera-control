@@ -1141,7 +1141,7 @@ class CamGUI(object):
                     t.join()
                     
             self.recording_trigger_toggle_status = False
-            print('The camera camera stopped gracefully!')
+            print('The cameras stopped gracefully!')
             self.toggle_trigger_recording_status = IntVar(value=0)
             self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
         else:
