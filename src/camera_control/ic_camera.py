@@ -196,9 +196,10 @@ class ICCam(ctypes.Structure):
     
     def release_video_file(self):
         if self.vid_file is not None:
-            self.vid_file.release()
             frame_times = copy.deepcopy(self.vid_file.frame_times)
             frame_num = copy.deepcopy(self.vid_file.frame_num)
+            self.vid_file.release()
+            
             print(f'Flipping vertical back for cam {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
             
