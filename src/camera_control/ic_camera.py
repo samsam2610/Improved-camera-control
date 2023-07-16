@@ -153,7 +153,8 @@ class ICCam(ctypes.Structure):
         
         # result = self.cam.StopLive()
         # print(f'Cam {self.cam_num} stopped with result: {result}')
-        
+        result = self.cam.SetContinuousMode(1)
+        print(f'Cam {self.cam_num} continuous mode set with result: {result}')
       
         #
         result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
