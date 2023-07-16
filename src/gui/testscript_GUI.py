@@ -24,7 +24,7 @@ class CamGUI_Tests(CamGUI):
         
         self.window.after(2000, self.init_cams)
         self.window.after(3000, self.show_calibration_live)
-        self.window.after(1000, self.test_experimental_func)
+        self.window.after(3000, self.test_experimental_func)
         self.window.mainloop()
  
 
