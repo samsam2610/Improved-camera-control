@@ -205,7 +205,7 @@ class ICCam(ctypes.Structure):
                                        pData.width,
                                        pData.bitsperpixel)),
                         time_data=time.perf_counter(),
-                        frame_number=framenumber)
+                        frame_num=framenumber)
        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
