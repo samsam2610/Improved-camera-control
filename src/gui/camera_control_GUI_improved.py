@@ -1204,11 +1204,6 @@ class CamGUI(object):
             self.trigger_status_label[num]['text'] = 'Disabled'
             self.trigger_status_indicator[num]['bg'] = 'gray'
         
-        # check that videos have been initialized
-        if len(self.vid_out) == 0:
-            show_video_error(self)
-            return
-        
         # check for frames before saving. if any video has not taken frames, delete all videos
         frames_taken = all([len(i) > 0 for i in self.frame_times])
         
