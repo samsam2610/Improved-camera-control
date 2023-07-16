@@ -1164,7 +1164,6 @@ class CamGUI(object):
                 self.recording_trigger_thread.append(threading.Thread(target=self.enable_trigger_on_thread, args=(i, barrier), name=thread_name))
                 self.recording_trigger_thread[-1].daemon = True
                 self.recording_trigger_thread[-1].start()
-                self.recording_trigger_thread.append(True)
     
     def enable_trigger_on_thread(self, num, barrier):
         try:
