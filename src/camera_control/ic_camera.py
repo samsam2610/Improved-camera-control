@@ -201,7 +201,7 @@ class ICCam(ctypes.Structure):
             colorformat = ctypes.c_int()
             
             # Query the image description values
-            ic.TIS_GrabberDLL.GetImageDescription(hGrabber, Width, Height, BitsPerPixel, colorformat)
+            ic.TIS_GrabberDLL.GetImageDescription(handle_ptr, Width, Height, BitsPerPixel, colorformat)
 
             # Calculate the buffer size
             bpp = int(BitsPerPixel.value/8.0)
