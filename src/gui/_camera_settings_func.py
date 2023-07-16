@@ -173,7 +173,7 @@ def set_frame_rate(self, num, framerate=None, initCamera=False):
         result = self.cam[num].set_frame_rate(int(selected_frame_rate))
         self.framerate[num].set(selected_frame_rate)
     else:
-        self.cam[num].close(getPosition=True)
+        self.cam[num].close()
         result = self.cam[num].set_frame_rate(int(selected_frame_rate))
         self.framerate[num].set(selected_frame_rate)
         current_framerate = get_current_frame_rate(self, num)
