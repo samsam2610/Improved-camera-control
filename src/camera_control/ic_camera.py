@@ -186,7 +186,7 @@ class ICCam(ctypes.Structure):
         if self.vid_file is not None:
             self.vid_file.release()
         buffer_size, width, height, bpp = self.cam.GetFrameData()
-        self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim, buffer_size, width, height, bpp)
+        self.vid_file = VideoRecordingSession(video_file, self.cam_num, fourcc, fps, dim, buffer_size, width, height, bpp)
         print(f'Trigger capturing mode vid file is ready for {self.cam_num}')
         return self.vid_file
     
@@ -197,7 +197,7 @@ class ICCam(ctypes.Structure):
             frame_num = self.vid_file.frame_num
             self.cam.SetFrameReadyCallback()
             self.vid_file = None
-            print(f'Trigger capturing mode vid file is released for {self.cam_num}')
+            print(f'Trigger capturing mode vid file is released for cam {self.cam_num}')
             return frame_times, frame_num
         else:
             return None, None
@@ -283,8 +283,9 @@ class ICCam(ctypes.Structure):
         
 
 class VideoRecordingSession(ctypes.Structure):
-    def __init__(self, video_file, fourcc: str, fps: int, dim, buffer_size, width, height, bitsperpixel):
+    def __init__(self, video_file, cam_num, fourcc: str, fps: int, dim, buffer_size, width, height, bitsperpixel):
         self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
+        self.vid_out.open()
         self.frame_times = []
         self.frame_num = []
         self.buffer_size = buffer_size
