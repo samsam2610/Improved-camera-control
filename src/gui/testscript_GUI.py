@@ -16,14 +16,17 @@ class CamGUI_Tests(CamGUI):
         # self.test_calibration_live_button.invoke()
        
     def test_experimental_func(self):
+        self.init_cams()
         time.sleep(1)
+        self.show_calibration_live()
+        time.sleep(3)
         self.setup_trigger_recording_button.invoke()
         
     def auto_init_cam(self):
         print("Initialize camera in test mode")
         
-        self.window.after(2000, self.init_cams)
-        self.window.after(3000, self.show_calibration_live)
+        # self.window.after(2000, self.init_cams)
+        # self.window.after(3000, self.show_calibration_live)
         self.window.after(3000, self.test_experimental_func)
         self.window.mainloop()
  
