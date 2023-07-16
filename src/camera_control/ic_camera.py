@@ -176,9 +176,9 @@ class ICCam(ctypes.Structure):
             self.vid_file.release()
         buffer_size, width, height, bpp = self.cam.GetFrameData()
         self.vid_file = VideoRecordingSession(video_file, fourcc, fps, dim, buffer_size, width, height, bpp)
-        # self.cam.StopLive()
-        # self.cam.SetRingBufferSize(10)
-        # self.cam.StartLive()
+        self.cam.StopLive()
+        self.cam.SetRingBufferSize(10)
+        self.cam.StartLive()
         return self.vid_file
     
     def release_video_file(self):
@@ -202,17 +202,17 @@ class ICCam(ctypes.Structure):
             image = ctypes.cast(pBuffer,
                                 ctypes.POINTER(
                                     ctypes.c_ubyte * pData.buffer_size))
-            # np_frame = np.frombuffer(image.contents, dtype=np.uint8)
-            # np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
-            # pData.write(frame=np_frame, time_data=time.perf_counter(), frame_num=framenumber)
+            np_frame = np.frombuffer(image.contents, dtype=np.uint8)
+            np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
+            pData.write(frame=np_frame, time_data=time.perf_counter(), frame_num=framenumber)
             # np_frame = cv2.flip(np_frame, 0)
-            pData.write(frame=np.ndarray(buffer=image.contents,
-                                    dtype=np.uint8,
-                                    shape=(pData.height,
-                                       pData.width,
-                                       pData.bitsperpixel)),
-                        time_data=time.perf_counter(),
-                        frame_num=framenumber)
+            # pData.write(frame=np.ndarray(buffer=image.contents,
+            #                         dtype=np.uint8,
+            #                         shape=(pData.height,
+            #                            pData.width,
+            #                            pData.bitsperpixel)),
+            #             time_data=time.perf_counter(),
+            #             frame_num=framenumber)
        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
