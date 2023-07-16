@@ -1761,7 +1761,7 @@ class CamGUI(object):
         self.toggle_trigger_recording_button.grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
         Hovertip(self.toggle_trigger_recording_button, "Start/Stop listening to trigger to capture frame")
         
-        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Trigger", state="disabled", width=14, command=self.save_trigger_recording)
+        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Trigger", state="normal", width=14, command=self.save_trigger_recording)
         self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
         Hovertip(self.save_trigger_recording_button, "Save the trigger recording to file")
         
