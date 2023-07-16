@@ -201,9 +201,9 @@ class ICCam(ctypes.Structure):
 
             pData.write(frame=np.ndarray(buffer=image.contents,
                                     dtype=np.uint8,
-                                    shape=(Height.value,
-                                       Width.value,
-                                       bpp)),
+                                    shape=(pData.height,
+                                       pData.width,
+                                       pData.bitsperpixel)),
                         time_data=time.perf_counter(),
                         frame_number=framenumber)
        
