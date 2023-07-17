@@ -735,9 +735,8 @@ class CamGUI(object):
                 # self.toggle_calibration_capture(termination=True)
                 
         except Exception as e:
-            print("Exception occurred:", type(e).__name__, "| Exception value:", e, "| Thread ID:", num,
-                  "| Frame count:", self.frame_count[num], "| Capture time:", self.frame_times[num][-1],
-                  "| Traceback:", ''.join(traceback.format_tb(e.__traceback__)))
+            print("Exception occurred:", type(e).__name__, "| Exception value:", e,
+                  ''.join(traceback.format_tb(e.__traceback__)))
 
     def process_marker_on_thread(self):
         """
