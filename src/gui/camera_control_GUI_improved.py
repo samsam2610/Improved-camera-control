@@ -528,6 +528,7 @@ class CamGUI(object):
                 self.all_rows.append([])
                 self.previous_frame_count.append(0)
                 self.current_frame_count.append(0)
+                self.frame_times.append([])
 
             # check if file exists, ask to overwrite or change attempt number if it does
             create_video_files(self, overwrite=True)
