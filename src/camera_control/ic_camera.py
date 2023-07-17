@@ -210,12 +210,6 @@ class ICCam(ctypes.Structure):
             return None, None
             
     def create_frame_callback_video(self):
-        # handle_ptr = self.cam._handle
-        # if self.vid_file is None:
-        #     print('No video file set up')
-        #     return None
-        
-        # pData = self.vid_file
         def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
             callback_time = time.perf_counter()
             image = ctypes.cast(pBuffer,
@@ -239,11 +233,13 @@ class ICCam(ctypes.Structure):
         print(f'Setting up video callback function pointer for cam {self.cam_num}')
         CallbackfunctionPtr = self.create_frame_callback_video()
         # if turn_off_continuous_mode is not False:
-        result = self.turn_off_continuous_mode()
-        print(f'Cam {self.cam_num} mode turned off with result: {result}')
         
         print(f'Flipping vertical for {self.cam_num}')
         self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
+
+        result = self.turn_off_continuous_mode()
+        print(f'Cam {self.cam_num} mode turned off with result: {result}')
+        
         
         result = self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_file)
         print(f'Cam {self.cam_num} frame ready callback result: {result}')
