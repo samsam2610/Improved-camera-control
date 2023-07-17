@@ -39,7 +39,7 @@ def draw_calibration_on_thread(self, num, barrier):
             break
         frame_current = self.cam[num].get_image()
         if frame_current is not None:
-            drawn_frame = self.draw_axis(frame_current,
+            drawn_frame = draw_axis(frame_current,
                                             camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
                                             dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
                                             rotation=self.cgroup_test.cameras[num].get_rotation(),
