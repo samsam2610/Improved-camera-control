@@ -264,7 +264,6 @@ class ICCam(ctypes.Structure):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive()
         return 1
-        # self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
         
     def turn_on_continuous_mode(self):
         # self.get_window_position()
@@ -272,8 +271,21 @@ class ICCam(ctypes.Structure):
         self.cam.SetContinuousMode(1)
         self.cam.StartLive()
         return 1
-        # self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
-        
+    
+    def set_flip_vertical(self, state: bool=True):
+        if state:
+            print(f'Flipping vertical for {self.cam_num}')
+            self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
+        else:
+            print(f'Flipping vertical back for {self.cam_num}')
+            self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
+            
+    def get_flip_vertical(self):
+        flip_vertical = [0]
+        self.cam.GetPropertySwitch("Flip Vertical", flip_vertical)
+        return flip_vertical[0]
+    
+    
     def start(self, show_display=1, setPosition=False):
         self.cam.SetContinuousMode(0)
         print(f'Flipping vertical back for cam {self.cam_num}')
@@ -292,16 +304,55 @@ class ICCam(ctypes.Structure):
 
 class VideoRecordingSession(ctypes.Structure):
     def __init__(self, video_file, cam_num, fourcc: str, fps: int, dim, buffer_size, width, height, bitsperpixel):
-        fourcc = cv2.VideoWriter_fourcc(*fourcc)
-        self.vid_out = cv2.VideoWriter(video_file, fourcc, fps, dim)
-        # self.vid_out.open()
+        self.fourcc = cv2.VideoWriter_fourcc(*fourcc)
+        self.vid_out = None
+        self.video_file = video_file
         self.frame_times = []
         self.frame_num = []
         self.buffer_size = buffer_size
         self.width = width
         self.height = height
         self.bitsperpixel = bitsperpixel
+        self.cam_num = cam_num
+        self.recording_status = False
         print(f'Cam {cam_num} video file set up: {self.vid_out.isOpened()}')
+    
+    def set_recording_status(self, status: bool):
+        if self.vid_out is None:
+            print(f'Cam {self.cam_num} video file not set up yet')
+            return None
+        self.recording_status = status
+        return 1
+    
+    def init_video_file(self):
+        self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
+        self.frame_times = []
+        self.frame_num = []
+        return 1
+    
+    def update_params(self, video_file, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None):
+        if fourcc is not None:
+            self.fourcc = cv2.VideoWriter_fourcc(*fourcc)
+        
+        if fps is not None:
+            self.fps = fps
+        
+        if dim is not None:
+            self.dim = dim
+        
+        if buffer_size is not None:
+            self.buffer_size = buffer_size
+            
+        if width is not None:
+            self.width = width
+        
+        if height is not None:
+            self.height = height
+            
+        if bitsperpixel is not None:
+            self.bitsperpixel = bitsperpixel
+            
+        return 1
         
     def reset(self):
         self.vid_out = None
@@ -309,12 +360,20 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_num = []
         
     def release(self):
+        if vid_out is None:
+            print(f'Cam {self.cam_num} video file not set up yet')
+            return None
         self.vid_out.release()
         self.vid_out = None
         self.frame_times = []
         self.frame_num = []
+        return 1
         
     def write(self, frame, time_data, frame_num):
+        if self.vid_out is None or self.recording_status is False:
+            print(f'Cam {self.cam_num} is not ready for recording')
+            return None
         self.vid_out.write(frame)
         self.frame_times.append(time_data)
         self.frame_num.append(frame_num)
+        return 1

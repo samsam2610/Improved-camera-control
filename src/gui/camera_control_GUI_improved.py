@@ -22,7 +22,7 @@ import threading
 import time
 import traceback
 from pathlib import Path
-from tkinter import Entry, Label, Button, StringVar, IntVar,\
+from tkinter import Entry, Label, Button, StringVar, IntVar, BooleanVar, \
     Tk, END, Radiobutton, filedialog, ttk, Frame, Scale, HORIZONTAL, Spinbox, Checkbutton, DoubleVar, messagebox
 from idlelib.tooltip import Hovertip
 
@@ -38,7 +38,7 @@ from _video_files_func import create_video_files, create_output_files, save_vid,
 from _calibration_func import draw_calibration_on_thread, draw_reprojection_on_thread, detect_markers_on_thread
 from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, get_frame_dimensions, get_formats, set_formats, \
     get_fov, set_fov, set_frame_rate, get_current_frame_rate, \
-    set_partial_scan_limit, toggle_auto_center, toggle_polarity, \
+    set_partial_scan_limit, toggle_auto_center, toggle_polarity, toggle_flip_vertical, \
     set_x_offset, set_y_offset, \
     show_video_error, show_camera_error
 
@@ -87,6 +87,7 @@ class CamGUI(object):
         self.y_offset_spinbox = []
 
         self.auto_center = []
+        self.flip_vertical = []
         self.frame_acquired_count_label = []
         self.board_detected_count_label = []
 
@@ -186,6 +187,9 @@ class CamGUI(object):
         
         polarity = self.cam[num].get_trigger_polarity()
         self.polarity[num].set(polarity)
+        
+        flip_vertical = self.cam[num].get_flip_vertical()
+        self.flip_vertical[num].set(bool(flip_vertical))
         
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
@@ -1472,6 +1476,10 @@ class CamGUI(object):
             Label(framerate_frame, textvariable=self.current_framerate[i], width=5).\
                     grid(row=1, column=1, sticky="w", padx=5, pady=3)
             
+            self.polarity.append(IntVar())
+            Checkbutton(framerate_frame, text="Trigger Polarity", variable=self.polarity[i], command=lambda index_cam=i: toggle_polarity(self, index_cam), onvalue=1, offvalue=0).\
+                grid(row=1, column=3, sticky="w", padx=5, pady=3)
+ 
             framerate_frame.\
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="new")
             framerate_frame.pack_propagate(False)
@@ -1511,8 +1519,8 @@ class CamGUI(object):
             Checkbutton(partial_scan_frame, text="Auto-center", variable=self.auto_center[i], command=lambda index_cam=i: toggle_auto_center(self, index_cam)).\
                 grid(row=0, column=5, sticky="w", padx=5, pady=3)
             
-            self.polarity.append(IntVar())
-            Checkbutton(partial_scan_frame, text="Polarity", variable=self.polarity[i], command=lambda index_cam=i: toggle_polarity(self, index_cam), onvalue=1, offvalue=0).\
+            self.flip_vertical.append(BooleanVar())
+            Checkbutton(partial_scan_frame, text="Flip Vertical", variable=self.flip_vertical[i], command=lambda index_cam=i: toggle_flip_vertical(self, index_cam)).\
                 grid(row=1, column=5, sticky="w", padx=5, pady=3)
             
             partial_scan_frame.\
