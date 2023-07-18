@@ -85,6 +85,7 @@ class ICCam(ctypes.Structure):
         
     def set_frame_rate(self, fps):
         result = self.cam.SetFrameRate(fps)
+        self.cam.ShowPropertyDialog()
         return result
 
     def get_frame_rate(self):
