@@ -291,7 +291,6 @@ class ICCam(ctypes.Structure):
         print(f'Flipping vertical back for cam {self.cam_num}')
         self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
         self.cam.StartLive(show_display)
-        self.cam.ShowPropertyDialog()
         # self.cam.SetDefaultWindowPosition(default=0)
         
         if setPosition:
