@@ -85,7 +85,6 @@ class ICCam(ctypes.Structure):
         
     def set_frame_rate(self, fps):
         result = self.cam.SetFrameRate(fps)
-        self.cam.ShowPropertyDialog()
         return result
 
     def get_frame_rate(self):
@@ -292,6 +291,7 @@ class ICCam(ctypes.Structure):
         print(f'Flipping vertical back for cam {self.cam_num}')
         self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
         self.cam.StartLive(show_display)
+        self.cam.ShowPropertyDialog()
         # self.cam.SetDefaultWindowPosition(default=0)
         if setPosition:
             if self.windowPos['x'] is not None:
