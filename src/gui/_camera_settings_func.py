@@ -142,7 +142,7 @@ def toggle_flip_vertical(self, num):
         self.show_camera_error()
         return
     
-    self.cam[num].set_flip_vertical(value=self.flip_vertical[num].get())
+    self.cam[num].set_flip_vertical(state=self.flip_vertical[num].get())
 
 
 def set_partial_scan_limit(self, num):
