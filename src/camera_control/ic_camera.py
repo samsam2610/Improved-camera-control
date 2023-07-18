@@ -293,6 +293,7 @@ class ICCam(ctypes.Structure):
         self.cam.StartLive(show_display)
         self.cam.ShowPropertyDialog()
         # self.cam.SetDefaultWindowPosition(default=0)
+        
         if setPosition:
             if self.windowPos['x'] is not None:
                 self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
