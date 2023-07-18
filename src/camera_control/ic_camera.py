@@ -282,7 +282,7 @@ class ICCam(ctypes.Structure):
             
     def get_flip_vertical(self):
         flip_vertical = [0]
-        self.cam.GetPropertySwitch("Flip Vertical", flip_vertical)
+        self.cam.GetPropertySwitch("Flip Vertical", "Value", flip_vertical)
         return flip_vertical[0]
     
     
