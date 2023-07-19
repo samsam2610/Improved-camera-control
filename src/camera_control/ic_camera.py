@@ -191,7 +191,7 @@ class ICCam(ctypes.Structure):
         if self.vid_file is not None:
             self.vid_file.release()
         buffer_size, width, height, bpp = self.cam.GetFrameData()
-        self.vid_file.set_params(video_file=video_file, fourcc=fourcc, fps=fps, dim=dim, buffer_size=buffer_size, width=width, height=height, bpp=bpp)
+        self.vid_file.set_params(video_file=video_file, fourcc=fourcc, fps=fps, dim=dim, buffer_size=buffer_size, width=width, height=height, bitsperpixel=bpp)
         print(f'Trigger capturing mode vid file is ready for {self.cam_num}')
         return self.vid_file
     
