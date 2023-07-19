@@ -1109,6 +1109,7 @@ class CamGUI(object):
             dim = self.cam[i].get_image_dimensions()
             # fourcc = cv2.VideoWriter_fourcc(*)
             self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), dim))
+            self.cam[i].set_frame_callback_video()
             
         subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
         create_output_files(self, subject_name=subject_name)
@@ -1157,20 +1158,10 @@ class CamGUI(object):
             self.toggle_trigger_recording_button.config(text="Capture On", background="green")
             self.vid_start_time = time.perf_counter()
             
-            # Set frame callback first
-            self.setting_callback_thread =[]
-            for num in range(len(self.cam)):
-                thread_name = f"Cam {num + 1} thread"
-                self.setting_callback_thread.append(threading.Thread(target=self.set_frame_callback_on_thread, args=(num,), name=thread_name))
-                self.setting_callback_thread[-1].daemon = True
-                self.setting_callback_thread[-1].start()
-            
-            # Wait for all the threads to finish
-            print('Waiting for all cams are properly armed...')
-            current_thread = threading.currentThread()
-            for t in self.setting_callback_thread:
-                if t is not current_thread and t.is_alive():
-                    t.join()
+            # Set the cameras into appropriate modes before enable trigger
+            for i in range(len(self.cam)):
+                self.cam[i].set_flip_vertical(state=True)
+                self.cam[i].turn_off_continuous_mode()
                 
             # enable the trigger
             barrier = threading.Barrier(len(self.cam))
@@ -1184,9 +1175,6 @@ class CamGUI(object):
                 self.recording_trigger_thread[-1].daemon = True
                 self.recording_trigger_thread[-1].start()
     
-    def set_frame_callback_on_thread(self, num):
-        self.cam[num].set_frame_callback_video()
-        
     def enable_trigger_on_thread(self, num, barrier):
         try:
             barrier.wait(timeout=10)
@@ -1194,10 +1182,11 @@ class CamGUI(object):
             print(f'Barrier broken for cam {num}. Failed to sync start the trigger. Please try again!')
             return None
         self.cam[num].enable_trigger()
-        
+        self.cam[num].set_recording_status(state=True)
         while self.recording_trigger_toggle_status:
             if not self.recording_trigger_status[num]:
                 self.cam[num].disable_trigger()
+                self.cam[num].set_recording_status(state=False)
                 print(f'Kill thread for cam {num}')
                 break
             time.sleep(0.01)

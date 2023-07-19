@@ -230,7 +230,7 @@ class ICCam(ctypes.Structure):
        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
-    def set_frame_callback_video(self, turn_off_continuous_mode=False):
+    def set_frame_callback_video(self):
         """
         Set up the frame callback function pointer for the camera
         Be careful to set it only once, otherwise it will hang the camera.
@@ -249,8 +249,14 @@ class ICCam(ctypes.Structure):
             print(f'Cam {self.cam_num} frame ready callback result: {result}')
             
             return 1
+        else:
+            print(f'Cam {self.cam_num} callback already registered')
         
         print(f'Cam {self.cam_num} video callback set up {self.cam.callback_registered}')
+        
+    def set_recording_status(self, state=False):
+        self.vid_file.recording_status = state
+        print(f'Cam {self.cam_num} recording status set to {state}')
         
     def get_window_position(self):
         err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'] = self.cam.GetWindowPosition()
