@@ -368,7 +368,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_num = []
         
     def release(self):
-        if vid_out is None:
+        if self.vid_out is None:
             print(f'Cam {self.cam_num} video file not set up yet')
             return None
         self.vid_out.release()
