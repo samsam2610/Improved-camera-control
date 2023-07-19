@@ -427,6 +427,10 @@ class TIS_GrabberDLL(object):
     SetRingBufferSize = __tisgrabber.IC_SetRingBufferSize
     SetRingBufferSize.restype = C.c_int
     SetRingBufferSize.argtypes = [GrabberHandlePtr, C.c_int]
+    
+    # ReleaseFrameBuffer = __tisgrabber.IC_ReleaseMemBuffer
+    # ReleaseFrameBuffer.restype = C.c_void_p
+    # ReleaseFrameBuffer.argtypes = []
     # ############################################################################
     
     ### GK Additions - adding frame filters. Pieces copied from: https://github.com/morefigs/py-ic-imaging-control

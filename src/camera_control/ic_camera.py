@@ -212,14 +212,13 @@ class ICCam(ctypes.Structure):
             
     def create_frame_callback_video(self):
         def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
-            if pData.recording_status:
-                callback_time = time.perf_counter()
-                image = ctypes.cast(pBuffer,
-                                    ctypes.POINTER(
-                                        ctypes.c_ubyte * pData.buffer_size))
-                np_frame = np.frombuffer(image.contents, dtype=np.uint8)
-                np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
-                pData.write(frame=np_frame, time_data=callback_time, frame_num=framenumber)
+            callback_time = time.perf_counter()
+            image = ctypes.cast(pBuffer,
+                                ctypes.POINTER(
+                                    ctypes.c_ubyte * pData.buffer_size))
+            np_frame = np.frombuffer(image.contents, dtype=np.uint8)
+            np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
+            pData.write(frame=np_frame, time_data=callback_time, frame_num=framenumber)
             # np_frame = cv2.flip(np_frame, 0)
             # pData.write(frame=np.ndarray(buffer=image.contents,
             #                         dtype=np.uint8,
@@ -300,7 +299,7 @@ class ICCam(ctypes.Structure):
     
     
     def start(self, show_display=1, setPosition=False):
-        self.cam.SetContinuousMode(0)
+        self.cam.SetContinuousMode(1)
         print(f'Flipping vertical back for cam {self.cam_num}')
         self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
         self.cam.StartLive(show_display)
@@ -382,9 +381,6 @@ class VideoRecordingSession(ctypes.Structure):
         return 1
         
     def write(self, frame, time_data, frame_num):
-        if self.vid_out is None or self.recording_status is False:
-            print(f'Cam {self.cam_num} is not ready for recording')
-            return None
         self.vid_out.write(frame)
         self.frame_times.append(time_data)
         self.frame_num.append(frame_num)
