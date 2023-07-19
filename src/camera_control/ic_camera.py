@@ -212,13 +212,14 @@ class ICCam(ctypes.Structure):
             
     def create_frame_callback_video(self):
         def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
-            callback_time = time.perf_counter()
-            image = ctypes.cast(pBuffer,
-                                ctypes.POINTER(
-                                    ctypes.c_ubyte * pData.buffer_size))
-            np_frame = np.frombuffer(image.contents, dtype=np.uint8)
-            np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
-            pData.write(frame=np_frame, time_data=callback_time, frame_num=framenumber)
+            if pData.recording_status:
+                callback_time = time.perf_counter()
+                image = ctypes.cast(pBuffer,
+                                    ctypes.POINTER(
+                                        ctypes.c_ubyte * pData.buffer_size))
+                np_frame = np.frombuffer(image.contents, dtype=np.uint8)
+                np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
+                pData.write(frame=np_frame, time_data=callback_time, frame_num=framenumber)
             # np_frame = cv2.flip(np_frame, 0)
             # pData.write(frame=np.ndarray(buffer=image.contents,
             #                         dtype=np.uint8,
