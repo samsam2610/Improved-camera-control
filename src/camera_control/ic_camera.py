@@ -49,7 +49,7 @@ class ICCam(ctypes.Structure):
         self.cam.SetVideoFormat(Format=self.formats)
         self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
         self.add_filters()
-        self.vid_file = None
+        self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
 
     def add_filters(self):
         if self.rotate != 0:
@@ -304,19 +304,11 @@ class ICCam(ctypes.Structure):
         
 
 class VideoRecordingSession(ctypes.Structure):
-    def __init__(self, video_file, cam_num, fourcc: str, fps: int, dim, buffer_size, width, height, bitsperpixel):
-        self.fourcc = cv2.VideoWriter_fourcc(*fourcc)
-        self.vid_out = None
-        self.video_file = video_file
-        self.frame_times = []
-        self.frame_num = []
-        self.buffer_size = buffer_size
-        self.width = width
-        self.height = height
-        self.bitsperpixel = bitsperpixel
+    def __init__(self, cam_num):
         self.cam_num = cam_num
         self.recording_status = False
-        print(f'Cam {cam_num} video file set up: {self.vid_out.isOpened()}')
+        self.frame_times = []
+        self.frame_num = []
     
     def set_recording_status(self, status: bool):
         if self.vid_out is None:
@@ -325,13 +317,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.recording_status = status
         return 1
     
-    def init_video_file(self):
-        self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
-        self.frame_times = []
-        self.frame_num = []
-        return 1
-    
-    def update_params(self, video_file, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None):
+    def set_params(self, video_file, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None):
         if fourcc is not None:
             self.fourcc = cv2.VideoWriter_fourcc(*fourcc)
         
@@ -352,7 +338,11 @@ class VideoRecordingSession(ctypes.Structure):
             
         if bitsperpixel is not None:
             self.bitsperpixel = bitsperpixel
-            
+        
+        self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
+        self.frame_times = []
+        self.frame_num = []
+
         return 1
         
     def reset(self):
