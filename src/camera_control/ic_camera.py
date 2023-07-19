@@ -328,6 +328,7 @@ class VideoRecordingSession(ctypes.Structure):
             print(f'Cam {self.cam_num} video file not set up yet')
             return None
         self.recording_status = status
+        print(f'Cam {self.cam_num} recording status set to {status}')
         return 1
     
     def set_params(self, video_file: str=None, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None):
@@ -366,6 +367,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.vid_out = None
         self.frame_times = []
         self.frame_num = []
+        self.recording_status = False
         
     def release(self):
         if self.vid_out is None:
@@ -373,6 +375,7 @@ class VideoRecordingSession(ctypes.Structure):
             return None
         self.vid_out.release()
         self.vid_out = None
+        self.recording_status = False
         self.frame_times = []
         self.frame_num = []
         return 1
