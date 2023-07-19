@@ -28,7 +28,7 @@ def set_gain(self, num):
         self.show_camera_error()
         return
     
-    self.cam[num].set_gain(int(self.gain[num].get()))
+    self.cam[num].set_gain(float(self.gain[num].get()))
     get_frame_rate_list(self, num)
 
 

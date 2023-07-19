@@ -11,7 +11,8 @@ def print_thread_name(num, barrier):
         wait_time = random.randint(1, 5)  # Random wait time between 1 and 5 seconds
         time.sleep(wait_time)
         barrier.wait()
-        print("Thread", num, "waited for", wait_time, "seconds")
+        current_time = time.perf_counter()
+        print("Thread", num, "waited for", wait_time, "seconds", "at time", current_time)
 
 
 barrier = threading.Barrier(2)
