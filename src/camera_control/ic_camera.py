@@ -108,7 +108,7 @@ class ICCam(ctypes.Structure):
     def get_exposure(self):
         exposure = [0]
         self.cam.GetPropertyAbsoluteValue("Exposure", "Value", exposure)
-        return round(exposure[0], 3)
+        return round(exposure[0], 5)
 
     def get_gain(self):
         gain = [0]
