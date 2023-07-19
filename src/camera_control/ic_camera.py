@@ -139,8 +139,9 @@ class ICCam(ctypes.Structure):
         result = self.cam.SetPropertySwitch("Trigger", "Enable", True)
         print(f'Cam {self.cam_num} trigger enabled with result: {result}')
         if not self.cam.callback_registered:
-            self.cam.SetFrameReadyCallback()
-
+            # self.cam.SetFrameReadyCallback()
+            self.set_frame_callback_video()
+            
     def frame_ready(self):
         self.cam.ResetFrameReady()
         self.cam.WaitTillFrameReady(100000)
@@ -190,7 +191,7 @@ class ICCam(ctypes.Structure):
         if self.vid_file is not None:
             self.vid_file.release()
         buffer_size, width, height, bpp = self.cam.GetFrameData()
-        self.vid_file = VideoRecordingSession(video_file, self.cam_num, fourcc, fps, dim, buffer_size, width, height, bpp)
+        self.vid_file.set_params(video_file=video_file, fourcc=fourcc, fps=fps, dim=dim, buffer_size=buffer_size, width=width, height=height, bpp=bpp)
         print(f'Trigger capturing mode vid file is ready for {self.cam_num}')
         return self.vid_file
     
@@ -230,19 +231,24 @@ class ICCam(ctypes.Structure):
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
     def set_frame_callback_video(self, turn_off_continuous_mode=False):
-        print(f'Flipping vertical for {self.cam_num}')
-        self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
-
-        result = self.turn_off_continuous_mode()
-        print(f'Cam {self.cam_num} mode turned off with result: {result}')
+        """
+        Set up the frame callback function pointer for the camera
+        Be careful to set it only once, otherwise it will hang the camera.
+        """
         
         if not self.cam.callback_registered:
             print('Cam {self.cam_num} callback not registered yet')
             print(f'Setting up video callback function pointer for cam {self.cam_num}')
             CallbackfunctionPtr = self.create_frame_callback_video()
 
+            if self.vid_file is None:
+                print(f'Cam {self.cam_num} video file is not set up yet')
+                return 0
+            
             result = self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.vid_file)
             print(f'Cam {self.cam_num} frame ready callback result: {result}')
+            
+            return 1
         
         print(f'Cam {self.cam_num} video callback set up {self.cam.callback_registered}')
         
@@ -317,7 +323,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.recording_status = status
         return 1
     
-    def set_params(self, video_file, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None):
+    def set_params(self, video_file: str=None, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None):
         if fourcc is not None:
             self.fourcc = cv2.VideoWriter_fourcc(*fourcc)
         
@@ -339,7 +345,11 @@ class VideoRecordingSession(ctypes.Structure):
         if bitsperpixel is not None:
             self.bitsperpixel = bitsperpixel
         
-        self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
+        if video_file is not None:
+            self.video_file = video_file
+            self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
+            self.frame_times = []
+            self.frame_num = []
         self.frame_times = []
         self.frame_num = []
 
