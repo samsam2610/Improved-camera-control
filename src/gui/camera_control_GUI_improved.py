@@ -166,7 +166,7 @@ class CamGUI(object):
         set_frame_rate(self, num, framerate=388, initCamera=True)
 
         # set gain and exposure using the values from the json
-        self.cam[num].set_exposure(float(self.cam_details[str(num)]['exposure']))
+        self.cam[num].set_exposure(float(format(self.cam_details[str(num)]['exposure'], '.6f')))
         self.cam[num].set_gain(int(self.cam_details[str(num)]['gain']))
         self.cam[num].start()
         
