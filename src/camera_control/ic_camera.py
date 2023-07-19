@@ -319,6 +319,7 @@ class VideoRecordingSession(ctypes.Structure):
     def __init__(self, cam_num):
         self.cam_num = cam_num
         self.recording_status = False
+        self.vid_out = None
         self.frame_times = []
         self.frame_num = []
     
