@@ -112,8 +112,8 @@ def draw_axis(frame, camera_matrix, dist_coeff, rotation, translation, board, ar
                             length=20)
 
         cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, c_ids)
-        # cv2.aruco.drawDetectedMarkers(frame, corners, ids)
-        # cv2.aruco.drawDetectedMarkers(frame, rejected_points, borderColor=(100, 0, 240))
+        cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+        cv2.aruco.drawDetectedMarkers(frame, rejected_points, borderColor=(100, 0, 240))
 
     except cv2.error as e:
         import sys
