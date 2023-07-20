@@ -1024,12 +1024,133 @@ class CamGUI(object):
             t[-1].start()
         else:
             for i in range(len(self.cam)):
-                t.append(threading.Thread(target=draw_calibration_on_thread, args=(self, i, barrier)))
+                t.append(threading.Thread(target=self.draw_calibration_on_thread, args=(i, barrier)))
                 t[-1].daemon = True
                 t[-1].start()
 
     # endregion Calibration
-    
+    def draw_calibration_on_thread(self, num, barrier):
+        """
+        Draws calibration on a separate thread for a given camera.
+
+        Parameters:
+        - num: The camera number.
+        - barrier: A threading.Barrier object used to synchronize multiple threads.
+
+        Returns:
+        None
+
+        Example usage:
+        draw_calibration_on_thread(0, barrier)
+        """
+        window_name = f'Camera {num}'
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(window_name, 640, 480)
+        from utils import aruco_dict
+        from cv2 import aruco
+        params = aruco.DetectorParameters()
+        params.cornerRefinementMethod = aruco.CORNER_REFINE_CONTOUR
+        params.adaptiveThreshWinSizeMin = 100
+        params.adaptiveThreshWinSizeMax = 1000
+        params.adaptiveThreshWinSizeStep = 50
+        params.adaptiveThreshConstant = 0
+        
+        while cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0:
+            try:
+                barrier.wait(timeout=15)
+            except threading.BrokenBarrierError:
+                print(f'Barrier broken for cam {num}. Proceeding...')
+                break
+            frame_current = self.cam[num].get_image()
+            if frame_current is not None:
+                drawn_frame = self.draw_axis(frame_current,
+                                                camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
+                                                dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
+                                                rotation=self.cgroup_test.cameras[num].get_rotation(),
+                                                translation=self.cgroup_test.cameras[num].get_translation(),
+                                                board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
+                if drawn_frame is not None:
+                    cv2.imshow(window_name, drawn_frame)
+                    cv2.waitKey(1)
+                else:
+                    cv2.imshow(window_name, frame_current)
+                    cv2.waitKey(1)
+            
+        barrier.abort()
+        self.recording_threads_status[num] = False
+        
+    def draw_axis(frame, camera_matrix, dist_coeff, rotation, translation, board, aruco_dict, params, verbose=True):
+        """
+        """
+        try:
+            corners, ids, rejected_points = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=params)
+            
+            if corners is None or ids is None:
+                print('No corner detected')
+                return None
+            if len(corners) != len(ids) or len(corners) == 0:
+                print('Incorrect corner or no corner detected!')
+                return None
+
+            corners, ids, rejectedCorners, recoveredIdxs = cv2.aruco.refineDetectedMarkers(frame, board, corners, ids,
+                                                                                           rejected_points, camera_matrix,
+                                                                                           dist_coeff, parameters=params)
+
+            if len(corners) == 0:
+                print('No corner detected after refinement!')
+                return None
+
+            ret, c_corners, c_ids = cv2.aruco.interpolateCornersCharuco(corners, ids,
+                                                                        frame, board,
+                                                                        cameraMatrix=camera_matrix, distCoeffs=dist_coeff)
+            print(f'Corners:', c_corners)
+            if c_corners is None or c_ids is None or len(c_corners) < 5:
+                print('No corner detected after interpolation!')
+                return None
+
+            n_corners = c_corners.size // 2
+            reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
+
+            ret, p_rvec, p_tvec = cv2.aruco.estimatePoseCharucoBoard(reshape_corners,
+                                                                        c_ids,
+                                                                        board,
+                                                                        camera_matrix,
+                                                                        dist_coeff,
+                                                                        rotation,
+                                                                        translation)
+
+            if p_rvec is None or p_tvec is None:
+                print('Cant detect rotation!')
+                return None
+            if np.isnan(p_rvec).any() or np.isnan(p_tvec).any():
+                print('Rotation is not usable')
+                return None
+
+            cv2.drawFrameAxes(image=frame,
+                                cameraMatrix=camera_matrix,
+                                distCoeffs=dist_coeff,
+                                rvec=rotation,
+                                tvec=translation,
+                                length=20)
+
+            cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, c_ids)
+            # cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+            # cv2.aruco.drawDetectedMarkers(frame, rejected_points, borderColor=(100, 0, 240))
+
+        except cv2.error as e:
+            import sys
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            traceback.print_exc()
+            return None
+
+        # if verbose:
+        #     print('Translation : {0}'.format(p_tvec))
+        #     print('Rotation    : {0}'.format(p_rvec))
+        #     print('Distance from camera: {0} m'.format(np.linalg.norm(p_tvec)))
+
+        return frame
     # region Trigger recording
     def setup_trigger_recording(self, overwrite=True):
         if len(self.vid_out) > 0:
