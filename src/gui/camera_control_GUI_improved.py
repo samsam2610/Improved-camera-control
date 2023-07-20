@@ -1109,20 +1109,20 @@ class CamGUI(object):
             n_corners = c_corners.size // 2
             reshape_corners = np.reshape(c_corners, (n_corners, 1, 2))
 
-            ret, p_rvec, p_tvec = cv2.aruco.estimatePoseCharucoBoard(reshape_corners,
-                                                                        c_ids,
-                                                                        board,
-                                                                        camera_matrix,
-                                                                        dist_coeff,
-                                                                        rotation,
-                                                                        translation)
+            # ret, p_rvec, p_tvec = cv2.aruco.estimatePoseCharucoBoard(reshape_corners,
+            #                                                             c_ids,
+            #                                                             board,
+            #                                                             camera_matrix,
+            #                                                             dist_coeff,
+            #                                                             rotation,
+            #                                                             translation)
 
-            if p_rvec is None or p_tvec is None:
-                print('Cant detect rotation!')
-                return None
-            if np.isnan(p_rvec).any() or np.isnan(p_tvec).any():
-                print('Rotation is not usable')
-                return None
+            # if p_rvec is None or p_tvec is None:
+            #     print('Cant detect rotation!')
+            #     return None
+            # if np.isnan(p_rvec).any() or np.isnan(p_tvec).any():
+            #     print('Rotation is not usable')
+            #     return None
 
             cv2.drawFrameAxes(image=frame,
                                 cameraMatrix=camera_matrix,
@@ -1131,7 +1131,7 @@ class CamGUI(object):
                                 tvec=translation,
                                 length=20)
 
-            cv2.aruco.drawDetectedCornersCharuco(frame, c_corners, c_ids)
+            cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, c_ids)
             cv2.aruco.drawDetectedMarkers(frame, corners, ids)
             # cv2.aruco.drawDetectedMarkers(frame, rejected_points, borderColor=(100, 0, 240))
 
