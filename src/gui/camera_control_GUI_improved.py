@@ -1562,7 +1562,7 @@ class CamGUI(object):
         self.video_codec_entry = ttk.Combobox(video_info_frame,
                                               value=self.fourcc_codes,
                                               state="readonly", width=5)
-        self.video_codec_entry.set("FFV1")  # default codec
+        self.video_codec_entry.set("FFVH")  # default codec
         self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
         self.video_codec_entry.\
             grid(sticky="nw", row=1, column=3, padx=5, pady=3)
