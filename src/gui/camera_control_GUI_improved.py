@@ -1002,8 +1002,6 @@ class CamGUI(object):
         self.cgroup_test = CameraGroup.load(calibration_file)# cgroup_test is loaded with the calibration file
         print('Calibration file loaded')
         
-        self.frame_queue = queue.Queue(maxsize=10)
-        
         barrier = threading.Barrier(len(self.cam))
         t = []
         # recording_threads_status is a list of False with length of number of cameras
@@ -1079,7 +1077,8 @@ class CamGUI(object):
         barrier.abort()
         self.recording_threads_status[num] = False
         
-    def draw_axis(self, frame, camera_matrix, dist_coeff, rotation, translation, board, aruco_dict, params, verbose=True):
+    @staticmethod
+    def draw_axis(frame, camera_matrix, dist_coeff, rotation, translation, board, aruco_dict, params, verbose=True):
         """
         """
         try:
