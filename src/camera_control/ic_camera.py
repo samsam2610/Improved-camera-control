@@ -17,6 +17,7 @@ import os
 import json
 import cv2
 import copy
+import threading
 
 
 path = Path(os.path.realpath(__file__))
@@ -218,7 +219,9 @@ class ICCam(ctypes.Structure):
                                     ctypes.c_ubyte * pData.buffer_size))
             np_frame = np.frombuffer(image.contents, dtype=np.uint8)
             np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
-            pData.write(frame=np_frame, time_data=callback_time, frame_num=framenumber)
+            # pData.write(frame=np_frame, time_data=callback_time, frame_num=framenumber)
+            write_thread = threading.Thread(target=pData.write, args=(np_frame, callback_time, framenumber))
+            write_thread.start()
             # np_frame = cv2.flip(np_frame, 0)
             # pData.write(frame=np.ndarray(buffer=image.contents,
             #                         dtype=np.uint8,
