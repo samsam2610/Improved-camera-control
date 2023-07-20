@@ -226,15 +226,20 @@ def check_frame(timeStampFile1, timeStampFile2, frameRate):
     # Calculate differences between cam_time_1 and cam_time_2
     cam_time_1_diff = cam1 - cam1[0]
     cam_time_2_diff = cam2 - cam2[0]
-    
-    # Calculate mean, mode, median, and standard deviation of the differences
-    mean_diff = np.mean(cam_time_1_diff - cam_time_2_diff)
-    median_diff = np.median(cam_time_1_diff - cam_time_2_diff)
-    std_diff = np.std(cam_time_1_diff - cam_time_2_diff)
-    
-    temp_text = "Difference: Mean={:.6f}, Median={:.6f}, Std={:.6f}".format(
-        mean_diff, median_diff, std_diff)
-    return_text.append(temp_text)
+   
+    try:
+        # Calculate mean, mode, median, and standard deviation of the differences
+        mean_diff = np.mean(cam_time_1_diff - cam_time_2_diff)
+        median_diff = np.median(cam_time_1_diff - cam_time_2_diff)
+        std_diff = np.std(cam_time_1_diff - cam_time_2_diff)
+        
+        temp_text = "Difference: Mean={:.6f}, Median={:.6f}, Std={:.6f}".format(
+            mean_diff, median_diff, std_diff)
+        return_text.append(temp_text)
+    except Exception as e:
+        print(e)
+        temp_text = "Could not calculate difference"
+        return_text.append(temp_text)
 
     return return_text
 
