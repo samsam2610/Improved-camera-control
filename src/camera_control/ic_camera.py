@@ -355,7 +355,7 @@ class VideoRecordingSession(ctypes.Structure):
         
         if video_file is not None:
             self.video_file = video_file
-            self.vid_out = cv2.VideoWriter(self.video_file, 0, self.fps, self.dim, isColor=False)
+            self.vid_out = cv2.VideoWriter(self.video_file, 0, self.fps, self.dim)
             self.frame_times = []
             self.frame_num = []
         self.frame_times = []
