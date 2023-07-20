@@ -191,17 +191,17 @@ def check_frame(timeStampFile1, timeStampFile2, frameRate):
     droppedFrames2 = np.where(
         np.logical_or(jitter2 < 1 / frameRate - tolerance, jitter2 > 1 / frameRate + tolerance))
     
-    if np.size(droppedFrames1) > 0:
-        temp_text = "These frames may not be exactly synchronized (jitter1): " + str(droppedFrames1)
-    else:
-        temp_text = "Frames cam 1 are synced!"
-    return_text.append(temp_text)
-    
-    if np.size(droppedFrames2) > 0:
-        temp_text = "These frames may not be exactly synchronized (jitter2): " + str(droppedFrames2)
-    else:
-        temp_text = "Frames from cam 2 are synced!"
-    return_text.append(temp_text)
+    # if np.size(droppedFrames1) > 0:
+    #     temp_text = "These frames may not be exactly synchronized (jitter1): " + str(droppedFrames1)
+    # else:
+    #     temp_text = "Frames cam 1 are synced!"
+    # return_text.append(temp_text)
+    #
+    # if np.size(droppedFrames2) > 0:
+    #     temp_text = "These frames may not be exactly synchronized (jitter2): " + str(droppedFrames2)
+    # else:
+    #     temp_text = "Frames from cam 2 are synced!"
+    # return_text.append(temp_text)
     
     mean_jitter1 = np.mean(jitter1)
     median_jitter1 = np.median(jitter1)
