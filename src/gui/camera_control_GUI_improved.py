@@ -1103,7 +1103,6 @@ class CamGUI(object):
             ret, c_corners, c_ids = cv2.aruco.interpolateCornersCharuco(corners, ids,
                                                                         frame, board,
                                                                         cameraMatrix=camera_matrix, distCoeffs=dist_coeff)
-            print(f'Corners:', c_corners)
             if c_corners is None or c_ids is None or len(c_corners) < 5:
                 print('No corner detected after interpolation!')
                 return None
