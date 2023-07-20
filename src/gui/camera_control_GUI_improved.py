@@ -1082,6 +1082,7 @@ class CamGUI(object):
         """
         """
         try:
+            board.setLegacyPattern(True)
             corners, ids, rejected_points = cv2.aruco.detectMarkers(frame, aruco_dict, parameters=params)
             
             if corners is None or ids is None:
