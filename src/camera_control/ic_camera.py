@@ -221,6 +221,7 @@ class ICCam(ctypes.Structure):
             np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
             # pData.write(frame=np_frame, time_data=callback_time, frame_num=framenumber)
             write_thread = threading.Thread(target=pData.write, args=(np_frame, callback_time, framenumber))
+            write_thread.daemon = True
             write_thread.start()
             # np_frame = cv2.flip(np_frame, 0)
             # pData.write(frame=np.ndarray(buffer=image.contents,
