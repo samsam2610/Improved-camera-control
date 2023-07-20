@@ -1131,7 +1131,7 @@ class CamGUI(object):
                                 tvec=translation,
                                 length=20)
 
-            # cv2.aruco.drawDetectedCornersCharuco(frame, reshape_corners, c_ids)
+            cv2.aruco.drawDetectedCornersCharuco(frame, c_corners, c_ids)
             cv2.aruco.drawDetectedMarkers(frame, corners, ids)
             # cv2.aruco.drawDetectedMarkers(frame, rejected_points, borderColor=(100, 0, 240))
 
