@@ -1079,7 +1079,7 @@ class CamGUI(object):
         barrier.abort()
         self.recording_threads_status[num] = False
         
-    def draw_axis(frame, camera_matrix, dist_coeff, rotation, translation, board, aruco_dict, params, verbose=True):
+    def draw_axis(self, frame, camera_matrix, dist_coeff, rotation, translation, board, aruco_dict, params, verbose=True):
         """
         """
         try:
