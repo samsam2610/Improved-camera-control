@@ -303,7 +303,7 @@ class ICCam(ctypes.Structure):
     
     
     def start(self, show_display=1, setPosition=False):
-        self.cam.SetContinuousMode(1)
+        self.cam.SetContinuousMode(0)
         print(f'Flipping vertical back for cam {self.cam_num}')
         self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
         self.cam.StartLive(show_display)
