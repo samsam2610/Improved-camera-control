@@ -41,13 +41,14 @@ def detect_raw_board_on_thread(self, num, barrier):
         frame_current = self.cam[num].get_image()
         if frame_current is not None:
             self.frame_count_test[num] += 1
-            frame_current = draw_axis(frame_current,
+            drawn_frame = draw_axis(frame_current,
                                             camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
                                             dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
                                             rotation=self.cgroup_test.cameras[num].get_rotation(),
                                             translation=self.cgroup_test.cameras[num].get_translation(),
                                             board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
-            
+            if drawn_frame is not None:
+                frame_current = drawn_frame
             self.frame_queue.put((frame_current, num, self.frame_count_test[num]))
 
 
