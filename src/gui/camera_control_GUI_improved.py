@@ -99,6 +99,7 @@ class CamGUI(object):
         self.fov_dict = []
         self.fov_labels = ['top', 'left', 'height', 'width']
 
+        self.test_calibration_live_toggle_status = []
         # Initialize GUI
         self.running_config = {'debug_mode': debug_mode, 'init_cam_bool': init_cam_bool}
         if self.running_config['init_cam_bool']:
@@ -983,7 +984,7 @@ class CamGUI(object):
         
         root.mainloop()
         
-    def test_calibration_live(self):
+    def toggle_test_calibration_live(self):
         print('')
         try:
             self.load_calibration_settings()
@@ -999,14 +1000,14 @@ class CamGUI(object):
         from src.aniposelib.cameras import CameraGroup
         
         # Load the calibration file
-        self.cgroup_test = CameraGroup.load(calibration_file)# cgroup_test is loaded with the calibration file
+        self.cgroup_test = CameraGroup.load(calibration_file) # cgroup_test is loaded with the calibration file
         print('Calibration file loaded')
         
         barrier = threading.Barrier(len(self.cam))
         t = []
         # recording_threads_status is a list of False with length of number of cameras
         self.frame_queue = queue.Queue(maxsize=10)
-        self.recording_threads_status = [True] * len(self.cam)
+        self.test_calibration_live_threads_status = [True] * len(self.cam)
         self.all_rows_test = [[] for _ in range(len(self.cam))]
         self.frame_count_test = [0] * len(self.cam)
         
@@ -1713,7 +1714,7 @@ class CamGUI(object):
         Hovertip(self.plot_calibration_error_button, "Press this button to plot the calibration error. ")
         
         test_calibration_frame = Frame(calibration_frame)
-        self.test_calibration_live_button = Button(test_calibration_frame, text="Try Calibrate", command=self.test_calibration_live, state="normal", width=9)
+        self.test_calibration_live_button = Button(test_calibration_frame, text="Try Calibrate", command=self.toggle_test_calibration_live, state="normal", width=9)
         self.test_calibration_live_button.\
             grid(sticky="nw", row=0, column=0, columnspan=1, padx=0, pady=0)
         

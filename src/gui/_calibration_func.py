@@ -52,7 +52,6 @@ def draw_calibration_on_thread(self, num, barrier):
                 cv2.imshow(window_name, frame_current)
                 cv2.waitKey(1)
         
-    barrier.abort()
     self.recording_threads_status[num] = False
     
 
