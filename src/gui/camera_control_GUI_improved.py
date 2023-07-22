@@ -1781,6 +1781,11 @@ class CamGUI(object):
         self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
         Hovertip(self.save_trigger_recording_button, "Save the trigger recording to file")
         
+        self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=14, command=lambda : self.save_trigger_recording(delete=True))
+        self.delete_trigger_recording_button.grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
+        Hovertip(self.delete_trigger_recording_button, "Delete the trigger recording")
+       
+        
         experimental_functions_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
         
         cur_row += 1
