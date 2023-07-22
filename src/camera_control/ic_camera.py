@@ -196,6 +196,12 @@ class ICCam(ctypes.Structure):
         print(f'Trigger capturing mode vid file is ready for {self.cam_num}')
         return self.vid_file
     
+    def delete_video_file(self):
+        if self.vid_file is not None:
+            self.vid_file.delete()
+            self.vid_file.reset()
+            print(f'Trigger capturing mode vid file is deleted for cam {self.cam_num}')
+            
     def release_video_file(self):
         if self.vid_file is not None:
             frame_times = copy.deepcopy(self.vid_file.frame_times)
@@ -372,6 +378,10 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_times = []
         self.frame_num = []
         self.recording_status = False
+       
+    def delete(self):
+        os.remove(self.video_file)
+        self.video_file = None
         
     def release(self):
         if self.vid_out is None:

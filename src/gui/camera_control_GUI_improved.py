@@ -1233,7 +1233,7 @@ class CamGUI(object):
             print(f'Cam {i} frame times size is {len(frame_times)}')
             frame_time_list.append(frame_times)
             if delete:
-                os.remove(self.vid_file[i])
+                self.cam[i].delete_video_file()
             else:
                 np.save(str(self.ts_file[i]), np.array(frame_time_list[i]))
                 np.savetxt(str(self.ts_file_csv[i]), np.array(frame_time_list[i]), delimiter=",")
