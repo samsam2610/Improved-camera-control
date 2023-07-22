@@ -424,3 +424,4 @@ class VideoRecordingSession(ctypes.Structure):
     def _process_frames(self):
         while self.recording_status:
             self.write_frame()
+            time.sleep(0.005)
