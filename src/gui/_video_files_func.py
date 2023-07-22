@@ -4,7 +4,7 @@ import numpy as np
 import threading
 import cv2
 import ffmpy
-
+from matplotlib import pyplot as plt
 
 def create_video_files(self, overwrite=False):
     if not os.path.isdir(os.path.normpath(self.dir_output.get())):
@@ -69,7 +69,7 @@ def create_output_files(self, subject_name='Sam'):
     self.save_msg = ""
 
 
-def save_vid(self, compress=False, delete=False):
+def save_vid(self, compress=False, delete=False, plotData=False):
     self.toggle_video_recording(force_termination=True)
     self.toggle_video_recording_button['state'] = 'disabled'
     self.toggle_video_recording_button.config(text="Capture Disabled", background="red")

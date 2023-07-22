@@ -1256,7 +1256,7 @@ class CamGUI(object):
         
         elif delete:
             self.save_msg = "Video has been deleted, please set up a new video to take another recording."
-        
+        self.plot_trigger_recording(frame_time_list)
         if self.save_msg:
             display_recorded_stats(self)
         
@@ -1266,6 +1266,55 @@ class CamGUI(object):
         self.received_pulse_label['text'] = ""
         self.set_calibration_buttons_group(state='disabled')
         
+    def plot_trigger_recording(self, frame_time_list):
+        """
+        Plot the calibration error progression.
+
+        This method creates a new window using the Tkinter library and plots the given list of calibration error values. The plot is displayed using Matplotlib embedded in the Tkinter window.
+
+        Parameters:
+        - None
+
+        Return Type:
+        - None
+
+        Example Usage:
+        plot_calibration_error()
+        """
+        root = Tk()
+        root.title('Calibration Error')
+        root.geometry('500x500')
+        root.configure(background='white')
+        
+        error_list = self.error_list
+        fig, ax = plt.subplots()
+
+        # Plot the error values
+        for num in range(len(self.cam)):
+            # Plot the data for each cam
+            plt.plot(frame_time_list[num], num, marker='o', linestyle='-', label=f'Camera {cam.get_id()}')
+        
+        # ax.plot(error_list)
+
+        # Customize the plot
+        ax.set_xlabel('Iteration')
+        ax.set_ylabel('Error')
+        ax.set_title('Error Progression')
+
+        # Display the plot
+        import tkinter as tk
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+        
+        canvas = FigureCanvasTkAgg(fig, master=root)
+        canvas.draw()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        
+        toolbar = NavigationToolbar2Tk(canvas, root)
+        toolbar.update()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        
+        root.mainloop()
+
     # endregion Trigger recording
     def close_window(self):
 
