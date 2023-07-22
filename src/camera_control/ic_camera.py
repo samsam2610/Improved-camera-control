@@ -399,21 +399,21 @@ class VideoRecordingSession(ctypes.Structure):
         return 1
         
     def write_frame(self):
-        with self.buffer_lock:
-            if len(self.frame_buffer) > 0:
-                frame, time_data, frame_num = self.frame_buffer.popleft()
-                self.vid_out.write(frame)
-                self.frame_times.append(time_data)
-                self.frame_num.append(frame_num)
-            else:
-                time.sleep(0.001)
+        # with self.buffer_lock:
+        if len(self.frame_buffer) > 0:
+            frame, time_data, frame_num = self.frame_buffer.popleft()
+            self.vid_out.write(frame)
+            self.frame_times.append(time_data)
+            self.frame_num.append(frame_num)
+        else:
+            time.sleep(0.001)
     
     def acquire_frame(self, frame, time_data, frame_num):
         # self.vid_out.write(frame)
         # self.frame_times.append(time_data)
         # self.frame_num.append(frame_num)
-        with self.buffer_lock:
-            self.frame_buffer.append((frame, time_data, frame_num))
+        # with self.buffer_lock:
+        self.frame_buffer.append((frame, time_data, frame_num))
         
         return 1
     
