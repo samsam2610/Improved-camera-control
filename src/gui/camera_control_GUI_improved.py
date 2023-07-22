@@ -1308,7 +1308,9 @@ class CamGUI(object):
         ax.set_xlabel('Iteration')
         ax.set_ylabel('Error')
         ax.set_title('Error Progression')
-
+        # Display the grid on the plot
+        plt.grid(True)
+        
         # Display the plot
         import tkinter as tk
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
