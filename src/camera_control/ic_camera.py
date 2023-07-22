@@ -266,7 +266,7 @@ class ICCam(ctypes.Structure):
         print(f'Cam {self.cam_num} video callback set up {self.cam.callback_registered}')
         
     def set_recording_status(self, state=False):
-        self.vid_file.recording_status = state
+        self.vid_file.set_recording_status(state)
         print(f'Cam {self.cam_num} recording status set to {state}')
         
     def get_window_position(self):
@@ -339,8 +339,8 @@ class VideoRecordingSession(ctypes.Structure):
             print(f'Cam {self.cam_num} video file not set up yet')
             return None
         self.recording_status = status
-        print(f'Cam {self.cam_num} recording status set to {status}')
-        if status:
+        print(f'Cam {self.cam_num} internal recording status set to {status}')
+        if status is True:
             self.start_processing()
         return 1
     
