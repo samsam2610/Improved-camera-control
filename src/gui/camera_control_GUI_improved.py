@@ -1839,11 +1839,11 @@ class CamGUI(object):
         self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
         Hovertip(self.save_trigger_recording_button, "Save the trigger recording to file")
         
-        self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=14, command=lambda : self.save_trigger_recording(delete=True))
+        self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=14, command=lambda: self.save_trigger_recording(delete=True))
         self.delete_trigger_recording_button.grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
         Hovertip(self.delete_trigger_recording_button, "Delete the trigger recording")
         
-        self.display_trigger_recording_stats = Button(experimental_functions_frame, text="Display stats", state="normal", width=14, command=lambda : self.display_recorded_stats(self))
+        self.display_trigger_recording_stats = Button(experimental_functions_frame, text="Display stats", state="normal", width=14, command=self.display_recorded_stats)
         self.display_trigger_recording_stats.grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
         Hovertip(self.display_trigger_recording_stats, "Display stats of recorded videos")
        
