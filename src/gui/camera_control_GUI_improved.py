@@ -1261,15 +1261,14 @@ class CamGUI(object):
         
         if self.save_msg:
             display_recorded_stats(self)
-        
+        self.frame_time_list = frame_time_list
         self.vid_out = []
         self.frame_times = []
         self.current_file_label['text'] = ""
         self.received_pulse_label['text'] = ""
         self.set_calibration_buttons_group(state='disabled')
-        self.plot_trigger_recording(frame_time_list)
-
         
+
     def plot_trigger_recording(self, frame_time_list):
         """
         Plot the calibration error progression.
@@ -1322,6 +1321,9 @@ class CamGUI(object):
         
         root.mainloop()
 
+    def display_recorded_stats(self):
+        self.plot_trigger_recording(self.frame_time_list)
+ 
     # endregion Trigger recording
     def close_window(self):
 
@@ -1840,8 +1842,11 @@ class CamGUI(object):
         self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=14, command=lambda : self.save_trigger_recording(delete=True))
         self.delete_trigger_recording_button.grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
         Hovertip(self.delete_trigger_recording_button, "Delete the trigger recording")
-       
         
+        self.display_trigger_recording_stats = Button(experimental_functions_frame, text="Display stats", state="normal", width=14, command=lambda : display_recorded_stats(self))
+        self.display_trigger_recording_stats.grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
+        Hovertip(self.display_trigger_recording_stats, "Display stats of recorded videos")
+       
         experimental_functions_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
         
         cur_row += 1
