@@ -406,9 +406,6 @@ class VideoRecordingSession(ctypes.Structure):
                 self.vid_out.write(frame)
                 self.frame_times.append(time_data)
                 self.frame_num.append(frame_num)
-                return frame, time_data, frame_num
-            else:
-                return None, None, None
     
     def acquire_frame(self, frame, time_data, frame_num):
         # self.vid_out.write(frame)
@@ -422,7 +419,8 @@ class VideoRecordingSession(ctypes.Structure):
     
     def start_processing(self):
         self.recording_status = True
-        processing_thread = threading.Thread(target=self._process_frames)
+        print(f'Cam {self.cam_num} thread is started')
+        processing_thread = threading.Thread(target=self._process_frames, daemon=True)
         processing_thread.start()
         
     def _process_frames(self):
