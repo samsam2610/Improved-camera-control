@@ -27,6 +27,8 @@ from tkinter import Entry, Label, Button, StringVar, IntVar, BooleanVar, \
 from idlelib.tooltip import Hovertip
 
 from matplotlib import pyplot as plt
+import matplotlib.ticker as ticker
+
 import matplotlib.animation as animation
 from matplotlib import style
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -1256,7 +1258,7 @@ class CamGUI(object):
         
         elif delete:
             self.save_msg = "Video has been deleted, please set up a new video to take another recording."
-        self.plot_trigger_recording(frame_time_list)
+        
         if self.save_msg:
             display_recorded_stats(self)
         
@@ -1265,6 +1267,8 @@ class CamGUI(object):
         self.current_file_label['text'] = ""
         self.received_pulse_label['text'] = ""
         self.set_calibration_buttons_group(state='disabled')
+        self.plot_trigger_recording(frame_time_list)
+
         
     def plot_trigger_recording(self, frame_time_list):
         """
@@ -1291,14 +1295,15 @@ class CamGUI(object):
         # Plot the error values
         for num in range(len(self.cam)):
             num_list = np.empty(len(frame_time_list[num]))
-            num_list.fill(num*10**-3)
+            num_list.fill(num*10**-4)
 
             # Plot the data for each cam
-            plt.plot(frame_time_list[num], num_list, marker='o', linestyle='-', label=f'Camera {num+1}')
+            plt.scatter(frame_time_list[num], num_list, marker='o', s=3, label=f'Camera {num+1}')
         
         # ax.plot(error_list)
 
         # Customize the plot
+        plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(0.001))
         ax.set_xlabel('Iteration')
         ax.set_ylabel('Error')
         ax.set_title('Error Progression')
