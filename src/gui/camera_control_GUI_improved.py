@@ -1302,7 +1302,9 @@ class CamGUI(object):
         # ax.plot(error_list)
 
         # Customize the plot
-        plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(0.001))
+        x_interval = 0.001
+
+        plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(base=x_interval))
         ax.set_xlabel('Iteration')
         ax.set_ylabel('Error')
         ax.set_title('Error Progression')
