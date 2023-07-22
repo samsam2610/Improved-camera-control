@@ -1187,9 +1187,10 @@ class CamGUI(object):
         except threading.BrokenBarrierError:
             print(f'Barrier broken for cam {num}. Failed to sync start the trigger. Please try again!')
             return None
-        self.cam[num].set_recording_status(state=True)
+        
         self.cam[num].enable_trigger()
         self.cam[num].turn_off_continuous_mode()
+        self.cam[num].set_recording_status(state=True)
         while self.recording_trigger_toggle_status:
             if not self.recording_trigger_status[num]:
                 self.cam[num].disable_trigger()
