@@ -52,7 +52,7 @@ def detect_raw_board_on_thread(self, num, barrier):
             self.frame_queue.put((frame_current, num, self.frame_count_test[num]))
 
 
-def draw_detection_on_thread(self):
+def draw_detection_on_thread(self, num):
     frame_groups = {}  # Dictionary to store frame groups by thread_id
     frame_counts = {}  # array to store frame counts for each thread_id
     from src.aniposelib.boards import merge_rows, extract_points

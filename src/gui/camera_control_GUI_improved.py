@@ -1028,7 +1028,7 @@ class CamGUI(object):
                 t[-1].daemon = True
                 t[-1].start()
             
-            t.append(threading.Thread(target=draw_detection_on_thread, args=(self)))
+            t.append(threading.Thread(target=draw_detection_on_thread, args=(self, i)))
             t[-1].daemon = True
             t[-1].start()
 
