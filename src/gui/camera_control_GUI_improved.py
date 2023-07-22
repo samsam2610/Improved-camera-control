@@ -35,7 +35,7 @@ import cv2
 import ffmpy
 import numpy as np
 from _video_files_func import create_video_files, create_output_files, save_vid, display_recorded_stats, check_frame
-from _calibration_func import draw_calibration_on_thread, draw_reprojection_on_thread, detect_markers_on_thread
+from _calibration_func import detect_raw_board_on_thread, draw_detection_on_thread, draw_reprojection_on_thread, detect_markers_on_thread
 from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, get_frame_dimensions, get_formats, set_formats, \
     get_fov, set_fov, set_frame_rate, get_current_frame_rate, \
     set_partial_scan_limit, toggle_auto_center, toggle_polarity, toggle_flip_vertical, \
@@ -1022,10 +1022,15 @@ class CamGUI(object):
             t[-1].daemon = True
             t[-1].start()
         else:
+            self.detection_window_status = True
             for i in range(len(self.cam)):
-                t.append(threading.Thread(target=draw_calibration_on_thread, args=(self, i, barrier)))
+                t.append(threading.Thread(target=detect_raw_board_on_thread(), args=(self, i, barrier)))
                 t[-1].daemon = True
                 t[-1].start()
+            
+            t.append(threading.Thread(target=draw_detection_on_thread, args=(self, i)))
+            t[-1].daemon = True
+            t[-1].start()
 
     # endregion Calibration
     

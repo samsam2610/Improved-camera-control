@@ -5,7 +5,7 @@ import traceback
 import os
 
 
-def draw_calibration_on_thread(self, num, barrier):
+def detect_raw_board_on_thread(self, num, barrier):
     """
     Draws calibration on a separate thread for a given camera.
 
@@ -19,9 +19,9 @@ def draw_calibration_on_thread(self, num, barrier):
     Example usage:
     draw_calibration_on_thread(0, barrier)
     """
-    window_name = f'Camera {num}'
-    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(window_name, 640, 480)
+    # window_name = f'Camera {num}'
+    # cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    # cv2.resizeWindow(window_name, 640, 480)
     from utils import aruco_dict
     from cv2 import aruco
     params = aruco.DetectorParameters()
@@ -31,7 +31,8 @@ def draw_calibration_on_thread(self, num, barrier):
     params.adaptiveThreshWinSizeStep = 50
     params.adaptiveThreshConstant = 0
     
-    while cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0:
+    # while cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0:
+    while self.detection_window_status:
         try:
             barrier.wait(timeout=15)
         except threading.BrokenBarrierError:
@@ -39,22 +40,72 @@ def draw_calibration_on_thread(self, num, barrier):
             break
         frame_current = self.cam[num].get_image()
         if frame_current is not None:
-            drawn_frame = draw_axis(frame_current,
+            self.frame_count_test[num] += 1
+            frame_current = draw_axis(frame_current,
                                             camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
                                             dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
                                             rotation=self.cgroup_test.cameras[num].get_rotation(),
                                             translation=self.cgroup_test.cameras[num].get_translation(),
                                             board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
-            if drawn_frame is not None:
-                cv2.imshow(window_name, drawn_frame)
-                cv2.waitKey(1)
-            else:
-                cv2.imshow(window_name, frame_current)
-                cv2.waitKey(1)
-        
-    self.recording_threads_status[num] = False
-    
+            
+            self.frame_queue.put((frame_current, num, self.frame_count_test[num]))
 
+
+def draw_detection_on_thread(self):
+    frame_groups = {}  # Dictionary to store frame groups by thread_id
+    frame_counts = {}  # array to store frame counts for each thread_id
+    from src.aniposelib.boards import merge_rows, extract_points
+
+    window_name = f'Detection'
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(window_name, 2160, 660)
+    
+    # Define the font settings
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 1.5
+    thickness = 1
+    
+    self.detection_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
+    try:
+        while self.detection_window_status:
+            # Retrieve frame information from the queue
+            frame, thread_id, frame_count,  = self.frame_queue.get()
+            if thread_id not in frame_groups:
+                frame_groups[thread_id] = []  # Create a new group for the thread_id if it doesn't exist
+                frame_counts[thread_id] = 0
+                
+            # Append frame information to the corresponding group
+            frame_groups[thread_id].append((frame, frame_count))
+            frame_counts[thread_id] += 1
+            
+            # Process the frame group (frames with the same thread_id)
+            # dumping the mix and match rows into detections.pickle to be pickup by calibrate_on_thread
+            try:
+                if all(count >= 2 for count in frame_counts.values()):
+                    frames = []
+                    for num in range(len(self.cam)):
+                        frame_group = frame_groups[num]
+                        frame = frame_group[-1][0]
+                        frames.append(frame)
+                    
+                    frame = cv2.hconcat(frames)
+                    cv2.putText(frame, 'Detection', (30, 50), font, font_scale, (0, 255, 0), thickness)
+                    cv2.imshow(window_name, frame)
+                    cv2.waitKey(1)
+                    
+                    
+            except Exception as e:
+                traceback.print_exc()
+                print("Exception occurred:", type(e).__name__, "| Exception value:", e,
+                      ''.join(traceback.format_tb(e.__traceback__)))
+            
+            self.detection_window_status = cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) > 0
+            
+    except Exception as e:
+        print("Exception occurred:", type(e).__name__, "| Exception value:", e,
+              ''.join(traceback.format_tb(e.__traceback__)))
+              
+    
 def draw_axis(frame, camera_matrix, dist_coeff, rotation, translation, board, aruco_dict, params, verbose=True):
     """
     """
