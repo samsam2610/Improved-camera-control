@@ -401,6 +401,7 @@ class VideoRecordingSession(ctypes.Structure):
     def write_frame(self):
         with self.buffer_lock:
             if len(self.frame_buffer) > 0:
+                print('Writing frame')
                 frame, time_data, frame_num = self.frame_buffer.popleft()
                 self.vid_out.write(frame)
                 self.frame_times.append(time_data)
