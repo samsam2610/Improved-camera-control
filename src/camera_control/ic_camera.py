@@ -225,7 +225,7 @@ class ICCam(ctypes.Structure):
                                     ctypes.c_ubyte * pData.buffer_size))
             np_frame = np.frombuffer(image.contents, dtype=np.uint8)
             np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
-            pData.write(frame=np_frame, time_data=callback_time, frame_num=framenumber)
+            pData.acquire_frame(frame=np_frame, time_data=callback_time, frame_num=framenumber)
             # write_thread = threading.Thread(target=pData.write, args=(np_frame, callback_time, framenumber))
             # write_thread.daemon = True
             # write_thread.start()
@@ -365,11 +365,12 @@ class VideoRecordingSession(ctypes.Structure):
         
         if video_file is not None:
             self.video_file = video_file
-            self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim, isColor=0)
+            self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
             self.frame_times = []
             self.frame_num = []
-        self.frame_times = []
-        self.frame_num = []
+            self.frame_buffer = deque()
+            self.buffer_lock = threading.Lock()
+            self.recording_status = False
 
         return 1
         
@@ -394,8 +395,31 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_num = []
         return 1
         
-    def write(self, frame, time_data, frame_num):
-        self.vid_out.write(frame)
-        self.frame_times.append(time_data)
-        self.frame_num.append(frame_num)
+    def write_frame(self):
+        with self.buffer_lock:
+            if len(self.frame_buffer) > 0:
+                frame, time_data, frame_num = self.frame_buffer.popleft()
+                self.vid_out.write(frame)
+                self.frame_times.append(time_data)
+                self.frame_num.append(frame_num)
+                return frame, time_data, frame_num
+            else:
+                return None, None, None
+    
+    def acquire_frame(self, frame, time_data, frame_num):
+        # self.vid_out.write(frame)
+        # self.frame_times.append(time_data)
+        # self.frame_num.append(frame_num)
+        with self.buffer_lock:
+            self.frame_buffer.append((frame, time_data, frame_num))
+        
         return 1
+    
+    def start_processing(self):
+        self.recording_status = True
+        processing_thread = threading.Thread(target=self._process_frames)
+        processing_thread.start()
+        
+    def _process_frames(self):
+        while self.recording_status:
+            self.write_frame()
