@@ -1024,7 +1024,7 @@ class CamGUI(object):
         else:
             self.detection_window_status = True
             for i in range(len(self.cam)):
-                t.append(threading.Thread(target=detect_raw_board_on_thread(), args=(self, i, barrier)))
+                t.append(threading.Thread(target=detect_raw_board_on_thread, args=(self, i, barrier)))
                 t[-1].daemon = True
                 t[-1].start()
             
