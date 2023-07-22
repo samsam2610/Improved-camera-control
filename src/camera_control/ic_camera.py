@@ -407,19 +407,19 @@ class VideoRecordingSession(ctypes.Structure):
             self.frame_num.append(frame_num)
     
     def acquire_frame(self, frame, time_data, frame_num):
-        self.vid_out.write(frame)
-        self.frame_times.append(time_data)
-        self.frame_num.append(frame_num)
-        # with self.buffer_lock:
-        # self.frame_buffer.append((frame, time_data, frame_num))
+        # self.vid_out.write(frame)
+        # self.frame_times.append(time_data)
+        # self.frame_num.append(frame_num)
+        with self.buffer_lock:
+                self.frame_buffer.append((frame, time_data, frame_num))
         
         return 1
     
     def start_processing(self):
         self.recording_status = True
         print(f'Cam {self.cam_num} thread is started')
-        # processing_thread = threading.Thread(target=self._process_frames, daemon=True)
-        # processing_thread.start()
+        processing_thread = threading.Thread(target=self._process_frames, daemon=True)
+        processing_thread.start()
         
     def _process_frames(self):
         while self.recording_status:
