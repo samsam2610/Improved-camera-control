@@ -304,6 +304,7 @@ class CamGUI(object):
             self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
             self.base_name.append(self.cam_name_no_space[i] + '_'
                                   + self.subject.get() + '_'
+                                  + self.setup_name.get() + '_'
                                   + date + '_'
                                   + str(int(da_fps)) + 'f'
                                   + temp_exposure + 'e'
@@ -523,7 +524,7 @@ class CamGUI(object):
             for i in range(len(self.cam)):
                 # write code to create a list of base names for the videos
                 self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
-                self.base_name.append(self.cam_name_no_space[i] + '_' + 'calibration_')
+                self.base_name.append(self.cam_name_no_space[i] + '_' + 'calibration_' + self.setup_name.get() + '_')
                 self.vid_file.append(os.path.normpath(self.dir_output.get() +
                                                       '/' +
                                                       self.base_name[i] +
@@ -1076,6 +1077,7 @@ class CamGUI(object):
             self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
             self.base_name.append(self.cam_name_no_space[i] + '_'
                                   + self.subject.get() + '_'
+                                  + self.setup_name.get() + '_'
                                   + date + '_'
                                   + str(int(da_fps)) + 'f'
                                   + temp_exposure + 'e'
@@ -1595,24 +1597,39 @@ class CamGUI(object):
         video_setting_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="w")
         cur_row += 1
         
-        # subject name
+        # Video info setting
         video_info_frame = Frame(self.window, borderwidth=1, relief="raised")
-        Label(video_info_frame, text="Subject: ").\
-            grid(sticky="nw", row=0, column=0, padx=5, pady=3)
+        
+        # Video name setting
+        video_name_frame = Frame(video_info_frame)
+        
+        # Subject name
+        Label(video_name_frame, text="Subject: ").\
+            grid(sticky="nw", row=0, column=0, padx=3, pady=0)
         self.subject = StringVar(value='Mouse')
-        self.subject_entry = ttk.Combobox(video_info_frame, textvariable=self.subject, width=15)
+        self.subject_entry = ttk.Combobox(video_name_frame, textvariable=self.subject, width=5)
         self.subject_entry['values'] = tuple(self.mouse_list)
         self.subject_entry.\
-            grid(sticky="nw", row=0, column=1, padx=5, pady=3)
+            grid(sticky="nw", row=0, column=1, padx=3, pady=0)
 
+        # Experimental setup
+        Label(video_name_frame, text="Setup: ").\
+            grid(sticky="nw", row=0, column=2, padx=3, pady=0)
+        self.setup_name = StringVar(value='Test')
+        self.setup_entry = Entry(video_name_frame, textvariable=self.setup_name, width=10)
+        self.setup_entry.\
+            grid(sticky="nw", row=0, column=3, padx=3, pady=0)
+        
         # attempt
-        Label(video_info_frame, text="Attempt: ").grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+        Label(video_name_frame, text="Attempt: ").grid(sticky="nw", row=0, column=4, padx=3, pady=0)
         self.attempt = StringVar(value="1")
-        self.attempt_entry = ttk.Combobox(video_info_frame, textvariable=self.attempt, width=5)
+        self.attempt_entry = ttk.Combobox(video_name_frame, textvariable=self.attempt, width=5)
         self.attempt_entry['values'] = tuple(range(1, 10))
         self.attempt_entry.\
-            grid(sticky="nw", row=0, column=3, padx=5, pady=3)
-
+            grid(sticky="nw", row=0, column=5, padx=3, pady=0)
+        
+        video_name_frame.grid(row=0, column=0, columnspan=4, sticky="nsew")
+        
         # type frame rate
         Label(video_info_frame, text="Frame Rate: ").\
             grid(sticky="nw", row=1, column=0, padx=5, pady=3)
@@ -1632,7 +1649,7 @@ class CamGUI(object):
         self.video_codec_entry.set("XVID")  # default codec
         self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
         self.video_codec_entry.\
-            grid(sticky="nw", row=1, column=3, padx=5, pady=3)
+            grid(sticky="nww", row=1, column=3, padx=5, pady=3)
         self.video_codec = self.video_codec_entry.get()  # add default video codec
         Hovertip(self.video_codec_entry, "Select video codec for video recording")
 
