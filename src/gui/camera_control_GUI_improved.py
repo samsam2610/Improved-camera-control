@@ -1291,7 +1291,7 @@ class CamGUI(object):
         # Plot the error values
         for num in range(len(self.cam)):
             num_list = np.empty(len(frame_time_list[num]))
-            num_list.fill(num)
+            num_list.fill(num*10**-3)
 
             # Plot the data for each cam
             plt.plot(frame_time_list[num], num_list, marker='o', linestyle='-', label=f'Camera {num+1}')
