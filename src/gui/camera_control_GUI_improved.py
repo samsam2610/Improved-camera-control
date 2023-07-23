@@ -1567,7 +1567,7 @@ class CamGUI(object):
                 grid(row=1, column=3, sticky="w", padx=5, pady=3)
  
             framerate_frame.\
-                grid(row=cur_row, column=0, padx=2, pady=3, sticky="new")
+                grid(row=cur_row, column=0, padx=2, pady=3, sticky="nsew")
             framerate_frame.pack_propagate(False)
             
             # partial offset scan box
