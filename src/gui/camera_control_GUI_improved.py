@@ -1457,6 +1457,7 @@ class CamGUI(object):
                 grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
             
             init_camera_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
+            init_camera_frame.pack_propagate(False)
 
             # change exposure
             capture_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
@@ -1914,7 +1915,7 @@ class CamGUI(object):
         test_calibration_frame.grid(row=1, column=4, padx=5, pady=3, sticky="nsew")
         
         calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
-        
+        calibration_frame.pack_propagate(False)
         # calibration result
         calibration_result_label = Label(self.window, text="Calibration Stats: ", font=("Arial", 12, "bold"))
         calibration_result_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
