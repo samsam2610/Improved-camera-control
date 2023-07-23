@@ -1688,8 +1688,7 @@ class CamGUI(object):
             self.tracking_points.append([None, None])
             Button(coord_track_frame, text="Track", command=lambda index_cam=i: track_frame_coord(self, index_cam), width=10). \
                 grid(row=0, column=4, sticky="w", padx=1, pady=0)
-            self.tracking_points_status.append(Label(coord_track_frame, text="Not Tracked", width=10, justify="left", anchor="w"))
-            self.tracking_points_status[i].grid(row=0, column=5, sticky="w", padx=1, pady=0)
+            
             
             coord_track_frame.grid(row=1, column=0, padx=3, pady=3, sticky="nsew")
             coord_track_frame.pack_propagate(False)
@@ -1716,6 +1715,14 @@ class CamGUI(object):
             camera_status_frame. \
                 grid(row=cur_row, column=0, padx=2, pady=0, sticky="w")
             camera_status_frame.pack_propagate(False)
+
+            # tracking point status
+            tracking_point_frame = Frame(self.window)
+            self.tracking_points_status.append(Label(tracking_point_frame, text="Not Tracked", width=30, justify="left", anchor="w"))
+            self.tracking_points_status[i].grid(row=0, column=0, columnspan=3, sticky="w", padx=1, pady=0)
+            
+            tracking_point_frame.grid(row=cur_row, column=2, padx=2, pady=0, sticky="w")
+            tracking_point_frame.pack_propagate(False)
             
             cur_row += 1
 
