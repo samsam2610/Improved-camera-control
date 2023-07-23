@@ -1408,10 +1408,10 @@ class CamGUI(object):
             # label for trigger status
             self.trigger_status_indicator.append(Label(camera_record_status_frame, text="Trigger status: ", bg="gray"))
             self.trigger_status_indicator[i]. \
-                grid(row=0, column=0, sticky="w", padx=5, pady=3)
-            self.trigger_status_label.append(Label(camera_record_status_frame, text="Disabled", width=30, anchor="w"))
+                grid(row=0, column=1, sticky="w", padx=5, pady=3)
+            self.trigger_status_label.append(Label(camera_record_status_frame, text="Disabled", width=10, anchor="w"))
             self.trigger_status_label[i]. \
-                grid(row=0, column=1, columnspan=3, sticky="w", padx=5, pady=3)
+                grid(row=0, column=2, columnspan=3, sticky="w", padx=5, pady=3)
             
             camera_record_status_frame.grid(row=cur_row, column=0, padx=1, pady=1, sticky="w")
 
