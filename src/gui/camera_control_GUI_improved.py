@@ -1944,14 +1944,9 @@ class CamGUI(object):
         calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         cur_row += 1
 
-
-        
         # empty row
         Label(self.window, text="").grid(row=cur_row, column=0)
         cur_row += 1
-
-        
-        cur_row += 3
 
         # close window/reset GUI
         Label(self.window).grid(row=cur_row, column=0)
