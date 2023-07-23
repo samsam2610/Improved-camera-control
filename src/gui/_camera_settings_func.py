@@ -1,5 +1,6 @@
 from tkinter import Label, Button, Tk
-
+import cv2
+from PIL import Image, ImageTk
 
 def show_camera_error(self):
     error_message = "No camera is found! \nPlease initialize camera before setting gain."
@@ -95,11 +96,60 @@ def set_fov(self, num):
 def reset_fov(self, num):
     pass
 
+
 def check_frame_coord(self, num):
-    pass
+    def click_event(event, x, y, flags, params):
+
+        # checking for left mouse clicks
+        if event == cv2.EVENT_LBUTTONDOWN:
+
+            # displaying the coordinates
+            # on the Shell
+            print(x, ' ', y)
+
+            # displaying the coordinates
+            # on the image window
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(frame, str(x) + ',' +
+                        str(y), (x,y), font,
+                        1, (255, 0, 0), 2)
+            cv2.imshow('image', frame)
+
+        # checking for right mouse clicks
+        if event == cv2.EVENT_RBUTTONDOWN:
+
+            # displaying the coordinates
+            # on the Shell
+            print(x, ' ', y)
+
+            # displaying the coordinates
+            # on the image window
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            b = frame[y, x, 0]
+            g = frame[y, x, 1]
+            r = frame[y, x, 2]
+            cv2.putText(frame, str(b) + ',' +
+                        str(g) + ',' + str(r),
+                        (x, y), font, 1,
+                        (255, 255, 0), 2)
+            cv2.imshow('image', frame)
+            
+    frame = self.cam[num].get_image()
+    if frame is not None:
+        # Create a window and set the mouse callback
+        cv2.namedWindow(f"Camera {num}")
+        cv2.setMouseCallback("Image", click_event)
+        
+        # wait for a key to be pressed to exit
+        cv2.waitKey(0)
+
+        # close the window
+        cv2.destroyAllWindows()
+
 
 def track_frame_coord(self, num):
     pass
+
 
 def set_x_offset(self, i, num):
     self.cam[num].set_auto_center(value=self.auto_center[num].get())
