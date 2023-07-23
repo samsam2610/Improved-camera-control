@@ -42,7 +42,7 @@ from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, g
     get_fov, set_fov, set_frame_rate, get_current_frame_rate, \
     set_partial_scan_limit, toggle_auto_center, toggle_polarity, toggle_flip_vertical, \
     set_x_offset, set_y_offset, \
-    check_frame_coord, \
+    check_frame_coord, track_frame_coord\
     show_video_error, show_camera_error
 
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
@@ -81,6 +81,9 @@ class CamGUI(object):
         self.framerate_list = []
         self.current_framerate = []
 
+        self.x_tracking_value = []
+        self.y_tracking_value = []
+        
         self.x_offset_value = []
         self.x_offset_scale = []
         self.x_offset_spinbox = []
@@ -1484,10 +1487,28 @@ class CamGUI(object):
             reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
             
             set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=10)
-            set_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
+            set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
 
             check_frame_coor_button = Button(fov_settings_frame, text="Check Frame Coord", command=lambda index_cam=i: check_frame_coord(self, index_cam), width=15)
-            check_frame_coor_button.grid(sticky="nsew", row=1, column=6, padx=5, pady=3)
+            check_frame_coor_button.grid(sticky="nsew", row=0, column=6, padx=5, pady=3)
+            
+            coord_track_frame = Frame(fov_settings_frame)
+            Label(coord_track_frame, text="X: ").\
+                grid(row=0, column=0, sticky="w", padx=0, pady=0)
+            self.x_tracking_value.append(IntVar())
+            x_tracking_entry = Entry(coord_track_frame, textvariable=self.x_tracking_value[i], width=3)
+            x_tracking_entry.grid(row=0, column=1, sticky="w", padx=0, pady=0)
+            
+            Label(coord_track_frame, text="Y: ").\
+                grid(row=0, column=2, sticky="w", padx=0, pady=0)
+            self.y_tracking_value.append(IntVar())
+            y_tracking_entry = Entry(coord_track_frame, textvariable=self.y_tracking_value[i], width=3)
+            y_tracking_entry.grid(row=0, column=3, sticky="w", padx=0, pady=0)
+            
+            Button(coord_track_frame, text="Track", command=lambda index_cam=i: track_frame_coord(self, index_cam), width=5).\
+                grid(row=0, column=4, sticky="w", padx=0, pady=0)
+            
+            coord_track_frame.grid(row=1, column=6, padx=5, pady=3, sticky="nsew")
             
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             fov_settings_frame.pack_propagate(False)

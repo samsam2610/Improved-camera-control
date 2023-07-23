@@ -98,6 +98,9 @@ def reset_fov(self, num):
 def check_frame_coord(self, num):
     pass
 
+def track_frame_coord(self, num):
+    pass
+
 def set_x_offset(self, i, num):
     self.cam[num].set_auto_center(value=self.auto_center[num].get())
     x_offset = self.x_offset_value[num].get()
