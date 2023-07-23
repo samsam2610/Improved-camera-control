@@ -73,9 +73,10 @@ class CamGUI(object):
         self.current_exposure = []
         self.exposure = []
         self.exposure_entry = []
+        
         self.gain = []
         self.gain_entry = []
-
+        
         self.formats = []
         self.format_entry = []
 
@@ -1532,8 +1533,11 @@ class CamGUI(object):
             Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: set_exposure(self, index_cam), width=14).\
                 grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
             
+            Label(capture_settings_frame, text=f"Current: {self.exposure[i].get()}s", width=8, justify="left", anchor="w").\
+                grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
+            
             # change gain
-            Label(capture_settings_frame, text='Gain:', width=8, justify="left", anchor="w").\
+            Label(capture_settings_frame, text='Gain (db):', width=8, justify="left", anchor="w").\
                 grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
                 
             self.gain.append(DoubleVar())
@@ -1544,6 +1548,8 @@ class CamGUI(object):
             Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda index_cam=i: set_gain(self, index_cam), width=14).\
                 grid(sticky="nsew", row=1, column=3, pady=3, padx=5)
             
+            Label(capture_settings_frame, text=f"Current: {self.gain[i].get()}db", width=8, justify="left", anchor="w").\
+                grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
             capture_settings_frame.\
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
             
