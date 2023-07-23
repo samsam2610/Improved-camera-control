@@ -1918,27 +1918,6 @@ class CamGUI(object):
         
         cur_row += 1
         
-        # File status
-        Label(self.window, text="Current file status: ").grid(row=cur_row, column=0, sticky="w")
-        self.current_file_label = Label(self.window, text="")
-        self.current_file_label.grid(row=cur_row, column=1, sticky="w")
-        cur_row += 1
-
-        # label for trigger receive text
-        Label(self.window, text="Trigger status: ").grid(row=cur_row, column=0, sticky="w")
-        self.received_pulse_label = Label(self.window, text="", wraplength=numberOfScreenUnits)
-        self.received_pulse_label.grid(row=cur_row, column=1, sticky="w")
-        cur_row += 1
-
-
-        cur_row += 1
-
-        # label for calibration process status text
-        Label(self.window, text="Calibration error: ").grid(row=cur_row, column=0, sticky="w")
-        self.calibration_error_stats = Label(self.window, text='', wraplength=numberOfScreenUnits)
-        self.calibration_error_stats.grid(row=cur_row, column=1, sticky="w")
-        cur_row += 1
-
         # empty row
         Label(self.window, text="").grid(row=cur_row, column=0)
         cur_row += 1
