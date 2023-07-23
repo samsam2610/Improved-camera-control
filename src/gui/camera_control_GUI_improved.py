@@ -1689,6 +1689,8 @@ class CamGUI(object):
             Button(coord_track_frame, text="Track", command=lambda index_cam=i: track_frame_coord(self, index_cam), width=10). \
                 grid(row=0, column=4, sticky="w", padx=1, pady=0)
             
+            Button(coord_track_frame, text="Reset", command=lambda index_cam=i: reset_track_frame_coord(self, index_cam), width=10). \
+                grid(row=0, column=5, sticky="w", padx=1, pady=0)
             
             coord_track_frame.grid(row=1, column=0, padx=3, pady=3, sticky="nsew")
             coord_track_frame.pack_propagate(False)

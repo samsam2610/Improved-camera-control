@@ -138,6 +138,11 @@ def track_frame_coord(self, num):
     self.tracking_points_status[num]['text'] = f"Tracking point: {self.tracking_points[num][0], self.tracking_points[num][1]}"
 
 
+def reset_track_frame_coord(self, num):
+    self.tracking_points[num] = [None, None]
+    self.tracking_points_status[num]['text'] = f"Tracking point: {self.tracking_points[num][0], self.tracking_points[num][1]}"
+
+
 def set_x_offset(self, i, num):
     self.cam[num].set_auto_center(value=self.auto_center[num].get())
     x_offset = self.x_offset_value[num].get()
