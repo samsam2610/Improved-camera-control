@@ -105,6 +105,9 @@ class CamGUI(object):
         self.video_file_status = []
         self.video_file_indicator = []
 
+        self.current_frame_count_label = []
+        self.current_frame_buffer_length_label = []
+        
         self.fov_dict = []
         self.fov_labels = ['top', 'left', 'height', 'width']
 
@@ -1273,7 +1276,7 @@ class CamGUI(object):
         self.frame_time_list = frame_time_list
         self.vid_out = []
         self.frame_times = []
-        self.current_file_label['text'] = ""
+        # self.current_file_label['text'] = ""
         self.received_pulse_label['text'] = ""
         self.set_calibration_buttons_group(state='disabled')
         
@@ -1781,6 +1784,38 @@ class CamGUI(object):
 
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
         cur_row += 2
+
+        # Experimental settings
+        experimental_settings_label = Label(self.window, text="Experimental settings: ", font=("Arial", 12, "bold"))
+        experimental_settings_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="nw")
+        cur_row += 1
+
+        experimental_functions_frame = Frame(self.window)
+        self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=14, command=self.setup_trigger_recording)
+        self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
+        Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
+
+        self.toggle_trigger_recording_status = IntVar(value=0)
+        self.toggle_trigger_recording_button = Button(experimental_functions_frame, text="Capture Disabled",
+                                                      background="red", state="normal", width=14, command=self.toggle_trigger_recording)
+        self.toggle_trigger_recording_button.grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+        Hovertip(self.toggle_trigger_recording_button, "Start/Stop listening to trigger to capture frame")
+
+        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Videos", state="normal", width=14, command=self.save_trigger_recording)
+        self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+        Hovertip(self.save_trigger_recording_button, "Save the trigger recording to file")
+
+        self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=14, command=lambda: self.save_trigger_recording(delete=True))
+        self.delete_trigger_recording_button.grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
+        Hovertip(self.delete_trigger_recording_button, "Delete the trigger recording")
+
+        self.display_trigger_recording_stats = Button(experimental_functions_frame, text="Display stats", state="normal", width=14, command=self.display_recorded_stats)
+        self.display_trigger_recording_stats.grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
+        Hovertip(self.display_trigger_recording_stats, "Display stats of recorded videos")
+
+        experimental_functions_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
+
+        cur_row += 1
         
         ## calibrate video section
         calibration_label = Label(self.window, text="Calibration: ", font=("Arial", 12, "bold"))
@@ -1885,37 +1920,7 @@ class CamGUI(object):
         calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         cur_row += 1
 
-        # Experimental settings
-        experimental_settings_label = Label(self.window, text="Experimental settings: ", font=("Arial", 12, "bold"))
-        experimental_settings_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="nw")
-        cur_row += 1
-        
-        experimental_functions_frame = Frame(self.window)
-        self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=14, command=self.setup_trigger_recording)
-        self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
-        Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
-        
-        self.toggle_trigger_recording_status = IntVar(value=0)
-        self.toggle_trigger_recording_button = Button(experimental_functions_frame, text="Capture Disabled",
-                                                    background="red", state="normal", width=14, command=self.toggle_trigger_recording)
-        self.toggle_trigger_recording_button.grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
-        Hovertip(self.toggle_trigger_recording_button, "Start/Stop listening to trigger to capture frame")
-        
-        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Videos", state="normal", width=14, command=self.save_trigger_recording)
-        self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
-        Hovertip(self.save_trigger_recording_button, "Save the trigger recording to file")
-        
-        self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=14, command=lambda: self.save_trigger_recording(delete=True))
-        self.delete_trigger_recording_button.grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
-        Hovertip(self.delete_trigger_recording_button, "Delete the trigger recording")
-        
-        self.display_trigger_recording_stats = Button(experimental_functions_frame, text="Display stats", state="normal", width=14, command=self.display_recorded_stats)
-        self.display_trigger_recording_stats.grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
-        Hovertip(self.display_trigger_recording_stats, "Display stats of recorded videos")
-       
-        experimental_functions_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
-        
-        cur_row += 1
+
         
         # empty row
         Label(self.window, text="").grid(row=cur_row, column=0)

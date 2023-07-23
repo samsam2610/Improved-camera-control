@@ -371,7 +371,9 @@ class VideoRecordingSession(ctypes.Structure):
             self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
             self.frame_times = []
             self.frame_num = []
-            self.frame_buffer = deque(maxlen=20)
+            self.frame_buffer = deque(maxlen=50)
+            self.frame_buffer_length = 0
+            self.frame_count = 0
             self.buffer_lock = threading.Lock()
             self.recording_status = False
 
@@ -397,14 +399,19 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_times = []
         self.frame_num = []
         return 1
-        
+    
+    def get_current_stats(self):
+        return self.frame_count, self.frame_buffer_length
+    
     def write_frame(self):
         # with self.buffer_lock:
-        while len(self.frame_buffer) > 0:
+        self.frame_buffer_length = len(self.frame_buffer)
+        while self.frame_buffer_length > 0:
             frame, time_data, frame_num = self.frame_buffer.popleft()
             self.vid_out.write(frame)
             self.frame_times.append(time_data)
             self.frame_num.append(frame_num)
+            self.frame_count += 1
     
     def acquire_frame(self, frame, time_data, frame_num):
         # self.vid_out.write(frame)
