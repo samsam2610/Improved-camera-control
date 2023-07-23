@@ -1494,21 +1494,21 @@ class CamGUI(object):
             
             coord_track_frame = Frame(fov_settings_frame)
             Label(coord_track_frame, text="X: ").\
-                grid(row=0, column=0, sticky="w", padx=0, pady=0)
+                grid(row=0, column=0, sticky="w", padx=1, pady=0)
             self.x_tracking_value.append(IntVar())
             x_tracking_entry = Entry(coord_track_frame, textvariable=self.x_tracking_value[i], width=3)
-            x_tracking_entry.grid(row=0, column=1, sticky="w", padx=0, pady=0)
+            x_tracking_entry.grid(row=0, column=1, sticky="w", padx=1, pady=0)
             
             Label(coord_track_frame, text="Y: ").\
-                grid(row=0, column=2, sticky="w", padx=0, pady=0)
+                grid(row=0, column=2, sticky="w", padx=1, pady=0)
             self.y_tracking_value.append(IntVar())
             y_tracking_entry = Entry(coord_track_frame, textvariable=self.y_tracking_value[i], width=3)
-            y_tracking_entry.grid(row=0, column=3, sticky="w", padx=0, pady=0)
+            y_tracking_entry.grid(row=0, column=3, sticky="w", padx=1, pady=0)
             
             Button(coord_track_frame, text="Track", command=lambda index_cam=i: track_frame_coord(self, index_cam), width=5).\
-                grid(row=0, column=4, sticky="w", padx=0, pady=0)
+                grid(row=0, column=4, sticky="w", padx=1, pady=0)
             
-            coord_track_frame.grid(row=1, column=6, padx=5, pady=3, sticky="nsew")
+            coord_track_frame.grid(row=1, column=6, padx=3, pady=3, sticky="nsew")
             
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             fov_settings_frame.pack_propagate(False)
