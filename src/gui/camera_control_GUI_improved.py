@@ -45,6 +45,8 @@ from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, g
     check_frame_coord, track_frame_coord, \
     show_video_error, show_camera_error
 
+from os_handler import *
+
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
 class CamGUI(object):
 
@@ -217,7 +219,7 @@ class CamGUI(object):
         for num in range(len(self.cam)):
             self.cam[num].get_image()
 
-    def sync_setup(self):
+    def set_up_vid_trigger(self):
 
         if len(self.vid_out) > 0:
             vid_open_window = Tk()
@@ -261,6 +263,7 @@ class CamGUI(object):
             self.cam_name_no_space.append(self.cam_name[num].replace(' ', ''))
             self.base_name.append(self.cam_name_no_space[num] + '_' +
                                   subject_name + '_' +
+                                  self.setup_name.get() + '_' +
                                   str(int(da_fps)) + 'f' +
                                   temp_exposure + 'e' +
                                   temp_gain + 'g')
@@ -328,7 +331,65 @@ class CamGUI(object):
         subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
         create_output_files(self, subject_name=subject_name)
         self.setup = True
-       
+   
+    def set_up_vid_trigger_synapse(self):
+        
+        if len(self.vid_out) > 0:
+            vid_open_window = Tk()
+            Label(vid_open_window,
+                  text="Video is currently open! "
+                       "\nPlease release the current video"
+                       " (click 'Save Video', even if no frames have been recorded)"
+                       " before setting up a new one.").pack()
+            Button(vid_open_window, text="Ok", command=lambda: vid_open_window.quit()).pack()
+            vid_open_window.mainloop()
+            vid_open_window.destroy()
+            return
+
+        # check if camera set up
+        if len(self.cam) == 0:
+            show_camera_error(self)
+            return
+        
+        self.trigger_on = 1
+        da_fps = str(self.fps.get())
+        month = datetime.datetime.now().month
+        month = str(month) if month >= 10 else '0' + str(month)
+        day = datetime.datetime.now().day
+        day = str(day) if day >= 10 else '0' + str(day)
+        year = str(datetime.datetime.now().year)
+        date = year + '-' + month + '-' + day
+        
+        # Preallocate vid_file dir
+        self.vid_file = []
+        self.base_name = []
+        self.cam_name_no_space = []
+
+        subject_name, dir_name = generate_folder()
+        if subject_name is None:
+            subject_name = 'Sam'
+            
+        for num in range(len(self.cam)):
+            temp_exposure = str(round(math.log2(1/float((self.exposure[num].get())))))
+            temp_gain = str(round(float(self.gain[num].get())))
+            self.cam_name_no_space.append(self.cam_name[num].replace(' ', ''))
+            self.base_name.append(self.cam_name_no_space[num] + '_' +
+                                  subject_name + '_' +
+                                  str(int(da_fps)) + 'f' +
+                                  temp_exposure + 'e' +
+                                  temp_gain + 'g')
+            self.vid_file.append(os.path.normpath(dir_name +
+                                                  '/' +
+                                                  self.base_name[num] +
+                                                  '.avi'))
+            self.trigger_status_label[num]['text'] = 'Trigger Ready'
+            self.trigger_status_indicator[num]['bg'] = 'red'
+
+        create_video_files(self)
+        create_output_files(self, subject_name=subject_name)
+        
+        self.setup = True
+
     def toggle_video_recording(self, force_termination=False):
         toggle_status = bool(self.toggle_video_recording_status.get())
         
@@ -1722,9 +1783,9 @@ class CamGUI(object):
         setup_video_frame = Frame(self.window, borderwidth=1, relief="raised")
         Button(setup_video_frame, text="Setup Recording", command=self.set_up_vid, width=14).\
             grid(sticky="nsew", row=0, column=0, columnspan=1, rowspan=1, padx=5, pady=3)
-        Button(setup_video_frame, text="Setup Trigger", command=self.sync_setup, width=14).\
+        Button(setup_video_frame, text="Setup Trigger", command=self.set_up_vid_trigger, width=14).\
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
-        Button(setup_video_frame, text="Snap A Frame", command=self.snap_image, width=14).\
+        Button(setup_video_frame, text="Sync With Synapse", command=self.set_up_vid_trigger_synapse, width=14).\
             grid(sticky="nsew", row=2, column=0, columnspan=1, padx=5, pady=3)
         # trigger
         self.trigger_on = IntVar(value=0)
