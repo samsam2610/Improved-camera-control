@@ -73,9 +73,11 @@ class CamGUI(object):
         self.current_exposure = []
         self.exposure = []
         self.exposure_entry = []
+        self.exposure_current_label = []
         
         self.gain = []
         self.gain_entry = []
+        self.gain_current_label = []
         
         self.formats = []
         self.format_entry = []
@@ -1533,8 +1535,8 @@ class CamGUI(object):
             Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: set_exposure(self, index_cam), width=14).\
                 grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
             
-            Label(capture_settings_frame, text=f"Current: {self.exposure[i].get()}s", width=15, justify="left", anchor="w").\
-                grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
+            self.exposure_current_label.append(Label(capture_settings_frame, text=f"Current: {self.exposure[i].get()} s", width=15, justify="left", anchor="w"))
+            self.exposure_current_label[i].grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
             
             # change gain
             Label(capture_settings_frame, text='Gain (db):', width=8, justify="left", anchor="w").\
@@ -1548,8 +1550,8 @@ class CamGUI(object):
             Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda index_cam=i: set_gain(self, index_cam), width=14).\
                 grid(sticky="nsew", row=1, column=3, pady=3, padx=5)
             
-            Label(capture_settings_frame, text=f"Current: {self.gain[i].get()}db", width=15, justify="left", anchor="w").\
-                grid(sticky="nsew", row=1, column=4, padx=5, pady=3)
+            self.gain_current_label.append(Label(capture_settings_frame, text=f"Current: {self.gain[i].get()} db", width=15, justify="left", anchor="w"))
+            self.gain_current_label[i].grid(sticky="nsew", row=1, column=4, padx=5, pady=3)
             
             capture_settings_frame.\
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
@@ -1586,7 +1588,6 @@ class CamGUI(object):
             set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=10)
             set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
 
-           
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             fov_settings_frame.pack_propagate(False)
             cur_row += 1

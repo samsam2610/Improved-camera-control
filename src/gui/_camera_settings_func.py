@@ -30,6 +30,7 @@ def set_gain(self, num):
         return
     
     self.cam[num].set_gain(float(self.gain[num].get()))
+    self.gain_current_label[num]['text'] = f"Current: {self.gain[num].get()} db"
     get_frame_rate_list(self, num)
 
 
@@ -40,6 +41,7 @@ def set_exposure(self, num):
         return
     
     self.cam[num].set_exposure(float(self.exposure[num].get()))
+    self.exposure_current_label[num]['text'] = f"Current: {self.exposure[num].get()} s"
     get_frame_rate_list(self, num)
 
 
