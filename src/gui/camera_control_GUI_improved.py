@@ -1753,13 +1753,13 @@ class CamGUI(object):
         self.calibration_duration_entry.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
         calibration_duration_frame.grid(row=0, column=0, padx=5, pady=3, sticky="nsew")
         
-        self.setup_calibration_button = Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration)
+        self.setup_calibration_button = Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration, width=10)
         self.setup_calibration_button.\
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
         Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
 
         self.toggle_calibration_capture_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration_capture,
-                                                            background="red", state="disabled", width=14)
+                                                            background="red", state="disabled", width=10)
         self.toggle_calibration_capture_button.\
             grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
         Hovertip(self.toggle_calibration_capture_button, "Press this button to start capturing frames for calibration. ")
@@ -1769,12 +1769,12 @@ class CamGUI(object):
             grid(sticky="nsew", row=1, column=1, columnspan=1, padx=5, pady=3)
         Hovertip(self.snap_calibration_button, "Press this button to snap a frame for calibration. ")
         
-        self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled")
+        self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled", width=11)
         self.update_calibration_button.\
             grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
         
-        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="disabled")
+        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="disabled", width=11)
         self.recalibrate_button.\
             grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.recalibrate_button, "Press this button to calibrate using all the frames. ")
@@ -1799,7 +1799,7 @@ class CamGUI(object):
         Hovertip(self.plot_calibration_error_button, "Press this button to plot the calibration error. ")
         
         test_calibration_frame = Frame(calibration_frame)
-        self.test_calibration_live_button = Button(test_calibration_frame, text="Try Calibrate", command=self.toggle_test_calibration_live, state="normal", width=9)
+        self.test_calibration_live_button = Button(test_calibration_frame, text="Try Calibration", command=self.toggle_test_calibration_live, state="normal", width=9)
         self.test_calibration_live_button.\
             grid(sticky="nw", row=0, column=0, columnspan=1, padx=0, pady=0)
         
