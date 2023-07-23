@@ -1484,9 +1484,9 @@ class CamGUI(object):
             reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
             
             set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=10)
-            set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
+            set_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
 
-            check_frame_coor_button = Button(fov_settings_frame, text="Check Frame Coor", command=lambda index_cam=i: check_frame_coor(self, index_cam), width=10)
+            check_frame_coor_button = Button(fov_settings_frame, text="Check Frame Coord", command=lambda index_cam=i: check_frame_coord(self, index_cam), width=15)
             check_frame_coor_button.grid(sticky="nsew", row=1, column=6, padx=5, pady=3)
             
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
