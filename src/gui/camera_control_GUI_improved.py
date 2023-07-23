@@ -1635,10 +1635,10 @@ class CamGUI(object):
             cur_row += 1
 
             # empty row
-            Label(self.window, text="").grid(row=cur_row + 2, column=0)
+            Label(self.window, text="").grid(row=cur_row + 1, column=0)
 
             # end of camera loop
-            cur_row = cur_row + 3
+            cur_row = cur_row + 2
 
         video_setting_label = Label(self.window, text="Video Settings: ", font=("Arial", 12, "bold"))
         video_setting_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="w")
@@ -1786,8 +1786,8 @@ class CamGUI(object):
         
         cur_row += 1
         # empty row
-        Label(self.window, text="").grid(row=cur_row + 2, column=0)
-        cur_row += 3
+        Label(self.window, text="").grid(row=cur_row + 1, column=0)
+        cur_row += 2
 
         # Experimental settings
         experimental_settings_label = Label(self.window, text="Experimental settings: ", font=("Arial", 12, "bold"))
@@ -1838,8 +1838,8 @@ class CamGUI(object):
         
         cur_row += 1
         # empty row
-        Label(self.window, text="").grid(row=cur_row + 2, column=0)
-        cur_row += 3
+        Label(self.window, text="").grid(row=cur_row + 1, column=0)
+        cur_row += 2
         
         ## calibrate video section
         calibration_label = Label(self.window, text="Calibration: ", font=("Arial", 12, "bold"))
