@@ -1557,10 +1557,8 @@ class CamGUI(object):
             self.board_detected_count_label[i].\
                 grid(row=0, column=3, sticky="nw", padx=5, pady=3)
             
-            
-            
             camera_status_frame.\
-                grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
+                grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
             camera_status_frame.pack_propagate(False)
             
             # framerate list frame
@@ -1587,7 +1585,7 @@ class CamGUI(object):
                 grid(row=1, column=3, sticky="w", padx=5, pady=3)
  
             framerate_frame.\
-                grid(row=cur_row, column=1, padx=2, pady=3, sticky="new")
+                grid(row=cur_row, column=0, padx=2, pady=3, sticky="new")
             framerate_frame.pack_propagate(False)
             
             # partial offset scan box
@@ -1630,7 +1628,7 @@ class CamGUI(object):
                 grid(row=1, column=5, sticky="w", padx=5, pady=3)
             
             partial_scan_frame.\
-                grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
+                grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
             partial_scan_frame.pack_propagate(False)
             cur_row += 1
 
@@ -1790,7 +1788,7 @@ class CamGUI(object):
         experimental_settings_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="nw")
         cur_row += 1
 
-        experimental_functions_frame = Frame(self.window, borderwidth=1, relief="raised")
+        experimental_functions_frame = Frame(self.window)
         self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=14, command=self.setup_trigger_recording)
         self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
         Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
@@ -1819,7 +1817,7 @@ class CamGUI(object):
         recording_stats_label = Label(self.window, text="Recording Stats: ", font=("Arial", 12, "bold"))
         recording_stats_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
         
-        recording_stats_frame = Frame(self.window, borderwidth=1, relief="raised")
+        recording_stats_frame = Frame(self.window)
         Label(recording_stats_frame, text="Current Status: ").\
             grid(sticky="nw", row=0, column=0, padx=5, pady=0)
         self.recording_status = StringVar(value="Not Recording")
