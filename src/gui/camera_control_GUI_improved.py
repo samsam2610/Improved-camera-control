@@ -1558,19 +1558,19 @@ class CamGUI(object):
             
             fov_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
             Label(fov_settings_frame, text='Top').grid(row=0, column=0, padx=5, pady=3)
-            Entry(fov_settings_frame, textvariable=self.fov_dict[i]['top'], width=5).\
+            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['top'], width=5).\
                 grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
 
             Label(fov_settings_frame, text='Left').grid(row=0, column=2, padx=5, pady=3)
-            Entry(fov_settings_frame, textvariable=self.fov_dict[i]['left'], width=5).\
+            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['left'], width=5).\
                 grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
 
             Label(fov_settings_frame, text='Height').grid(row=1, column=0, padx=5, pady=3)
-            Entry(fov_settings_frame, textvariable=self.fov_dict[i]['height'], width=5).\
+            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['height'], width=5).\
                 grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
 
             Label(fov_settings_frame, text='Width').grid(row=1, column=2, padx=5, pady=3)
-            Entry(fov_settings_frame, textvariable=self.fov_dict[i]['width'], width=5).\
+            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['width'], width=5).\
                 grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
             
             reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=10)
@@ -1581,24 +1581,6 @@ class CamGUI(object):
 
             check_frame_coor_button = Button(fov_settings_frame, text="Check Frame Coord", command=lambda index_cam=i: check_frame_coord(self, index_cam), width=15)
             check_frame_coor_button.grid(sticky="nsew", row=0, column=6, padx=5, pady=3)
-            
-            coord_track_frame = Frame(fov_settings_frame)
-            Label(coord_track_frame, text="X: ").\
-                grid(row=0, column=0, sticky="w", padx=1, pady=0)
-            self.x_tracking_value.append(IntVar())
-            x_tracking_entry = Entry(coord_track_frame, textvariable=self.x_tracking_value[i], width=3)
-            x_tracking_entry.grid(row=0, column=1, sticky="w", padx=1, pady=0)
-            
-            Label(coord_track_frame, text="Y: ").\
-                grid(row=0, column=2, sticky="w", padx=1, pady=0)
-            self.y_tracking_value.append(IntVar())
-            y_tracking_entry = Entry(coord_track_frame, textvariable=self.y_tracking_value[i], width=3)
-            y_tracking_entry.grid(row=0, column=3, sticky="w", padx=1, pady=0)
-            
-            Button(coord_track_frame, text="Track", command=lambda index_cam=i: track_frame_coord(self, index_cam), width=5).\
-                grid(row=0, column=4, sticky="w", padx=1, pady=0)
-            
-            coord_track_frame.grid(row=1, column=6, padx=3, pady=3, sticky="nsew")
             
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             fov_settings_frame.pack_propagate(False)
@@ -1673,6 +1655,25 @@ class CamGUI(object):
             partial_scan_frame.\
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
             partial_scan_frame.pack_propagate(False)
+
+            coord_track_frame = Frame(self.window, borderwidth=1, relief="raised")
+            Label(coord_track_frame, text="X: "). \
+                grid(row=0, column=0, sticky="w", padx=1, pady=0)
+            self.x_tracking_value.append(IntVar())
+            x_tracking_entry = Spinbox(coord_track_frame, from_=0, to=1e100, increment=1, textvariable=self.x_tracking_value[i], width=3)
+            x_tracking_entry.grid(row=0, column=1, sticky="w", padx=1, pady=0)
+
+            Label(coord_track_frame, text="Y: "). \
+                grid(row=0, column=2, sticky="w", padx=1, pady=0)
+            self.y_tracking_value.append(IntVar())
+            y_tracking_entry = Spinbox(coord_track_frame, from_=0, to=1e100, increment=1, textvariable=self.y_tracking_value[i], width=3)
+            y_tracking_entry.grid(row=0, column=3, sticky="w", padx=1, pady=0)
+
+            Button(coord_track_frame, text="Track", command=lambda index_cam=i: track_frame_coord(self, index_cam), width=10). \
+                grid(row=0, column=4, sticky="w", padx=1, pady=0)
+
+            coord_track_frame.grid(row=cur_row, column=2, padx=3, pady=3, sticky="nsew")
+            coord_track_frame.pack_propagate(False)
             
             cur_row += 1
             camera_status_frame = Frame(self.window)
@@ -1977,6 +1978,7 @@ class CamGUI(object):
         
         calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nsew")
         calibration_frame.pack_propagate(False)
+        
         # calibration result
         calibration_result_label = Label(self.window, text="Calibration Stats: ", font=("Arial", 12, "bold"))
         calibration_result_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
