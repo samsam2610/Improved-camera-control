@@ -2021,7 +2021,7 @@ class CamGUI(object):
         
         test_calibration_frame.grid(row=1, column=4, padx=5, pady=3, sticky="nsew")
         
-        calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nsew")
+        calibration_frame.grid(row=cur_row, column=0, columnspan=2, padx=2, pady=3, sticky="nsew")
         calibration_frame.pack_propagate(False)
         
         # calibration result
