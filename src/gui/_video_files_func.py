@@ -65,7 +65,7 @@ def create_output_files(self, subject_name='Sam'):
         # self.current_file_label['text'] = subject_name
         # self.frame_times.append([])
         # Change label to show current file name
-        self.video_file_status[i]['text'] = self.vid_file[i]
+        self.video_file_status[i]['text'] = self.base_name[i] + self.attempt.get()
         self.video_file_indicator[i]['bg'] = 'red'
     
     # empty out the video's stat message
