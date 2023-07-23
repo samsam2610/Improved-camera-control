@@ -1474,8 +1474,8 @@ class CamGUI(object):
             Label(capture_settings_frame, text='Gain:', width=8, justify="left", anchor="w").\
                 grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
                 
-            self.gain.append(StringVar())
-            self.gain_entry.append(Entry(capture_settings_frame, textvariable=self.gain[i], width=7, justify="left"))
+            self.gain.append(DoubleVar())
+            self.gain_entry.append(Spinbox(capture_settings_frame, from_=0, to=50, increment=0.1, textvariable=self.gain[i], width=7, justify="left"))
             self.gain_entry[i].\
                 grid(sticky="nsew", row=1, column=1, columnspan=2, padx=5, pady=3)
             
