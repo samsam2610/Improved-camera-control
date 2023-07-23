@@ -1400,19 +1400,18 @@ class CamGUI(object):
         for i in range(self.number_of_cams):
             # drop down menu to select camera
             # Add title label to the frame
-            video_file_status_frame = Frame(self.window)
-
-            title_label = Label(video_file_status_frame, text="Camera " + str(i + 1) + " Settings: ", font=("Arial", 12, "bold"))
-            title_label.grid(row=0, column=0, padx=1, pady=1, sticky="w")
+            title_label = Label(self.window, text="Camera " + str(i + 1) + " Settings: ", font=("Arial", 12, "bold"))
+            title_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="w")
             
             # Add status of the camera and its video setting to the frame
+            video_file_status_frame = Frame(self.window)
             self.video_file_indicator.append(Label(video_file_status_frame, text="Video File: ", width=8, justify="left", anchor="w", bg='gray'))
             self.video_file_indicator[i].grid(sticky="w", row=0, column=1, padx=3, pady=3)
             
-            self.video_file_status.append(Label(video_file_status_frame, text="Not Available", width=15, justify="left", anchor="w"))
-            self.video_file_status[i].grid(sticky="w", row=0, column=2, columnspan=2, padx=0, pady=0)
+            self.video_file_status.append(Label(video_file_status_frame, text="Not Available", width=20, justify="left", anchor="w"))
+            self.video_file_status[i].grid(sticky="w", row=0, column=2, columnspan=3, padx=0, pady=0)
             
-            video_file_status_frame.grid(row=cur_row, column=0, padx=1, pady=1, sticky="w")
+            video_file_status_frame.grid(row=cur_row, column=2, padx=1, pady=1, sticky="w")
             
             # Camera recording status frame
             camera_record_status_frame = Frame(self.window)
