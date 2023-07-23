@@ -189,11 +189,11 @@ class ICCam(ctypes.Structure):
         self.cam.GetPropertySwitch("Trigger", "Polarity", Value=polarity)
         return polarity[0]
 
-    def set_up_video_trigger(self, video_file, fourcc, fps, dim):
+    def set_up_video_trigger(self, video_file, fourcc, fps, dim, trackingCoords=None):
         if self.vid_file is not None:
             self.vid_file.release()
         buffer_size, width, height, bpp = self.cam.GetFrameData()
-        self.vid_file.set_params(video_file=video_file, fourcc=fourcc, fps=fps, dim=dim, buffer_size=buffer_size, width=width, height=height, bitsperpixel=bpp)
+        self.vid_file.set_params(video_file=video_file, fourcc=fourcc, fps=fps, dim=dim, buffer_size=buffer_size, width=width, height=height, bitsperpixel=bpp, trackingCoords=trackingCoords)
         print(f'Trigger capturing mode vid file is ready for {self.cam_num}')
         return self.vid_file
     
@@ -207,6 +207,7 @@ class ICCam(ctypes.Structure):
         if self.vid_file is not None:
             frame_times = copy.deepcopy(self.vid_file.frame_times)
             frame_num = copy.deepcopy(self.vid_file.frame_num)
+            tracking_value = copy.deepcopy(self.vid_file.tracking_value)
             self.vid_file.release()
             
             print(f'Flipping vertical back for cam {self.cam_num}')
@@ -333,6 +334,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.vid_out = None
         self.frame_times = []
         self.frame_num = []
+        self.tracking_value = None
     
     def set_recording_status(self, status: bool):
         if self.vid_out is None:
@@ -344,7 +346,7 @@ class VideoRecordingSession(ctypes.Structure):
             self.start_processing()
         return 1
     
-    def set_params(self, video_file: str=None, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None):
+    def set_params(self, video_file: str=None, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None, trackingCoords=None):
         if fourcc is not None:
             self.fourcc = cv2.VideoWriter_fourcc(*fourcc)
         
@@ -365,6 +367,15 @@ class VideoRecordingSession(ctypes.Structure):
             
         if bitsperpixel is not None:
             self.bitsperpixel = bitsperpixel
+            
+        if trackingCoords is not None:
+            self.tracking_x_value = trackingCoords[0]
+            self.tracking_y_value = trackingCoords[1]
+            self.tracking_value = []
+            self.tracking_point = True
+        else:
+            self.tracking_point = False
+            self.tracking_value = None
         
         if video_file is not None:
             self.video_file = video_file
@@ -384,6 +395,8 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_times = []
         self.frame_num = []
         self.recording_status = False
+        self.tracking_value = None
+        self.tracking_point = False
        
     def delete(self):
         os.remove(self.video_file)
@@ -398,6 +411,8 @@ class VideoRecordingSession(ctypes.Structure):
         self.recording_status = False
         self.frame_times = []
         self.frame_num = []
+        self.tracking_value = None
+        self.tracking_point = False
         return 1
     
     def get_current_stats(self):
@@ -412,6 +427,10 @@ class VideoRecordingSession(ctypes.Structure):
             self.frame_times.append(time_data)
             self.frame_num.append(frame_num)
             self.frame_count += 1
+            if self.tracking_point:
+                x = self.tracking_x_value
+                y = self.tracking_y_value
+                self.tracking_value.append(cv2.getRectSubPix(frame, (1, 1), (x, y))[0, 0])
     
     def acquire_frame(self, frame, time_data, frame_num):
         # self.vid_out.write(frame)

@@ -1201,7 +1201,11 @@ class CamGUI(object):
         
             dim = self.cam[i].get_image_dimensions()
             # fourcc = cv2.VideoWriter_fourcc(*)
-            self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), dim))
+            if self.tracking_points[i][0] is None:
+                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), dim))
+            else:
+                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), dim, self.tracking_points[i]))
+                
             self.cam[i].set_frame_callback_video()
             
         subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
@@ -1319,7 +1323,7 @@ class CamGUI(object):
         # delete the file and do not save timestamp files; otherwise, save timestamp files.
         frame_time_list = []
         for i in range(len(self.vid_out)):
-            frame_times, frame_num = self.cam[i].release_video_file()
+            frame_times, frame_num, tracking_value = self.cam[i].release_video_file()
             frame_times = [value - frame_times[0] for value in frame_times]
             print(f'Cam {i} frame times size is {len(frame_times)}')
             frame_time_list.append(frame_times)
