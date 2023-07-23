@@ -1542,24 +1542,7 @@ class CamGUI(object):
             fov_settings_frame.pack_propagate(False)
             cur_row += 1
         
-            camera_status_frame = Frame(self.window)
-            # label for frame acquired count
-            Label(camera_status_frame, text="Frame acquired #: ").\
-                grid(row=0, column=0, sticky="w", padx=5, pady=3)
-            self.frame_acquired_count_label.append(Label(camera_status_frame, text="0", width=5))
-            self.frame_acquired_count_label[i].\
-                grid(row=0, column=1, sticky="nw", padx=5, pady=3)
-
-            # label for frame acquired count
-            Label(camera_status_frame, text="Detected board #: ").\
-                grid(row=0, column=2, sticky="w", padx=5, pady=3)
-            self.board_detected_count_label.append(Label(camera_status_frame, text="0", width=5))
-            self.board_detected_count_label[i].\
-                grid(row=0, column=3, sticky="nw", padx=5, pady=3)
             
-            camera_status_frame.\
-                grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
-            camera_status_frame.pack_propagate(False)
             
             # framerate list frame
             framerate_frame = Frame(self.window, borderwidth=1, relief="raised")
@@ -1630,6 +1613,26 @@ class CamGUI(object):
             partial_scan_frame.\
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
             partial_scan_frame.pack_propagate(False)
+            
+            camera_status_frame = Frame(self.window)
+            # label for frame acquired count
+            Label(camera_status_frame, text="Frame acquired #: "). \
+                grid(row=0, column=0, sticky="w", padx=5, pady=3)
+            self.frame_acquired_count_label.append(Label(camera_status_frame, text="0", width=5))
+            self.frame_acquired_count_label[i]. \
+                grid(row=0, column=1, sticky="nw", padx=5, pady=3)
+
+            # label for frame acquired count
+            Label(camera_status_frame, text="Detected board #: "). \
+                grid(row=0, column=2, sticky="w", padx=5, pady=3)
+            self.board_detected_count_label.append(Label(camera_status_frame, text="0", width=5))
+            self.board_detected_count_label[i]. \
+                grid(row=0, column=3, sticky="nw", padx=5, pady=3)
+
+            camera_status_frame. \
+                grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
+            camera_status_frame.pack_propagate(False)
+            
             cur_row += 1
 
             # empty row
