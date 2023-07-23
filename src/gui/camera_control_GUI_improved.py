@@ -1628,7 +1628,7 @@ class CamGUI(object):
         self.attempt_entry.\
             grid(sticky="nw", row=0, column=5, padx=3, pady=0)
         
-        video_name_frame.grid(row=0, column=0, columnspan=4, sticky="nsew")
+        video_name_frame.grid(row=0, column=0, padx=5, pady=3, columnspan=4, sticky="nsew")
         
         # type frame rate
         Label(video_info_frame, text="Frame Rate: ").\
