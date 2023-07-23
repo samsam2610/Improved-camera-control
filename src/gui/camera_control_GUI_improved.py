@@ -402,13 +402,17 @@ class CamGUI(object):
         toggle_status = bool(self.toggle_video_recording_status.get())
         
         if toggle_status or force_termination:
+            self.recording_status.set('Stopping recording...')
             self.toggle_video_recording_status = IntVar(value=0)
             self.toggle_video_recording_button.config(text="Capture Off", background="red")
             if self.toggle_continuous_mode.get() == 1:
                 for i in range(len(self.cam)):
                     self.cam[i].turn_off_continuous_mode()
-        
+            
+            self.recording_status.set('Recording stopped.')
+            
         else: # start recording videos and change button text
+            self.recording_status.set('Starting recording...')
             self.toggle_video_recording_status = IntVar(value=1)
             self.toggle_video_recording_button.config(text="Capture On", background="green")
             
@@ -427,6 +431,8 @@ class CamGUI(object):
                 t.append(threading.Thread(target=self.record_on_thread, args=(i, barrier)))
                 t[-1].daemon = True
                 t[-1].start()
+            
+            self.recording_status.set('Recording stopped.')
 
     def record_on_thread(self, num, barrier=None):
         fps = int(self.fps.get())
@@ -1225,7 +1231,7 @@ class CamGUI(object):
                 self.recording_trigger_status[i] = False
                 
             print('Waiting for all the frames are done processing...')
-            self.calibration_process_stats.set('Waiting for all the frames are done processing...')
+            self.recording_status.set('Waiting for all the frames are done processing...')
             current_thread = threading.currentThread()
             for t in self.recording_trigger_thread:
                 if t is not current_thread and t.is_alive():
@@ -1234,6 +1240,7 @@ class CamGUI(object):
                     
             self.recording_trigger_toggle_status = False
             print('The cameras stopped gracefully!')
+            self.recording_status.set('The cameras stopped gracefully!')
             self.toggle_trigger_recording_status = IntVar(value=0)
             self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
         else:
@@ -1241,6 +1248,7 @@ class CamGUI(object):
                 print('Please setup the trigger recording first!')
                 return None
             
+            self.recording_status.set('Starting the trigger recording...')
             self.toggle_trigger_recording_status = IntVar(value=1)
             self.toggle_trigger_recording_button.config(text="Capture On", background="green")
             self.vid_start_time = time.perf_counter()
@@ -1921,6 +1929,8 @@ class CamGUI(object):
         Label(recording_stats_frame, text="Current Status: ").\
             grid(sticky="nw", row=0, column=0, padx=5, pady=0)
         self.recording_status = StringVar(value="Not Recording")
+        Label(recording_stats_frame, textvariable=self.recording_status, width=15).\
+            grid(sticky="nw", row=0, column=1, padx=5, pady=0)
         
         Label(recording_stats_frame, text="Current Duration (s): ").\
             grid(sticky="nw", row=1, column=0, padx=5, pady=0)
