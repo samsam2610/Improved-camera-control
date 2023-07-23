@@ -1817,12 +1817,14 @@ class CamGUI(object):
         
         # Recording stats
         recording_stats_label = Label(self.window, text="Recording stats: ", font=("Arial", 12, "bold"))
-        recording_stats_label.grid(row=cur_row-1, column=3, padx=1, pady=1, sticky="nw")
+        recording_stats_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
         
         recording_stats_frame = Frame(self.window)
         Label(recording_stats_frame, text="Current Status: ").\
             grid(sticky="nw", row=0, column=0, padx=5, pady=3)
         self.recording_status = StringVar(value="Not Recording")
+        
+        recording_stats_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         cur_row += 1
         
         ## calibrate video section
