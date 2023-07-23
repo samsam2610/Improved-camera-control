@@ -190,7 +190,10 @@ class CamGUI(object):
         
         # get the gain and exposure values to reflect that onto the GUI
         self.exposure[num].set(self.cam[num].get_exposure())
+        self.exposure_current_label[num]['text'] = f"Current: {self.exposure[num].get()} s"
+        
         self.gain[num].set(self.cam[num].get_gain())
+        self.gain_current_label[num]['text'] = f"Current: {self.gain[num].get()} db"
         
         get_fov(self, num)
         set_partial_scan_limit(self, num)
