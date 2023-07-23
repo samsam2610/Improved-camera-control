@@ -111,9 +111,9 @@ def check_frame_coord(self, num):
             # on the image window
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText(frame, str(x) + ',' +
-                        str(y), (x,y), font,
+                        str(y), (x, y), font,
                         1, (255, 0, 0), 2)
-            cv2.imshow('image', frame)
+            cv2.imshow(f"Camera {num}", frame)
 
         # checking for right mouse clicks
         if event == cv2.EVENT_RBUTTONDOWN:
