@@ -1460,11 +1460,11 @@ class CamGUI(object):
 
             # change exposure
             capture_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
-            Label(capture_settings_frame, text='Exposure (s):', width=8, justify="left", anchor="w").\
+            Label(capture_settings_frame, text='Exposure (s):', width=10, justify="left", anchor="w").\
                 grid(row=0, column=0, sticky="nsew", padx=5, pady=3)
             
-            self.exposure.append(StringVar())
-            self.exposure_entry.append(Entry(capture_settings_frame, textvariable=self.exposure[i], width=7, justify="left"))
+            self.exposure.append(DoubleVar())
+            self.exposure_entry.append(Spinbox(capture_settings_frame, from_=0.0001, to=1, increment=0.0001, textvariable=self.exposure[i], width=7, justify="left"))
             self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, columnspan=2, padx=5, pady=3)
 
             Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: set_exposure(self, index_cam), width=14).\
@@ -1542,8 +1542,6 @@ class CamGUI(object):
             fov_settings_frame.pack_propagate(False)
             cur_row += 1
         
-            
-            
             # framerate list frame
             framerate_frame = Frame(self.window, borderwidth=1, relief="raised")
             Label(framerate_frame, text="Frame Rate (fps): ").\
