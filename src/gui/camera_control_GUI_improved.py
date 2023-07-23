@@ -1948,12 +1948,11 @@ class CamGUI(object):
 
         # close window/reset GUI
         Label(self.window).grid(row=cur_row, column=0)
-        self.reset_button = Button(self.window, text="Reset GUI", command=self.selectCams).grid(sticky="nsew",
-                                                                                                row=cur_row + 1,
-                                                                                                column=0, columnspan=2)
-        self.close_button = Button(self.window, text="Close", command=self.close_window).grid(sticky="nsew",
-                                                                                              row=cur_row + 2, column=0,
-                                                                                              columnspan=2)
+        self.reset_button = (Button(self.window, text="Reset GUI", command=self.selectCams))
+        self.reset_button.grid(sticky="nsew", row=cur_row + 1, column=0, columnspan=2)
+        
+        self.close_button = Button(self.window, text="Close", command=self.close_window)
+        self.close_button.grid(sticky="nsew", row=cur_row + 1, column=2, columnspan=2)
     def runGUI(self):
         self.window.mainloop()
 
