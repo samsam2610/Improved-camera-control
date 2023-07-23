@@ -1413,7 +1413,7 @@ class CamGUI(object):
             self.trigger_status_label[i]. \
                 grid(row=0, column=1, columnspan=3, sticky="w", padx=5, pady=3)
             
-            camera_record_status_frame.grid(row=cur_row, column=1, padx=1, pady=1, sticky="w")
+            camera_record_status_frame.grid(row=cur_row, column=0, padx=1, pady=1, sticky="w")
 
             # Add status of the camera and its video setting to the frame
             video_file_status_frame = Frame(self.window)
