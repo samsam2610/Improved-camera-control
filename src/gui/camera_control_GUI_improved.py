@@ -1177,7 +1177,6 @@ class CamGUI(object):
             for i in range(len(self.cam)):
                 self.cam[i].set_flip_vertical(state=True)
                 
-                
             # enable the trigger
             barrier = threading.Barrier(len(self.cam))
             self.recording_trigger_thread = []
@@ -1206,7 +1205,7 @@ class CamGUI(object):
                 self.cam[num].set_recording_status(state=False)
                 print(f'Kill thread for cam {num}')
                 break
-            time.sleep(0.01)
+            time.sleep(0.1)
     
     def save_trigger_recording(self, compress=False, delete=False):
         """

@@ -410,8 +410,8 @@ class VideoRecordingSession(ctypes.Structure):
         # self.vid_out.write(frame)
         # self.frame_times.append(time_data)
         # self.frame_num.append(frame_num)
-        with self.buffer_lock:
-                self.frame_buffer.append((frame, time_data, frame_num))
+        # with self.buffer_lock:
+        self.frame_buffer.append((frame, time_data, frame_num))
         
         return 1
     
