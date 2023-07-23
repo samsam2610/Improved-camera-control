@@ -88,6 +88,8 @@ class CamGUI(object):
 
         self.x_tracking_value = []
         self.y_tracking_value = []
+        self.tracking_points = []
+        self.tracking_points_status = []
         
         self.x_offset_value = []
         self.x_offset_scale = []
@@ -211,7 +213,7 @@ class CamGUI(object):
         
         flip_vertical = self.cam[num].get_flip_vertical()
         self.flip_vertical[num].set(bool(flip_vertical))
-        
+       
         # reset output directory
         self.dir_output.set(self.output_entry['values'][cam_num])
         setup_window.destroy()
@@ -1683,9 +1685,12 @@ class CamGUI(object):
             y_tracking_entry = Spinbox(coord_track_frame, from_=0, to=1e100, increment=1, textvariable=self.y_tracking_value[i], width=5)
             y_tracking_entry.grid(row=0, column=3, sticky="w", padx=1, pady=0)
 
+            self.tracking_points.append([None, None])
             Button(coord_track_frame, text="Track", command=lambda index_cam=i: track_frame_coord(self, index_cam), width=10). \
                 grid(row=0, column=4, sticky="w", padx=1, pady=0)
-
+            self.tracking_points_status.append(Label(coord_track_frame, text="Not Tracked", width=10, justify="left", anchor="w"))
+            self.tracking_points_status[i].grid(row=0, column=5, sticky="w", padx=1, pady=0)
+            
             coord_track_frame.grid(row=1, column=0, padx=3, pady=3, sticky="nsew")
             coord_track_frame.pack_propagate(False)
             

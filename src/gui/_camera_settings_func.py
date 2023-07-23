@@ -134,7 +134,8 @@ def check_frame_coord(self, num):
 
 
 def track_frame_coord(self, num):
-    pass
+    self.tracking_points[num] = [self.x_tracking_value[num].get(), self.y_tracking_value[num].get()]
+    self.tracking_points_status[num]['text'] = f"Tracking point: {self.tracking_points[num][0], self.tracking_points[num][1]}"
 
 
 def set_x_offset(self, i, num):
