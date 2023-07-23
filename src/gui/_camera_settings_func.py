@@ -110,30 +110,12 @@ def check_frame_coord(self, num):
             # displaying the coordinates
             # on the image window
             font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
             cv2.putText(frame, str(x) + ',' +
                         str(y), (x, y), font,
                         1, (255, 0, 0), 2)
             cv2.imshow(f"Camera {num}", frame)
 
-        # checking for right mouse clicks
-        if event == cv2.EVENT_RBUTTONDOWN:
-
-            # displaying the coordinates
-            # on the Shell
-            print(x, ' ', y)
-
-            # displaying the coordinates
-            # on the image window
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            b = frame[y, x, 0]
-            g = frame[y, x, 1]
-            r = frame[y, x, 2]
-            cv2.putText(frame, str(b) + ',' +
-                        str(g) + ',' + str(r),
-                        (x, y), font, 1,
-                        (255, 255, 0), 2)
-            cv2.imshow(f"Camera {num}", frame)
-            
     frame = self.cam[num].get_image()
     if frame is not None:
         # Create a window and set the mouse callback
