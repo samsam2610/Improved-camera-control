@@ -1612,6 +1612,7 @@ class CamGUI(object):
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
             partial_scan_frame.pack_propagate(False)
             
+            cur_row += 1
             camera_status_frame = Frame(self.window)
             # label for frame acquired count
             Label(camera_status_frame, text="Frame acquired #: "). \
@@ -1626,9 +1627,9 @@ class CamGUI(object):
             self.board_detected_count_label.append(Label(camera_status_frame, text="0", width=5))
             self.board_detected_count_label[i]. \
                 grid(row=0, column=3, sticky="nw", padx=5, pady=3)
-
+            
             camera_status_frame. \
-                grid(row=cur_row, column=2, padx=2, pady=3, sticky="w")
+                grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
             camera_status_frame.pack_propagate(False)
             
             cur_row += 1
@@ -1782,6 +1783,8 @@ class CamGUI(object):
         Hovertip(self.display_stats_button, "Display stats of recorded videos")
 
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
+        # empty row
+        Label(self.window, text="").grid(row=cur_row + 2, column=0)
         cur_row += 2
 
         # Experimental settings
