@@ -1420,7 +1420,7 @@ class CamGUI(object):
             self.video_file_indicator.append(Label(video_file_status_frame, text="Video File: ", width=8, justify="left", anchor="w", bg='gray'))
             self.video_file_indicator[i].grid(sticky="w", row=0, column=1, padx=3, pady=3)
 
-            self.video_file_status.append(Label(video_file_status_frame, text="Not Available", width=30, justify="left", anchor="w"))
+            self.video_file_status.append(Label(video_file_status_frame, text="Not Available", width=50, justify="left", anchor="w"))
             self.video_file_status[i].grid(sticky="w", row=0, column=2, columnspan=3, padx=0, pady=0)
 
             video_file_status_frame.grid(row=cur_row, column=2, padx=1, pady=1, sticky="w")
