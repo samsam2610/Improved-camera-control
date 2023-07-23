@@ -42,7 +42,7 @@ def set_exposure(self, num):
         return
     
     self.cam[num].set_exposure(float(self.exposure[num].get()))
-    self.exposure_current_label[num]['text'] = f"Current: {self.exposure[num].get()} ({str(round(math.log2(1/float((self.exposure[num].get())))))}) s"
+    self.exposure_current_label[num]['text'] = f"Current: {self.exposure[num].get()} (-{str(round(math.log2(1/float((self.exposure[num].get())))))}) s"
     get_frame_rate_list(self, num)
 
 

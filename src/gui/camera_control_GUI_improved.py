@@ -190,7 +190,7 @@ class CamGUI(object):
         
         # get the gain and exposure values to reflect that onto the GUI
         self.exposure[num].set(self.cam[num].get_exposure())
-        self.exposure_current_label[num]['text'] = f"Current: {self.exposure[num].get()} ({str(round(math.log2(1/float((self.exposure[num].get())))))}) s"
+        self.exposure_current_label[num]['text'] = f"Current: {self.exposure[num].get()} (-{str(round(math.log2(1/float((self.exposure[num].get())))))}) s"
         
         self.gain[num].set(self.cam[num].get_gain())
         self.gain_current_label[num]['text'] = f"Current: {self.gain[num].get()} db"
@@ -1538,7 +1538,7 @@ class CamGUI(object):
             Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: set_exposure(self, index_cam), width=14).\
                 grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
             
-            self.exposure_current_label.append(Label(capture_settings_frame, text=f"Current: {self.exposure[i].get()} ({str(round(math.log2(1/float((self.exposure[i].get())))))}) s", width=15, justify="left", anchor="w"))
+            self.exposure_current_label.append(Label(capture_settings_frame, text=f"Current: {self.exposure[i].get()} (-{str(round(math.log2(1/float((self.exposure[i].get())))))}) s", width=18, justify="left", anchor="w"))
             self.exposure_current_label[i].grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
             
             # change gain
