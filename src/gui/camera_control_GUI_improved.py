@@ -42,6 +42,7 @@ from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, g
     get_fov, set_fov, set_frame_rate, get_current_frame_rate, \
     set_partial_scan_limit, toggle_auto_center, toggle_polarity, toggle_flip_vertical, \
     set_x_offset, set_y_offset, \
+    check_frame_coord, \
     show_video_error, show_camera_error
 
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
@@ -1479,12 +1480,15 @@ class CamGUI(object):
             Entry(fov_settings_frame, textvariable=self.fov_dict[i]['width'], width=5).\
                 grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
             
-            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=14)
+            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=10)
             reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
             
-            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=14)
+            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=10)
             set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
 
+            check_frame_coor_button = Button(fov_settings_frame, text="Check Frame Coor", command=lambda index_cam=i: check_frame_coor(self, index_cam), width=10)
+            check_frame_coor_button.grid(sticky="nsew", row=1, column=6, padx=5, pady=3)
+            
             fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             fov_settings_frame.pack_propagate(False)
             cur_row += 1
