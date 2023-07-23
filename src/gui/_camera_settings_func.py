@@ -132,12 +132,13 @@ def check_frame_coord(self, num):
                         str(g) + ',' + str(r),
                         (x, y), font, 1,
                         (255, 255, 0), 2)
-            cv2.imshow('image', frame)
+            cv2.imshow(f"Camera {num}", frame)
             
     frame = self.cam[num].get_image()
     if frame is not None:
         # Create a window and set the mouse callback
         cv2.namedWindow(f"Camera {num}")
+        cv2.imshow(f"Camera {num}", frame)
         cv2.setMouseCallback(f"Camera {num}", click_event)
         
         # wait for a key to be pressed to exit
