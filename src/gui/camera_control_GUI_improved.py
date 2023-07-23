@@ -1456,7 +1456,7 @@ class CamGUI(object):
             Button(init_camera_frame, text="Set Format", command=lambda index_cam=i: set_formats(self, index_cam), width=14).\
                 grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
             
-            init_camera_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
+            init_camera_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nsew")
             init_camera_frame.pack_propagate(False)
 
             # change exposure
@@ -1914,7 +1914,7 @@ class CamGUI(object):
         
         test_calibration_frame.grid(row=1, column=4, padx=5, pady=3, sticky="nsew")
         
-        calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
+        calibration_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nsew")
         calibration_frame.pack_propagate(False)
         # calibration result
         calibration_result_label = Label(self.window, text="Calibration Stats: ", font=("Arial", 12, "bold"))
@@ -1942,7 +1942,8 @@ class CamGUI(object):
         self.calibration_current_duration_label = Label(calibration_result_frame, textvariable=self.calibration_current_duration_value)
         self.calibration_current_duration_label.grid(sticky="wn", row=2, column=1, columnspan=1, padx=0, pady=0)
         
-        calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
+        calibration_result_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
+        calibration_result_frame.pack_propagate(False)
         cur_row += 1
 
         # close window/reset GUI
