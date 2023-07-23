@@ -1816,16 +1816,23 @@ class CamGUI(object):
         experimental_functions_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
         
         # Recording stats
-        recording_stats_label = Label(self.window, text="Recording stats: ", font=("Arial", 12, "bold"))
+        recording_stats_label = Label(self.window, text="Recording Stats: ", font=("Arial", 12, "bold"))
         recording_stats_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
         
         recording_stats_frame = Frame(self.window)
         Label(recording_stats_frame, text="Current Status: ").\
-            grid(sticky="nw", row=0, column=0, padx=5, pady=3)
+            grid(sticky="nw", row=0, column=0, padx=5, pady=0)
         self.recording_status = StringVar(value="Not Recording")
         
+        Label(recording_stats_frame, text="Current Duration (s): ").\
+            grid(sticky="nw", row=1, column=0, padx=5, pady=0)
+        self.recording_duration = StringVar()
+        Label(recording_stats_frame, textvariable=self.recording_duration, width=5).\
+            grid(sticky="nw", row=1, column=1, padx=5, pady=0)
+        
         recording_stats_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
-        cur_row += 1
+        
+        cur_row += 2
         
         ## calibrate video section
         calibration_label = Label(self.window, text="Calibration: ", font=("Arial", 12, "bold"))
