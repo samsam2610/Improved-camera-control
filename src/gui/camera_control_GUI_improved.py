@@ -42,7 +42,7 @@ from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, g
     get_fov, set_fov, set_frame_rate, get_current_frame_rate, \
     set_partial_scan_limit, toggle_auto_center, toggle_polarity, toggle_flip_vertical, \
     set_x_offset, set_y_offset, \
-    check_frame_coord, track_frame_coord, \
+    check_frame_coord, track_frame_coord, reset_track_frame_coord, \
     show_video_error, show_camera_error
 
 from os_handler import *
