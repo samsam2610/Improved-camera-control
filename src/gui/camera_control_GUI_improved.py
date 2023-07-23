@@ -1759,22 +1759,22 @@ class CamGUI(object):
         Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
 
         self.toggle_calibration_capture_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration_capture,
-                                                            background="red", state="disabled", width=8)
+                                                            background="red", state="disabled", width=15)
         self.toggle_calibration_capture_button.\
             grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
         Hovertip(self.toggle_calibration_capture_button, "Press this button to start capturing frames for calibration. ")
         
-        self.snap_calibration_button = Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame, state="disabled", width=8)
+        self.snap_calibration_button = Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame, state="disabled", width=15)
         self.snap_calibration_button.\
             grid(sticky="nsew", row=1, column=1, columnspan=1, padx=5, pady=3)
         Hovertip(self.snap_calibration_button, "Press this button to snap a frame for calibration. ")
         
-        self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled", width=13)
+        self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled", width=15)
         self.update_calibration_button.\
             grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
         
-        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="disabled", width=13)
+        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="disabled", width=15)
         self.recalibrate_button.\
             grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.recalibrate_button, "Press this button to calibrate using all the frames. ")
