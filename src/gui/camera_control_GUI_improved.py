@@ -1748,33 +1748,33 @@ class CamGUI(object):
         calibration_duration_frame = Frame(calibration_frame)
         Label(calibration_duration_frame, text="Capture Duration(s): ").\
             grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
-        self.calibration_duration_entry = Entry(calibration_duration_frame, width=5)
+        self.calibration_duration_entry = Entry(calibration_duration_frame, width=3)
         self.calibration_duration_entry.insert(0, "30")
         self.calibration_duration_entry.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
-        calibration_duration_frame.grid(row=0, column=0, padx=5, pady=3, sticky="nsew")
+        calibration_duration_frame.grid(row=0, column=0, padx=0, pady=3, sticky="nsew")
         
-        self.setup_calibration_button = Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration, width=10)
+        self.setup_calibration_button = Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration, width=3)
         self.setup_calibration_button.\
             grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
         Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
 
         self.toggle_calibration_capture_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration_capture,
-                                                            background="red", state="disabled", width=10)
+                                                            background="red", state="disabled", width=8)
         self.toggle_calibration_capture_button.\
             grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
         Hovertip(self.toggle_calibration_capture_button, "Press this button to start capturing frames for calibration. ")
         
-        self.snap_calibration_button = Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame, state="disabled")
+        self.snap_calibration_button = Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame, state="disabled", width=8)
         self.snap_calibration_button.\
             grid(sticky="nsew", row=1, column=1, columnspan=1, padx=5, pady=3)
         Hovertip(self.snap_calibration_button, "Press this button to snap a frame for calibration. ")
         
-        self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled", width=12)
+        self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled", width=13)
         self.update_calibration_button.\
             grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
         
-        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="disabled", width=12)
+        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="disabled", width=13)
         self.recalibrate_button.\
             grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.recalibrate_button, "Press this button to calibrate using all the frames. ")
@@ -1791,7 +1791,7 @@ class CamGUI(object):
         self.added_board_value = StringVar(value="0")
         self.added_board_label = Label(added_board_frame, width=5, textvariable=self.added_board_value)
         self.added_board_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
-        added_board_frame.grid(row=1, column=3, padx=5, pady=3, sticky="nsew")
+        added_board_frame.grid(row=1, column=3, padx=0, pady=3, sticky="nsew")
         
         self.plot_calibration_error_button = Button(calibration_frame, text="Plot Calibration Error", command=self.plot_calibration_error)
         self.plot_calibration_error_button.\
