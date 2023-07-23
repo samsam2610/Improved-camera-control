@@ -1616,20 +1616,20 @@ class CamGUI(object):
             camera_status_frame = Frame(self.window)
             # label for frame acquired count
             Label(camera_status_frame, text="Frame acquired #: "). \
-                grid(row=0, column=0, sticky="w", padx=5, pady=3)
+                grid(row=0, column=0, sticky="w", padx=5, pady=0)
             self.frame_acquired_count_label.append(Label(camera_status_frame, text="0", width=5))
             self.frame_acquired_count_label[i]. \
-                grid(row=0, column=1, sticky="nw", padx=5, pady=3)
+                grid(row=0, column=1, sticky="nw", padx=5, pady=0)
 
             # label for frame acquired count
             Label(camera_status_frame, text="Detected board #: "). \
-                grid(row=0, column=2, sticky="w", padx=5, pady=3)
+                grid(row=0, column=2, sticky="w", padx=5, pady=0)
             self.board_detected_count_label.append(Label(camera_status_frame, text="0", width=5))
             self.board_detected_count_label[i]. \
-                grid(row=0, column=3, sticky="nw", padx=5, pady=3)
+                grid(row=0, column=3, sticky="nw", padx=5, pady=0)
             
             camera_status_frame. \
-                grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")
+                grid(row=cur_row, column=0, padx=2, pady=0, sticky="w")
             camera_status_frame.pack_propagate(False)
             
             cur_row += 1
@@ -1783,9 +1783,11 @@ class CamGUI(object):
         Hovertip(self.display_stats_button, "Display stats of recorded videos")
 
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
+        
+        cur_row += 1
         # empty row
         Label(self.window, text="").grid(row=cur_row + 2, column=0)
-        cur_row += 2
+        cur_row += 3
 
         # Experimental settings
         experimental_settings_label = Label(self.window, text="Experimental settings: ", font=("Arial", 12, "bold"))
@@ -1834,7 +1836,10 @@ class CamGUI(object):
         
         recording_stats_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         
-        cur_row += 2
+        cur_row += 1
+        # empty row
+        Label(self.window, text="").grid(row=cur_row + 2, column=0)
+        cur_row += 3
         
         ## calibrate video section
         calibration_label = Label(self.window, text="Calibration: ", font=("Arial", 12, "bold"))
