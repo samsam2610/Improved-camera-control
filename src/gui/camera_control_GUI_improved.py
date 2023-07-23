@@ -101,6 +101,9 @@ class CamGUI(object):
 
         self.trigger_status_indicator = []
         self.trigger_status_label = []
+        
+        self.video_file_status = []
+        self.video_file_indicator = []
 
         self.fov_dict = []
         self.fov_labels = ['top', 'left', 'height', 'width']
@@ -1397,8 +1400,32 @@ class CamGUI(object):
         for i in range(self.number_of_cams):
             # drop down menu to select camera
             # Add title label to the frame
-            title_label = Label(self.window, text="Camera " + str(i + 1) + " Settings: ", font=("Arial", 12, "bold"))
-            title_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="w")
+            video_file_status_frame = Frame(self.window)
+
+            title_label = Label(video_file_status_frame, text="Camera " + str(i + 1) + " Settings: ", font=("Arial", 12, "bold"))
+            title_label.grid(row=0, column=0, padx=1, pady=1, sticky="w")
+            
+            # Add status of the camera and its video setting to the frame
+            self.video_file_indicator.append(Label(video_file_status_frame, text="Video File: ", width=8, justify="left", anchor="w", bg='gray'))
+            self.video_file_indicator[i].grid(sticky="w", row=0, column=1, padx=3, pady=3)
+            
+            self.video_file_status.append(Label(video_file_status_frame, text="Not Available", width=15, justify="left", anchor="w"))
+            self.video_file_status[i].grid(sticky="w", row=0, column=2, columnspan=2, padx=0, pady=0)
+            
+            video_file_status_frame.grid(row=cur_row, column=0, padx=1, pady=1, sticky="w")
+            
+            # Camera recording status frame
+            camera_record_status_frame = Frame(self.window)
+            # label for trigger status
+            self.trigger_status_indicator.append(Label(camera_record_status_frame, text="Trigger status: ", bg="gray"))
+            self.trigger_status_indicator[i]. \
+                grid(row=0, column=0, sticky="w", padx=5, pady=3)
+            self.trigger_status_label.append(Label(camera_record_status_frame, text="Disabled", width=30, anchor="w"))
+            self.trigger_status_label[i]. \
+                grid(row=0, column=1, columnspan=3, sticky="w", padx=5, pady=3)
+            
+            camera_record_status_frame.grid(row=cur_row, column=1, padx=1, pady=1, sticky="w")
+            
             cur_row += 1
 
             init_camera_frame = Frame(self.window, borderwidth=1, relief="raised")
@@ -1529,13 +1556,7 @@ class CamGUI(object):
             self.board_detected_count_label[i].\
                 grid(row=0, column=3, sticky="nw", padx=5, pady=3)
             
-            # label for trigger status
-            self.trigger_status_indicator.append(Label(camera_status_frame, text="Trigger status: ", bg="gray"))
-            self.trigger_status_indicator[i].\
-                grid(row=1, column=0, sticky="w", padx=5, pady=3)
-            self.trigger_status_label.append(Label(camera_status_frame, text="Disabled", width=30, anchor="w"))
-            self.trigger_status_label[i].\
-                grid(row=1, column=1, columnspan=3, sticky="w", padx=5, pady=3)
+            
             
             camera_status_frame.\
                 grid(row=cur_row, column=0, padx=2, pady=3, sticky="w")

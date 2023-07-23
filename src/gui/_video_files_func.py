@@ -45,6 +45,10 @@ def create_video_files(self, overwrite=False):
             self.vid_out[i] = cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim)
         else:
             self.vid_out.append(cv2.VideoWriter(self.vid_file[i], fourcc, int(self.fps.get()), dim))
+       
+        # Change label to show current file name
+        self.video_file_status[i]['text'] = self.vid_file[i]
+        self.video_file_indicator[i]['bg'] = 'red'
         
         self.toggle_video_recording_button['state'] = 'normal'
         self.toggle_video_recording_button['text'] = 'Click to start recording'
@@ -62,7 +66,7 @@ def create_output_files(self, subject_name='Sam'):
         self.ts_file_csv.append(self.vid_file[i].replace('.avi', '.csv'))
         self.ts_file_csv[i] = self.ts_file_csv[i].replace(self.cam_name_no_space[i],
                                                           'TIMESTAMPS_' + self.cam_name_no_space[i])
-        self.current_file_label['text'] = subject_name
+        # self.current_file_label['text'] = subject_name
         # self.frame_times.append([])
     
     # empty out the video's stat message
