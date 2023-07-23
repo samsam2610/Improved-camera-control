@@ -1783,14 +1783,14 @@ class CamGUI(object):
         Hovertip(self.display_stats_button, "Display stats of recorded videos")
 
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
-        cur_row += 3
+        cur_row += 2
 
         # Experimental settings
         experimental_settings_label = Label(self.window, text="Experimental settings: ", font=("Arial", 12, "bold"))
         experimental_settings_label.grid(row=cur_row, column=0, padx=1, pady=1, sticky="nw")
         cur_row += 1
 
-        experimental_functions_frame = Frame(self.window)
+        experimental_functions_frame = Frame(self.window, borderwidth=1, relief="raised")
         self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=14, command=self.setup_trigger_recording)
         self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
         Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
@@ -1819,7 +1819,7 @@ class CamGUI(object):
         recording_stats_label = Label(self.window, text="Recording Stats: ", font=("Arial", 12, "bold"))
         recording_stats_label.grid(row=cur_row-1, column=2, padx=1, pady=1, sticky="nw")
         
-        recording_stats_frame = Frame(self.window)
+        recording_stats_frame = Frame(self.window, borderwidth=1, relief="raised")
         Label(recording_stats_frame, text="Current Status: ").\
             grid(sticky="nw", row=0, column=0, padx=5, pady=0)
         self.recording_status = StringVar(value="Not Recording")
@@ -1832,7 +1832,7 @@ class CamGUI(object):
         
         recording_stats_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         
-        cur_row += 3
+        cur_row += 2
         
         ## calibrate video section
         calibration_label = Label(self.window, text="Calibration: ", font=("Arial", 12, "bold"))
