@@ -1783,7 +1783,7 @@ class CamGUI(object):
         Hovertip(self.display_stats_button, "Display stats of recorded videos")
 
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
-        cur_row += 2
+        cur_row += 3
 
         # Experimental settings
         experimental_settings_label = Label(self.window, text="Experimental settings: ", font=("Arial", 12, "bold"))
@@ -1832,7 +1832,7 @@ class CamGUI(object):
         
         recording_stats_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nw")
         
-        cur_row += 2
+        cur_row += 3
         
         ## calibrate video section
         calibration_label = Label(self.window, text="Calibration: ", font=("Arial", 12, "bold"))
