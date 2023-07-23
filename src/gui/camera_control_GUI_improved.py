@@ -1814,7 +1814,15 @@ class CamGUI(object):
         Hovertip(self.display_trigger_recording_stats, "Display stats of recorded videos")
 
         experimental_functions_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
-
+        
+        # Recording stats
+        recording_stats_label = Label(self.window, text="Recording stats: ", font=("Arial", 12, "bold"))
+        recording_stats_label.grid(row=cur_row-1, column=3, padx=1, pady=1, sticky="nw")
+        
+        recording_stats_frame = Frame(self.window)
+        Label(recording_stats_frame, text="Current Status: ").\
+            grid(sticky="nw", row=0, column=0, padx=5, pady=3)
+        self.recording_status = StringVar(value="Not Recording")
         cur_row += 1
         
         ## calibrate video section
