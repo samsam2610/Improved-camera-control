@@ -69,10 +69,11 @@ class ICCam(ctypes.Structure):
         self.size = (self.crop['width'], self.crop['height'])
 
     def set_ROI(self):
-        result_left = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Left", self.crop['left'])
-        result_right = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Top", self.crop['top'])
-        result_width = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Width", self.crop['width'])
-        result_height = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Height", self.crop['height'])
+        # result_roi = self.cam.SetPropertySwitch("Auto Functions ROI", "Enabled", True)
+        result_left = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Left", int(self.crop['left']))
+        result_right = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Top", int(self.crop['top']))
+        result_width = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Width", int(self.crop['width']))
+        result_height = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Height", int(self.crop['height']))
         print(f'For cam {self.cam_num}, the ROI was set with results: {result_left}, {result_right}, {result_width}, {result_height}')
         
     def set_crop(self, top=None, left=None, height=None, width=None):
