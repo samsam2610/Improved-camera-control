@@ -83,7 +83,8 @@ class ICCam(ctypes.Structure):
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
-        self.add_filters()
+        # self.add_filters()
+        sef.set_ROI()
         self.cam.StartLive()
     
     
