@@ -69,10 +69,11 @@ class ICCam(ctypes.Structure):
         self.size = (self.crop['width'], self.crop['height'])
 
     def set_ROI(self):
-        self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Left", self.crop['left'])
-        self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Top", self.crop['top'])
-        self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Width", self.crop['width'])
-        self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Height", self.crop['height'])
+        result_left = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Left", self.crop['left'])
+        result_right = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Top", self.crop['top'])
+        result_width = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Width", self.crop['width'])
+        result_height = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Height", self.crop['height'])
+        print(f'For cam {self.cam_num}, the ROI was set with results: {result_left}, {result_right}, {result_width}, {result_height}')
         
     def set_crop(self, top=None, left=None, height=None, width=None):
         self.crop['top'] = top if top is not None else self.crop['top']
@@ -84,7 +85,7 @@ class ICCam(ctypes.Structure):
         self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
         # self.add_filters()
-        sef.set_ROI()
+        self.set_ROI()
         self.cam.StartLive()
     
     
