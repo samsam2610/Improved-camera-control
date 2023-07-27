@@ -50,7 +50,8 @@ class ICCam(ctypes.Structure):
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
         self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
-        self.add_filters()
+        # self.add_filters()
+        self.set_ROI()
         self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
 
     def add_filters(self):
@@ -67,6 +68,12 @@ class ICCam(ctypes.Structure):
         self.cam.FilterSetParameter(h_c, b'Width', self.crop['width'])
         self.size = (self.crop['width'], self.crop['height'])
 
+    def set_ROI(self):
+        self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Left", self.crop['left'])
+        self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Top", self.crop['top'])
+        self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Width", self.crop['width'])
+        self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Height", self.crop['height'])
+        
     def set_crop(self, top=None, left=None, height=None, width=None):
         self.crop['top'] = top if top is not None else self.crop['top']
         self.crop['left'] = left if left is not None else self.crop['left']
@@ -78,7 +85,8 @@ class ICCam(ctypes.Structure):
         self.cam.SetVideoFormat(Format=self.formats)
         self.add_filters()
         self.cam.StartLive()
-        
+    
+    
     def get_crop(self):
         return (self.crop['top'],
                 self.crop['left'],
