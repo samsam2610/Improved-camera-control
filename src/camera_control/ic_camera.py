@@ -50,8 +50,8 @@ class ICCam(ctypes.Structure):
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
         self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
-        # self.add_filters()
-        self.set_ROI()
+        self.add_filters()
+        # self.set_ROI()
         self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
 
     def add_filters(self):
@@ -85,8 +85,8 @@ class ICCam(ctypes.Structure):
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
-        # self.add_filters()
-        self.set_ROI()
+        self.add_filters()
+        # self.set_ROI()
         self.cam.StartLive()
     
     
