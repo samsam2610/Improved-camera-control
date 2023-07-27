@@ -215,9 +215,9 @@ class ICCam(ctypes.Structure):
             
             self.vid_file.reset()
             print(f'Trigger capturing mode vid file is released for cam {self.cam_num}')
-            return frame_times, frame_num
+            return frame_times, frame_num, tracking_value
         else:
-            return None, None
+            return None, None, None
             
     def create_frame_callback_video(self):
         def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
@@ -426,6 +426,7 @@ class VideoRecordingSession(ctypes.Structure):
             self.vid_out.write(frame)
             self.frame_times.append(time_data)
             self.frame_num.append(frame_num)
+            self.frame_buffer_length = len(self.frame_buffer)
             self.frame_count += 1
             if self.tracking_point:
                 x = self.tracking_x_value
