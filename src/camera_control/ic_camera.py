@@ -54,7 +54,12 @@ class ICCam(ctypes.Structure):
         # self.set_ROI()
         self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
 
-    def add_filters(self):
+    def add_filters(self, top=None, left=None, height=None, width=None):
+        top = top if top is not None else self.crop['top']
+        left = left if left is not None else self.crop['left']
+        height = height if height is not None else self.crop['height']
+        width = width if width is not None else self.crop['width']
+        
         if self.rotate != 0:
             h_r = self.cam.CreateFrameFilter(b'Rotate Flip')
             self.cam.AddFrameFilter(h_r)
@@ -62,10 +67,10 @@ class ICCam(ctypes.Structure):
 
         h_c = self.cam.CreateFrameFilter(b'ROI')
         self.cam.AddFrameFilter(h_c)
-        self.cam.FilterSetParameter(h_c, b'Top', self.crop['top'])
-        self.cam.FilterSetParameter(h_c, b'Left', self.crop['left'])
-        self.cam.FilterSetParameter(h_c, b'Height', self.crop['height'])
-        self.cam.FilterSetParameter(h_c, b'Width', self.crop['width'])
+        self.cam.FilterSetParameter(h_c, b'Top', top)
+        self.cam.FilterSetParameter(h_c, b'Left', left)
+        self.cam.FilterSetParameter(h_c, b'Height', height)
+        self.cam.FilterSetParameter(h_c, b'Width', width)
         self.size = (self.crop['width'], self.crop['height'])
 
     def set_ROI(self):
@@ -314,10 +319,21 @@ class ICCam(ctypes.Structure):
             
             print(f'Flipping vertical for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
-            self.set_crop()
+            self.cam.close()
+            self.cam = ic.TIS_CAM()
+            self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
+            self.cam.SetVideoFormat(Format=self.formats)
+            self.add_filters(top=0)
+            self.cam.StartLive()
         else:
             print(f'Flipping vertical back for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
+            self.cam.close()
+            self.cam = ic.TIS_CAM()
+            self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
+            self.cam.SetVideoFormat(Format=self.formats)
+            self.add_filters()
+            self.cam.StartLive()
             
     def get_flip_vertical(self):
         flip_vertical = [0]
