@@ -1251,16 +1251,17 @@ class CamGUI(object):
             if self.setup is False:
                 print('Please setup the trigger recording first!')
                 return None
-            
+           
+            # Set the cameras into appropriate modes before enable trigger
+            # for i in range(len(self.cam)):
+            #     # self.cam[i].set_flip_vertical(state=True)
+                # time.sleep(1)
+                
             self.recording_status.set('Starting the trigger recording...')
             self.toggle_trigger_recording_status = IntVar(value=1)
             self.toggle_trigger_recording_button.config(text="Capture On", background="green")
             self.vid_start_time = time.perf_counter()
             
-            # Set the cameras into appropriate modes before enable trigger
-            for i in range(len(self.cam)):
-                self.cam[i].set_flip_vertical(state=True)
-                
             # enable the trigger
             barrier = threading.Barrier(len(self.cam))
             self.recording_trigger_thread = []
@@ -1279,6 +1280,8 @@ class CamGUI(object):
         except threading.BrokenBarrierError:
             print(f'Barrier broken for cam {num}. Failed to sync start the trigger. Please try again!')
             return None
+        self.cam[num].set_flip_vertical(state=True)
+        time.sleep(2)
         
         self.cam[num].enable_trigger()
         self.cam[num].turn_off_continuous_mode()
