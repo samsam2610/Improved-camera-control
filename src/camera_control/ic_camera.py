@@ -319,21 +319,21 @@ class ICCam(ctypes.Structure):
             
             print(f'Flipping vertical for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
-            self.cam.close()
-            self.cam = ic.TIS_CAM()
-            self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
-            self.cam.SetVideoFormat(Format=self.formats)
+            # self.cam.close()
+            # self.cam = ic.TIS_CAM()
+            # self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
+            # self.cam.SetVideoFormat(Format=self.formats)
             self.add_filters(top=0)
-            self.cam.StartLive()
+            # self.cam.StartLive()
         else:
             print(f'Flipping vertical back for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
-            self.cam.close()
-            self.cam = ic.TIS_CAM()
-            self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
-            self.cam.SetVideoFormat(Format=self.formats)
+            # self.cam.close()
+            # self.cam = ic.TIS_CAM()
+            # self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
+            # self.cam.SetVideoFormat(Format=self.formats)
             self.add_filters()
-            self.cam.StartLive()
+            # self.cam.StartLive()
             
     def get_flip_vertical(self):
         flip_vertical = [0]
