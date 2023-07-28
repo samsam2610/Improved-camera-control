@@ -314,7 +314,7 @@ class ICCam(ctypes.Structure):
             
             print(f'Flipping vertical for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
-            self.set_partial_scan(x_offset=x_offset, y_offset=y_offset)
+            self.set_crop()
         else:
             print(f'Flipping vertical back for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
@@ -438,7 +438,6 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_buffer_length = len(self.frame_buffer)
         while self.frame_buffer_length > 0:
             frame, time_data, frame_num = self.frame_buffer.popleft()
-            frame = cv2.flip(frame, 0)
             self.vid_out.write(frame)
             self.frame_times.append(time_data)
             self.frame_num.append(frame_num)
