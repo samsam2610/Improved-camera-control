@@ -81,13 +81,13 @@ class ICCam(ctypes.Structure):
         self.crop['left'] = left if left is not None else self.crop['left']
         self.crop['height'] = height if height is not None else self.crop['height']
         self.crop['width'] = width if width is not None else self.crop['width']
-        # self.cam.close()
-        # self.cam = ic.TIS_CAM()
-        # self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
-        # self.cam.SetVideoFormat(Format=self.formats)
-        # self.add_filters()
-        self.set_ROI()
-        # self.cam.StartLive()
+        self.cam.close()
+        self.cam = ic.TIS_CAM()
+        self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
+        self.cam.SetVideoFormat(Format=self.formats)
+        self.add_filters()
+        # self.set_ROI()
+        self.cam.StartLive()
     
     
     def get_crop(self):
@@ -438,6 +438,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_buffer_length = len(self.frame_buffer)
         while self.frame_buffer_length > 0:
             frame, time_data, frame_num = self.frame_buffer.popleft()
+            frame = cv2.flip(frame, 0)
             self.vid_out.write(frame)
             self.frame_times.append(time_data)
             self.frame_num.append(frame_num)

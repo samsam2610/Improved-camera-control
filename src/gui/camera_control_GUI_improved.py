@@ -1258,8 +1258,8 @@ class CamGUI(object):
             self.vid_start_time = time.perf_counter()
             
             # Set the cameras into appropriate modes before enable trigger
-            for i in range(len(self.cam)):
-                self.cam[i].set_flip_vertical(state=True)
+            # for i in range(len(self.cam)):
+            #     self.cam[i].set_flip_vertical(state=True)
                 
             # enable the trigger
             barrier = threading.Barrier(len(self.cam))
