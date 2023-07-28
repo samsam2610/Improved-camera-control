@@ -406,7 +406,7 @@ class VideoRecordingSession(ctypes.Structure):
             self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
             self.frame_times = []
             self.frame_num = []
-            self.frame_buffer = deque()
+            self.frame_buffer = deque(maxlen=50)
             self.frame_buffer_length = 0
             self.frame_count = 0
             self.buffer_lock = threading.Lock()
