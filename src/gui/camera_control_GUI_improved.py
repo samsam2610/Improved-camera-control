@@ -1255,7 +1255,7 @@ class CamGUI(object):
             # Set the cameras into appropriate modes before enable trigger
             for i in range(len(self.cam)):
                 self.cam[i].set_flip_vertical(state=True)
-                time.sleep(1)
+                time.sleep(2)
                 
             self.recording_status.set('Starting the trigger recording...')
             self.toggle_trigger_recording_status = IntVar(value=1)
