@@ -50,8 +50,8 @@ class ICCam(ctypes.Structure):
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
         self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
-        # self.add_filters()
-        self.set_ROI()
+        self.add_filters()
+        # self.set_ROI()
         self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
 
     def add_filters(self):
@@ -70,10 +70,10 @@ class ICCam(ctypes.Structure):
 
     def set_ROI(self):
         # result_roi = self.cam.SetPropertySwitch("Auto Functions ROI", "Enabled", True)
-        result_left = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", b"Left", int(self.crop['left']))
-        result_right = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", b"Top", int(self.crop['top']))
-        result_width = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", b"Width", int(self.crop['width']))
-        result_height = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", b"Height", int(self.crop['height']))
+        result_left = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Left", int(self.crop['left']))
+        result_right = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Top", int(self.crop['top']))
+        result_width = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Width", int(self.crop['width']))
+        result_height = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Height", int(self.crop['height']))
         print(f'For cam {self.cam_num}, the ROI was set with results: {result_left}, {result_right}, {result_width}, {result_height}')
         
     def set_crop(self, top=None, left=None, height=None, width=None):
@@ -85,8 +85,8 @@ class ICCam(ctypes.Structure):
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
-        # self.add_filters()
-        self.set_ROI()
+        self.add_filters()
+        # self.set_ROI()
         self.cam.StartLive()
     
     
