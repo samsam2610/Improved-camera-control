@@ -53,6 +53,8 @@ class ICCam(ctypes.Structure):
         self.add_filters()
         # self.set_ROI()
         self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
+        self.x_offset = None
+        self.y_offset = None
 
     def add_filters(self, top=None, left=None, height=None, width=None):
         top = top if top is not None else self.crop['top']
@@ -315,25 +317,16 @@ class ICCam(ctypes.Structure):
     def set_flip_vertical(self, state: bool=True):
         if state:
             print(f'Getting offset value for {self.cam_num}')
-            x_offset, y_offset = self.get_partial_scan()
+            self.x_offset, self.y_offset = self.get_partial_scan()
             
             print(f'Flipping vertical for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
-            # self.cam.close()
-            # self.cam = ic.TIS_CAM()
-            # self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
-            # self.cam.SetVideoFormat(Format=self.formats)
-            self.add_filters(top=0)
-            # self.cam.StartLive()
+            self.set_partial_scan(y_offset=self.crop['top'])
         else:
             print(f'Flipping vertical back for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
-            # self.cam.close()
-            # self.cam = ic.TIS_CAM()
-            # self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
-            # self.cam.SetVideoFormat(Format=self.formats)
-            self.add_filters()
-            # self.cam.StartLive()
+            if self.y_offset is not None:
+                self.set_partial_scan(y_offset=self.y_offset)
             
     def get_flip_vertical(self):
         flip_vertical = [0]
