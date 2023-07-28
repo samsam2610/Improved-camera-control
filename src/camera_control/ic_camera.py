@@ -406,7 +406,7 @@ class VideoRecordingSession(ctypes.Structure):
             self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
             self.frame_times = []
             self.frame_num = []
-            self.frame_buffer = deque(maxlen=50)
+            self.frame_buffer = deque(maxlen=200)
             self.frame_buffer_length = 0
             self.frame_count = 0
             self.buffer_lock = threading.Lock()
@@ -452,10 +452,10 @@ class VideoRecordingSession(ctypes.Structure):
             self.frame_num.append(frame_num)
             self.frame_buffer_length = len(self.frame_buffer)
             self.frame_count += 1
-            if self.tracking_point:
-                x = self.tracking_x_value
-                y = self.tracking_y_value
-                self.tracking_value.append(cv2.getRectSubPix(frame, (1, 1), (x, y))[0, 0])
+            # if self.tracking_point:
+            #     x = self.tracking_x_value
+            #     y = self.tracking_y_value
+            #     self.tracking_value.append(cv2.getRectSubPix(frame, (1, 1), (x, y))[0, 0])
     
     def acquire_frame(self, frame, time_data, frame_num):
         # self.vid_out.write(frame)
@@ -475,4 +475,4 @@ class VideoRecordingSession(ctypes.Structure):
     def _process_frames(self):
         while self.recording_status:
             self.write_frame()
-            time.sleep(0.005)
+            time.sleep(0.001)
