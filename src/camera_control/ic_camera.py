@@ -94,8 +94,8 @@ class ICCam(ctypes.Structure):
             width = width - (width % 4)  # Adjust width to the nearest multiple of 4
         if height % 4 != 0:
             height = height - (height % 4)  # Adjust height to the nearest multiple of 4
-
-        return f'Y800 ({width}x{height})'
+        result = f'Y800 ({width}x{height})'
+        return result
    
     def set_formats(self, width=None, height=None):
         self.crop['width'] = width if width is not None else self.crop['width']
