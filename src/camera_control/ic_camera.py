@@ -19,6 +19,7 @@ import cv2
 import copy
 import threading
 from collections import deque
+import math
 
 
 path = Path(os.path.realpath(__file__))
@@ -29,7 +30,7 @@ cam_details = json.load(open(dets_file, 'r'))
 
 class ICCam(ctypes.Structure):
 
-    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats='Y800 (1024x768)'):
+    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None):
         '''
         Params
         ------
@@ -44,17 +45,25 @@ class ICCam(ctypes.Structure):
         self.crop = crop if crop is not None else cam_details[str(self.cam_num)]['crop']
         self.exposure = exposure if exposure is not None else cam_details[str(self.cam_num)]['exposure']
         self.gain = gain if gain is not None else cam_details[str(self.cam_num)]['gain']
-        self.formats = formats if formats is not None else cam_details[str(self.cam_num)]['formats']
-
+        # self.formats = formats if formats is not None else cam_details[str(self.cam_num)]['formats']
+        self.formats = self.config_formats(width=self.crop['width'], height=self.crop['height'])
+        
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
         self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
-        self.add_filters()
+        # self.add_filters()
         # self.set_ROI()
         self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
+        self.x_offset = None
+        self.y_offset = None
 
-    def add_filters(self):
+    def add_filters(self, top=None, left=None, height=None, width=None):
+        top = top if top is not None else self.crop['top']
+        left = left if left is not None else self.crop['left']
+        height = height if height is not None else self.crop['height']
+        width = width if width is not None else self.crop['width']
+        
         if self.rotate != 0:
             h_r = self.cam.CreateFrameFilter(b'Rotate Flip')
             self.cam.AddFrameFilter(h_r)
@@ -62,20 +71,12 @@ class ICCam(ctypes.Structure):
 
         h_c = self.cam.CreateFrameFilter(b'ROI')
         self.cam.AddFrameFilter(h_c)
-        self.cam.FilterSetParameter(h_c, b'Top', self.crop['top'])
-        self.cam.FilterSetParameter(h_c, b'Left', self.crop['left'])
-        self.cam.FilterSetParameter(h_c, b'Height', self.crop['height'])
-        self.cam.FilterSetParameter(h_c, b'Width', self.crop['width'])
+        self.cam.FilterSetParameter(h_c, b'Top', top)
+        self.cam.FilterSetParameter(h_c, b'Left', left)
+        self.cam.FilterSetParameter(h_c, b'Height', height)
+        self.cam.FilterSetParameter(h_c, b'Width', width)
         self.size = (self.crop['width'], self.crop['height'])
 
-    def set_ROI(self):
-        # result_roi = self.cam.SetPropertySwitch("Auto Functions ROI", "Enabled", True)
-        result_left = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Left", int(self.crop['left']))
-        result_right = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Top", int(self.crop['top']))
-        result_width = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Width", int(self.crop['width']))
-        result_height = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Height", int(self.crop['height']))
-        print(f'For cam {self.cam_num}, the ROI was set with results: {result_left}, {result_right}, {result_width}, {result_height}')
-        
     def set_crop(self, top=None, left=None, height=None, width=None):
         self.crop['top'] = top if top is not None else self.crop['top']
         self.crop['left'] = left if left is not None else self.crop['left']
@@ -88,7 +89,46 @@ class ICCam(ctypes.Structure):
         self.add_filters()
         # self.set_ROI()
         self.cam.StartLive()
-    
+   
+    def config_formats(self, width, height):
+        width = int(width)
+        height = int(height)
+        
+        if width < 16:
+            width = int(4*round(width/4)) if width % 4 != 0 else width
+        else:
+            width = int(16*round(width/16)) if width % 16 != 0 else width
+            
+        if height < 16:
+            height = int(4*round(height/4)) if height % 4 != 0 else height
+        else:
+            height = int(16*round(height/16)) if height % 16 != 0 else height
+            
+        result = f"Y800 ({width}x{height})"
+        self.crop['width'] = width
+        self.crop['height'] = height
+        
+        print(f'Cam {self.cam_num} video format set to {result}')
+        return result
+   
+    def set_formats(self, width=None, height=None):
+        self.crop['width'] = width if width is not None else self.crop['width']
+        self.crop['height'] = height if height is not None else self.crop['height']
+        self.formats = self.config_formats(width=self.crop['width'], height=self.crop['height'])
+        current_frame_rate = self.get_frame_rate()
+        
+        self.cam.close()
+        self.cam = ic.TIS_CAM()
+        self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
+        result = self.cam.SetVideoFormat(Format=self.formats)
+        print(f'Cam {self.cam_num} video format set with result: {result}')
+        result = self.cam.SetFrameRate(current_frame_rate)
+        print(f'Cam {self.cam_num} frame rate set with result: {result}')
+        
+        self.cam.StartLive()
+        
+    def get_formats(self):
+        return (self.crop['width'], self.crop['height'])
     
     def get_crop(self):
         return (self.crop['top'],
@@ -222,7 +262,7 @@ class ICCam(ctypes.Structure):
             self.vid_file.release()
             
             print(f'Flipping vertical back for cam {self.cam_num}')
-            self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
+            self.set_flip_vertical(state=False)
             
             self.vid_file.reset()
             print(f'Trigger capturing mode vid file is released for cam {self.cam_num}')
@@ -310,14 +350,16 @@ class ICCam(ctypes.Structure):
     def set_flip_vertical(self, state: bool=True):
         if state:
             print(f'Getting offset value for {self.cam_num}')
-            x_offset, y_offset = self.get_partial_scan()
+            self.x_offset, self.y_offset = self.get_partial_scan()
             
             print(f'Flipping vertical for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
-            self.set_partial_scan(x_offset=x_offset, y_offset=y_offset)
+            self.set_partial_scan(y_offset=self.crop['top'])
         else:
             print(f'Flipping vertical back for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
+            if self.y_offset is not None:
+                self.set_partial_scan(y_offset=self.y_offset)
             
     def get_flip_vertical(self):
         flip_vertical = [0]
@@ -443,10 +485,10 @@ class VideoRecordingSession(ctypes.Structure):
             self.frame_num.append(frame_num)
             self.frame_buffer_length = len(self.frame_buffer)
             self.frame_count += 1
-            if self.tracking_point:
-                x = self.tracking_x_value
-                y = self.tracking_y_value
-                self.tracking_value.append(cv2.getRectSubPix(frame, (1, 1), (x, y))[0, 0])
+            # if self.tracking_point:
+            #     x = self.tracking_x_value
+            #     y = self.tracking_y_value
+            #     self.tracking_value.append(cv2.getRectSubPix(frame, (1, 1), (x, y))[0, 0])
     
     def acquire_frame(self, frame, time_data, frame_num):
         # self.vid_out.write(frame)
@@ -467,3 +509,7 @@ class VideoRecordingSession(ctypes.Structure):
         while self.recording_status:
             self.write_frame()
             time.sleep(0.005)
+            
+        self.write_frame() # write the last frame
+        
+        

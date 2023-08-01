@@ -79,7 +79,8 @@ class CamGUI(object):
         self.gain_entry = []
         self.gain_current_label = []
         
-        self.formats = []
+        self.format_width = []
+        self.format_height = []
         self.format_entry = []
 
         self.framerate = []
@@ -182,9 +183,9 @@ class CamGUI(object):
         self.cam_name[num] = names[cam_num]
         self.cam[num] = ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get())
         
-        # self.cam[num].start()
         set_frame_rate(self, num, framerate=388, initCamera=True)
-
+        get_formats(self, num)
+        
         # set gain and exposure using the values from the json
         self.cam[num].set_exposure(float(format(self.cam_details[str(num)]['exposure'], '.6f')))
         self.cam[num].set_gain(int(self.cam_details[str(num)]['gain']))
@@ -1251,16 +1252,17 @@ class CamGUI(object):
             if self.setup is False:
                 print('Please setup the trigger recording first!')
                 return None
-            
+           
+            # Set the cameras into appropriate modes before enable trigger
+            for i in range(len(self.cam)):
+                self.cam[i].set_flip_vertical(state=True)
+                time.sleep(0.5)
+                
             self.recording_status.set('Starting the trigger recording...')
             self.toggle_trigger_recording_status = IntVar(value=1)
             self.toggle_trigger_recording_button.config(text="Capture On", background="green")
             self.vid_start_time = time.perf_counter()
             
-            # Set the cameras into appropriate modes before enable trigger
-            for i in range(len(self.cam)):
-                self.cam[i].set_flip_vertical(state=True)
-                
             # enable the trigger
             barrier = threading.Barrier(len(self.cam))
             self.recording_trigger_thread = []
@@ -1513,26 +1515,33 @@ class CamGUI(object):
             init_camera_frame = Frame(self.window, borderwidth=1, relief="raised")
             
             Label(init_camera_frame, text="Camera name: ", width=10, justify="left", anchor="w").\
-                grid(sticky="w", row=0, column=0, padx=5, pady=3)
+                grid(sticky="w", row=0, column=0, padx=1, pady=3)
             self.camera.append(StringVar())
             self.camera_entry.append(ttk.Combobox(init_camera_frame, textvariable=self.camera[i], width=10, justify="left"))
             self.camera_entry[i]['values'] = self.cam_names
             self.camera_entry[i].current(i)
-            self.camera_entry[i].grid(row=0, column=1, padx=5, pady=3)
+            self.camera_entry[i].grid(row=0, column=1, padx=1, pady=3)
 
             # initialize camera button
             self.camera_init_button.append(Button(init_camera_frame, text=f"Initialize Camera {i+1}", command=lambda index_cam=i: self.init_cam(index_cam), width=14))
             self.camera_init_button[i].grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
 
             # format
-            Label(init_camera_frame, text="Format: ", width=10, justify="left", anchor="w").\
-                grid(sticky="w", row=1, column=0, padx=5, pady=3)
-            self.formats.append(StringVar())
-            self.format_entry.append(ttk.Combobox(init_camera_frame, textvariable=self.formats[i], width=15, justify="left"))
-            self.format_entry[i]['values'] = self.format_list
-            self.format_entry[i].current(i)
-            self.format_entry[i].grid(row=1, column=1, padx=5, pady=3)
+            format_frame = Frame(init_camera_frame)
+            Label(format_frame, text="Width: ", width=5, justify="left", anchor="w").\
+                grid(sticky="w", row=0, column=0, padx=1, pady=0)
+            self.format_width.append(IntVar(value=1024))
+            self.format_width_entry = Spinbox(format_frame, from_=0, to=2e3, increment=4, textvariable=self.format_width[i], width=5, justify="left")
+            self.format_width_entry.grid(row=0, column=1, padx=1, pady=0, sticky="w")
 
+            Label(format_frame, text="Height: ", width=5, justify="left", anchor="w").\
+                grid(sticky="w", row=0, column=2, padx=1, pady=0)
+            self.format_height.append(IntVar(value=768))
+            self.format_height_entry = Spinbox(format_frame, from_=0, to=2e3, increment=4, textvariable=self.format_height[i], width=5, justify="left")
+            self.format_height_entry.grid(row=0, column=3, padx=1, pady=0, sticky="w")
+            
+            format_frame.grid(row=1, column=0, padx=2, pady=2, sticky="nsew", columnspan=2)
+            
             # Set camera format
             Button(init_camera_frame, text="Set Format", command=lambda index_cam=i: set_formats(self, index_cam), width=14).\
                 grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
@@ -1590,13 +1599,13 @@ class CamGUI(object):
             Label(fov_settings_frame, text='Left').grid(row=0, column=2, padx=5, pady=3)
             Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['left'], width=5).\
                 grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
-
-            Label(fov_settings_frame, text='Height').grid(row=1, column=0, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['height'], width=5).\
-                grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
-
-            Label(fov_settings_frame, text='Width').grid(row=1, column=2, padx=5, pady=3)
+            
+            Label(fov_settings_frame, text='Width').grid(row=1, column=0, padx=5, pady=3)
             Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['width'], width=5).\
+                grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+            
+            Label(fov_settings_frame, text='Height').grid(row=1, column=2, padx=5, pady=3)
+            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['height'], width=5).\
                 grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
             
             reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=10)
