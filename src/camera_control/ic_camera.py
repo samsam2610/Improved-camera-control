@@ -92,14 +92,14 @@ class ICCam(ctypes.Structure):
    
     def config_formats(self, width, height):
         if width < 16:
-            width = int(4*math.round(width % 4)) if width % 4 != 0 else width
+            width = int(4*round(width % 4)) if width % 4 != 0 else width
         else:
-            width = int(16*math.round(width % 16)) if width % 16 != 0 else width
+            width = int(16*round(width % 16)) if width % 16 != 0 else width
             
         if height < 16:
-            height = int(4*math.round(height % 4)) if height % 4 != 0 else height
+            height = int(4*round(height % 4)) if height % 4 != 0 else height
         else:
-            height = int(16*math.round(height % 16)) if height % 16 != 0 else height
+            height = int(16*round(height % 16)) if height % 16 != 0 else height
             
         result = f"Y800 ({width}x{height})"
         print(f'Cam {self.cam_num} video format set to {result}')
