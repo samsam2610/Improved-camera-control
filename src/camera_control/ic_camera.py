@@ -94,7 +94,7 @@ class ICCam(ctypes.Structure):
             width = width - (width % 4)  # Adjust width to the nearest multiple of 4
         if height % 4 != 0:
             height = height - (height % 4)  # Adjust height to the nearest multiple of 4
-        result = f'Y800 ({width}x{height})'
+        result = f"Y800 ({width}x{height})"
         print(f'Cam {self.cam_num} video format set to {result}')
         return result
    

@@ -1599,13 +1599,13 @@ class CamGUI(object):
             Label(fov_settings_frame, text='Left').grid(row=0, column=2, padx=5, pady=3)
             Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['left'], width=5).\
                 grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
-
-            Label(fov_settings_frame, text='Height').grid(row=1, column=0, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['height'], width=5).\
-                grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
-
-            Label(fov_settings_frame, text='Width').grid(row=1, column=2, padx=5, pady=3)
+            
+            Label(fov_settings_frame, text='Width').grid(row=1, column=0, padx=5, pady=3)
             Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['width'], width=5).\
+                grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+            
+            Label(fov_settings_frame, text='Height').grid(row=1, column=2, padx=5, pady=3)
+            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['height'], width=5).\
                 grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
             
             reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=10)
