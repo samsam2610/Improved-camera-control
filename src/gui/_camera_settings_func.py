@@ -62,7 +62,9 @@ def get_formats(self, num):
         show_camera_error(self)
         return
     
-    return self.cam[num].get_formats()
+    (width, height) = self.cam[num].get_formats()
+    self.format_width[num].set(width)
+    self.format_height[num].set(height)
 
 
 def set_formats(self, num):
@@ -75,8 +77,10 @@ def set_formats(self, num):
     height = self.format_height[num].get()
     self.cam[num].set_formats(width=width, height=height)
     time.sleep(0.5)  # wait for camera to set format
-    get_frame_rate_list(self, num)
-
+    frame_rate_list = self.cam[num].get_frame_rate_list()
+    self.framerate_list[num]['values'] = frame_rate_list
+    get_formats(self, num)
+    
 
 def get_fov(self, num):
     crop_details = self.cam_details[str(num)]['crop']
@@ -97,7 +101,8 @@ def set_fov(self, num):
                            height=self.cam_details[str(num)]['crop']['height'],
                            width=self.cam_details[str(num)]['crop']['width'])
     
-    get_frame_rate_list(self, num)
+    frame_rate_list = self.cam[num].get_frame_rate_list()
+    self.framerate_list[num]['values'] = frame_rate_list
 
 
 def reset_fov(self, num):

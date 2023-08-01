@@ -111,7 +111,7 @@ class ICCam(ctypes.Structure):
         self.cam.StartLive()
         
     def get_formats(self):
-        pass
+        return (self.crop['width'], self.crop['height'])
     
     def get_crop(self):
         return (self.crop['top'],
