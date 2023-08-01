@@ -29,7 +29,7 @@ cam_details = json.load(open(dets_file, 'r'))
 
 class ICCam(ctypes.Structure):
 
-    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats='Y800 (1024x768)'):
+    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None):
         '''
         Params
         ------
@@ -90,10 +90,16 @@ class ICCam(ctypes.Structure):
         self.cam.StartLive()
    
     def config_formats(self, width, height):
-        if width % 4 != 0:
-            width = width - (width % 4)  # Adjust width to the nearest multiple of 4
-        if height % 4 != 0:
-            height = height - (height % 4)  # Adjust height to the nearest multiple of 4
+        if width < 16:
+            width = int(4*math.round(width % 4)) if width % 4 != 0 else width
+        else:
+            width = int(16*math.round(width % 16)) if width % 16 != 0 else width
+            
+        if height < 16:
+            height = int(4*math.round(height % 4)) if height % 4 != 0 else height
+        else:
+            height = int(16*math.round(height % 16)) if height % 16 != 0 else height
+            
         result = f"Y800 ({width}x{height})"
         print(f'Cam {self.cam_num} video format set to {result}')
         return result
