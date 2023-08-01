@@ -91,6 +91,9 @@ class ICCam(ctypes.Structure):
         self.cam.StartLive()
    
     def config_formats(self, width, height):
+        width = int(width)
+        height = int(height)
+        
         if width < 16:
             width = int(4*round(width % 4)) if width % 4 != 0 else width
         else:
