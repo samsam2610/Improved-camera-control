@@ -105,6 +105,9 @@ class ICCam(ctypes.Structure):
             height = int(16*round(height/16)) if height % 16 != 0 else height
             
         result = f"Y800 ({width}x{height})"
+        self.crop['width'] = width
+        self.crop['height'] = height
+        
         print(f'Cam {self.cam_num} video format set to {result}')
         return result
    
