@@ -183,9 +183,9 @@ class CamGUI(object):
         self.cam_name[num] = names[cam_num]
         self.cam[num] = ICCam(cam_num, exposure=self.exposure[cam_num].get(), gain=self.gain[cam_num].get())
         
-        set_formats(self, num)
         set_frame_rate(self, num, framerate=388, initCamera=True)
-
+        get_formats(self, num)
+        
         # set gain and exposure using the values from the json
         self.cam[num].set_exposure(float(format(self.cam_details[str(num)]['exposure'], '.6f')))
         self.cam[num].set_gain(int(self.cam_details[str(num)]['gain']))
