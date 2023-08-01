@@ -1,3 +1,4 @@
+import time
 from tkinter import Label, Button, Tk
 import cv2
 import math
@@ -69,8 +70,11 @@ def set_formats(self, num):
     if is_camera_set_up(self, num) is False:
         show_camera_error(self)
         return
-    
-    self.cam[num].set_formats(str(self.formats[num].get()))
+   
+    width = self.format_width[num].get()
+    height = self.format_height[num].get()
+    self.cam[num].set_formats(width=width, height=height)
+    time.sleep(0.5)  # wait for camera to set format
     get_frame_rate_list(self, num)
 
 
