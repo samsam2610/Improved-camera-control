@@ -51,7 +51,7 @@ class ICCam(ctypes.Structure):
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
         self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
-        self.add_filters()
+        # self.add_filters()
         # self.set_ROI()
         self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
         self.x_offset = None
@@ -106,8 +106,11 @@ class ICCam(ctypes.Structure):
         self.cam.close()
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
-        self.cam.SetVideoFormat(Format=self.formats)
-        self.cam.SetFrameRate(current_frame_rate)
+        result = self.cam.SetVideoFormat(Format=self.formats)
+        print(f'Cam {self.cam_num} video format set with result: {result}')
+        result = self.cam.SetFrameRate(current_frame_rate)
+        print(f'Cam {self.cam_num} frame rate set with result: {result}')
+        
         self.cam.StartLive()
         
     def get_formats(self):
