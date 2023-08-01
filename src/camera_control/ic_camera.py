@@ -509,3 +509,7 @@ class VideoRecordingSession(ctypes.Structure):
         while self.recording_status:
             self.write_frame()
             time.sleep(0.005)
+            
+        self.write_frame() # write the last frame
+        
+        
