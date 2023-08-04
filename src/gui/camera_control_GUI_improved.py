@@ -1124,7 +1124,7 @@ class CamGUI(object):
     # endregion Calibration
     
     # region Trigger recording
-    def setup_trigger_recording(self, overwrite=True):
+    def setup_trigger_recording(self, overwrite=False):
         if len(self.vid_out) > 0:
             vid_open_window = Tk()
             Label(vid_open_window,
@@ -1453,7 +1453,7 @@ class CamGUI(object):
 
             # number of cameras
             Label(select_cams_window, text="How many cameras?").grid(sticky="w", row=0, column=0)
-            self.number_of_cams = StringVar(value="1")
+            self.number_of_cams = IntVar(value=1)
             self.number_of_cams_entry = Entry(select_cams_window, textvariable=self.number_of_cams).\
                 grid(sticky="nsew", row=0, column=1)
             Button(select_cams_window, text="Set Cameras", command=select_cams_window.quit).\
