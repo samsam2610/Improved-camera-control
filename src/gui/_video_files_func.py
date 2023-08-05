@@ -54,7 +54,7 @@ def create_output_files(self, subject_name='Sam'):
     # create output file names
     self.ts_file = []
     self.ts_file_csv = []
-    # self.frame_times = []
+    self.frame_times = []
     
     for i in range(len(self.cam)):
         self.ts_file.append(self.vid_file[i].replace('.avi', '.npy'))
@@ -63,7 +63,7 @@ def create_output_files(self, subject_name='Sam'):
         self.ts_file_csv[i] = self.ts_file_csv[i].replace(self.cam_name_no_space[i],
                                                           'TIMESTAMPS_' + self.cam_name_no_space[i])
         # self.current_file_label['text'] = subject_name
-        # self.frame_times.append([])
+        self.frame_times.append([])
         # Change label to show current file name
         self.video_file_status[i]['text'] = self.base_name[i] + self.attempt.get()
         self.video_file_indicator[i]['bg'] = 'red'
@@ -127,12 +127,12 @@ def save_vid(self, compress=False, delete=False, plotData=False):
                         'Video has been deleted, please set up a new video to take another recording.'
     
     if self.save_msg:
-        self.display_recorded_stats()
+        display_recorded_stats(self)
     
     self.vid_out = []
     self.frame_times = []
     # self.current_file_label['text'] = ""
-    self.received_pulse_label['text'] = ""
+    # self.received_pulse_label['text'] = ""
     self.set_calibration_buttons_group(state='disabled')
 
 

@@ -120,6 +120,8 @@ class CamGUI(object):
         self.fov_labels = ['top', 'left', 'height', 'width']
 
         self.test_calibration_live_toggle_status = []
+        self.calibration_toggle_status = False
+        self.calibrating_thread = None
         # Initialize GUI
         self.running_config = {'debug_mode': debug_mode, 'init_cam_bool': init_cam_bool}
         if self.running_config['init_cam_bool']:
@@ -515,25 +517,41 @@ class CamGUI(object):
         
         return 1
 
-    def load_calibration_settings(self):
+    def load_calibration_settings(self, draw_calibration_board=False):
         from src.gui.utils import load_config, get_calibration_board
         from pathlib import Path
         
-        self.calibration_process_stats.set('Looking for config.toml directory ...')
+        calibration_stats_message = 'Looking for config.toml directory ...'
+        self.calibration_process_stats.set(calibration_stats_message)
+        print(calibration_stats_message)
+        
         path = Path(os.path.realpath(__file__))
         # Navigate to the outer parent directory and join the filename
         config_toml_path = os.path.normpath(str(path.parents[2] / 'config-files' / 'config.toml'))
         config_anipose = load_config(config_toml_path)
-        self.calibration_process_stats.set('Successfully found and loaded config. Determining calibration board ...')
+        calibration_stats_message = 'Found config.toml directory. Loading config ...'
+        print(calibration_stats_message)
+        
+        calibration_stats_message = 'Successfully found and loaded config. Determining calibration board ...'
+        self.calibration_process_stats.set(calibration_stats_message)
+        print(calibration_stats_message)
+        
         self.board_calibration = get_calibration_board(config=config_anipose)
+        calibration_stats_message = 'Successfully determined calibration board. Initializing camera calibration objects ...'
+        self.calibration_process_stats.set(calibration_stats_message)
+        print(calibration_stats_message)
 
-        self.calibration_process_stats.set('Loaded calibration board.')
-
-        # Check available detection file, if file available will delete it (for now)
         self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
         self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml')
         
-    def setup_calibration(self):
+        board_dir = os.path.join(self.dir_output.get(), 'board.png')
+        if draw_calibration_board:
+            numx, numy = self.board_calibration.get_size()
+            size = numx*200, numy*200
+            img = self.board_calibration.draw(size)
+            cv2.imwrite(board_dir, img)
+            
+    def setup_calibration(self, override=False):
         """
         Method: setup_calibration
 
@@ -585,11 +603,14 @@ class CamGUI(object):
             self.frame_process_threshold = 2
             self.queue_frame_threshold = 1000
             
-            # Check available detection file, if file available will delete it (for now)
-            self.clear_calibration_file(self.rows_fname)
-            self.clear_calibration_file(self.calibration_out)
-            self.rows_fname_available = False
-            
+            if override:
+                # Check available detection file, if file available will delete it (for now)
+                self.clear_calibration_file(self.rows_fname)
+                self.clear_calibration_file(self.calibration_out)
+                self.rows_fname_available = False
+            else:
+                self.rows_fname_available = os.path.exists(self.rows_fname)
+                
             # Set calibration parameter
             result = self.set_calibration_duration()
             if result == 0:
@@ -625,7 +646,7 @@ class CamGUI(object):
                 self.frame_times.append([])
 
             # check if file exists, ask to overwrite or change attempt number if it does
-            create_video_files(self, overwrite=True)
+            create_video_files(self, overwrite=override)
             create_output_files(self, subject_name='Sam')
 
             self.calibration_process_stats.set('Setting the frame sizes...')
@@ -660,7 +681,10 @@ class CamGUI(object):
         """
         if self.calibration_capture_toggle_status or termination:
             self.calibration_capture_toggle_status = False
-            
+            if self.toggle_continuous_mode.get() == 1:
+                for i in range(len(self.cam)):
+                    self.cam[i].turn_off_continuous_mode()
+                    
             print('Waiting for all the frames are done processing...')
             self.calibration_process_stats.set('Waiting for all the frames are done processing...')
             current_thread = threading.currentThread()
@@ -698,7 +722,11 @@ class CamGUI(object):
             # Setting capture toggle status
             self.recording_threads_status = []
             self.calibration_capture_toggle_status = True
-            
+           
+            if self.toggle_continuous_mode.get() == 1:
+                for i in range(len(self.cam)):
+                    self.cam[i].turn_on_continuous_mode()
+                    
             # Sync camera capture time using threading.Barrier
             barrier = threading.Barrier(len(self.cam))
             
@@ -766,7 +794,7 @@ class CamGUI(object):
                 row = self.board_calibration.fill_points_rows([row])
                 self.all_rows[num].extend(row)
                 self.current_all_rows[num].extend(row)
-                self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
+                self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}; {len(row)}'
                 self.frame_acquired_count_label[num]['text'] = f'{self.frame_count[num]}'
                 self.vid_out[num].write(frame_current)
         
@@ -797,7 +825,6 @@ class CamGUI(object):
                     self.frame_times[num].append(time.perf_counter())
                     self.frame_count[num] += 1
                     frame_current = self.cam[num].get_image()
-                    
                     # detect the marker as the frame is acquired
                     corners, ids = self.board_calibration.detect_image(frame_current)
                     if corners is not None:
@@ -811,9 +838,11 @@ class CamGUI(object):
                         row = self.board_calibration.fill_points_rows([row])
                         self.all_rows[num].extend(row)
                         self.current_all_rows[num].extend(row)
-                        self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
+                        self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}; {len(corners)}'
                         if num == 0:
                             self.calibration_current_duration_value.set(f'{time.perf_counter()-start_time:.2f}')
+                    else:
+                        print(f'No marker detected on cam {num} at frame {self.frame_count[num]}')
                     
                     # putting frame into the frame queue along with following information
                     self.frame_queue.put((frame_current,  # the frame itself
@@ -1081,16 +1110,18 @@ class CamGUI(object):
         except:
             print('Calibration is not setup. Will attempt to load calibration file.')
             calibration_file = os.path.join(self.dir_output.get(), 'calibration.toml')
-            
-        if not os.path.exists(calibration_file):
-            messagebox.showerror('Error', 'Calibration file not found!')
-            return
         
         from src.aniposelib.cameras import CameraGroup
         
         # Load the calibration file
-        self.cgroup_test = CameraGroup.load(calibration_file) # cgroup_test is loaded with the calibration file
-        print('Calibration file loaded')
+        try:
+            # if not os.path.exists(calibration_file):
+            #     messagebox.showerror('Error', 'Calibration file not found!')
+            self.cgroup_test = CameraGroup.load(calibration_file) # cgroup_test is loaded with the calibration file
+            print('Calibration file loaded')
+        except:
+            self.cgroup_test = None
+            print('Failed to load calibration file. Using none instead.')
         
         barrier = threading.Barrier(len(self.cam))
         t = []
@@ -1358,12 +1389,11 @@ class CamGUI(object):
             display_recorded_stats(self)
         self.frame_time_list = frame_time_list
         self.vid_out = []
-        self.frame_times = []
+        # self.frame_times = []
         # self.current_file_label['text'] = ""
         # self.received_pulse_label['text'] = ""
         self.set_calibration_buttons_group(state='disabled')
         
-
     def plot_trigger_recording(self, frame_time_list):
         """
         Plot the calibration error progression.
@@ -1877,7 +1907,7 @@ class CamGUI(object):
         self.force_frame_sync_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
         Hovertip(self.force_frame_sync_button, "Force frame sync for camera captured on threads")
 
-        self.toggle_continuous_mode = IntVar(value=0)
+        self.toggle_continuous_mode = IntVar(value=1)
         self.toggle_continuous_mode_button = Checkbutton(record_video_frame, text="Continuous Mode", variable=self.toggle_continuous_mode,
                                                          onvalue=1, offvalue=0, width=13)
         self.toggle_continuous_mode_button.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)

@@ -29,7 +29,7 @@ cam_details = json.load(open(dets_file, 'r'))
 
 class ICCam(ctypes.Structure):
 
-    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats='Y800 (1024x768)'):
+    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats=None):
         '''
         Params
         ------
@@ -90,12 +90,24 @@ class ICCam(ctypes.Structure):
         self.cam.StartLive()
    
     def config_formats(self, width, height):
-        if width % 4 != 0:
-            width = width - (width % 4)  # Adjust width to the nearest multiple of 4
-        if height % 4 != 0:
-            height = height - (height % 4)  # Adjust height to the nearest multiple of 4
+        width = int(width)
+        height = int(height)
 
-        return f'Y800 ({width}x{height})'
+        if width < 16:
+            width = int(4*round(width/4)) if width % 4 != 0 else width
+        else:
+            width = int(16*round(width/16)) if width % 16 != 0 else width
+        if height < 16:
+            height = int(4*round(height/4)) if height % 4 != 0 else height
+        else:
+            height = int(16*round(height/16)) if height % 16 != 0 else height
+
+        result = f"Y800 ({width}x{height})"
+        self.crop['width'] = width
+        self.crop['height'] = height
+
+        print(f'Cam {self.cam_num} video format set to {result}')
+        return result
    
     def set_formats(self, width=None, height=None):
         self.crop['width'] = width if width is not None else self.crop['width']
@@ -152,8 +164,10 @@ class ICCam(ctypes.Structure):
         return round(gain[0], 3)
 
     def get_image(self):
-        self.cam.SnapImage()
+        error = self.cam.SnapImage()
         frame = self.cam.GetImageEx()
+        if error is not 1:
+            print(f'Cam {self.cam_num} error: {error}')
         return cv2.flip(frame, 0)
 
     def get_image_dimensions(self):
@@ -479,7 +493,7 @@ class VideoRecordingSession(ctypes.Structure):
         # self.frame_num.append(frame_num)
         # with self.buffer_lock:
         self.frame_buffer.append((frame, time_data, frame_num))
-        
+        print(f'Cam {self.cam_num} frame {frame_num} acquired')
         return 1
     
     def start_processing(self):
@@ -492,3 +506,5 @@ class VideoRecordingSession(ctypes.Structure):
         while self.recording_status:
             self.write_frame()
             time.sleep(0.005)
+            
+        self.write_frame() # write the last frame

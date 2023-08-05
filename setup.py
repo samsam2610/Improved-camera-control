@@ -21,7 +21,7 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Image Recognition"
     ],
     install_requires=[
-        'opencv-contrib-python',
+        'opencv-contrib-python==4.6.0.68',
         'numba', 'pandas',
         'numpy==1.19.2', 'scipy', 'toml', 'tqdm', 'Click'
     ],

@@ -109,8 +109,10 @@ def load_config(fname):
 
     if os.path.exists(fname):
         config = toml.load(fname)
+        print("Loaded config from {}".format(fname))
     else:
         config = dict()
+        print("No config file found, using defaults")
 
     # put in the defaults
     if 'path' not in config:
