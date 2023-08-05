@@ -1371,12 +1371,11 @@ class CamGUI(object):
             display_recorded_stats(self)
         self.frame_time_list = frame_time_list
         self.vid_out = []
-        self.frame_times = []
+        # self.frame_times = []
         # self.current_file_label['text'] = ""
         # self.received_pulse_label['text'] = ""
         self.set_calibration_buttons_group(state='disabled')
         
-
     def plot_trigger_recording(self, frame_time_list):
         """
         Plot the calibration error progression.
