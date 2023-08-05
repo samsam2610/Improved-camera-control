@@ -132,7 +132,7 @@ def save_vid(self, compress=False, delete=False, plotData=False):
     self.vid_out = []
     self.frame_times = []
     # self.current_file_label['text'] = ""
-    self.received_pulse_label['text'] = ""
+    # self.received_pulse_label['text'] = ""
     self.set_calibration_buttons_group(state='disabled')
 
 
