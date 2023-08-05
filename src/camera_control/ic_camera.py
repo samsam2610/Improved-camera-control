@@ -44,8 +44,9 @@ class ICCam(ctypes.Structure):
         self.crop = crop if crop is not None else cam_details[str(self.cam_num)]['crop']
         self.exposure = exposure if exposure is not None else cam_details[str(self.cam_num)]['exposure']
         self.gain = gain if gain is not None else cam_details[str(self.cam_num)]['gain']
-        self.formats = formats if formats is not None else cam_details[str(self.cam_num)]['formats']
-
+        # self.formats = formats if formats is not None else cam_details[str(self.cam_num)]['formats']
+        self.formats = self.config_formats(width=self.crop['width'], height=self.crop['height'])
+        
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
@@ -75,14 +76,6 @@ class ICCam(ctypes.Structure):
         self.cam.FilterSetParameter(h_c, b'Width', width)
         self.size = (self.crop['width'], self.crop['height'])
 
-    def set_ROI(self):
-        # result_roi = self.cam.SetPropertySwitch("Auto Functions ROI", "Enabled", True)
-        result_left = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Left", int(self.crop['left']))
-        result_right = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Top", int(self.crop['top']))
-        result_width = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Width", int(self.crop['width']))
-        result_height = self.cam.SetPropertyAbsoluteValue("Auto Functions ROI", "Height", int(self.crop['height']))
-        print(f'For cam {self.cam_num}, the ROI was set with results: {result_left}, {result_right}, {result_width}, {result_height}')
-        
     def set_crop(self, top=None, left=None, height=None, width=None):
         self.crop['top'] = top if top is not None else self.crop['top']
         self.crop['left'] = left if left is not None else self.crop['left']
@@ -95,7 +88,30 @@ class ICCam(ctypes.Structure):
         self.add_filters()
         # self.set_ROI()
         self.cam.StartLive()
-    
+   
+    def config_formats(self, width, height):
+        if width % 4 != 0:
+            width = width - (width % 4)  # Adjust width to the nearest multiple of 4
+        if height % 4 != 0:
+            height = height - (height % 4)  # Adjust height to the nearest multiple of 4
+
+        return f'Y800 ({width}x{height})'
+   
+    def set_formats(self, width=None, height=None):
+        self.crop['width'] = width if width is not None else self.crop['width']
+        self.crop['height'] = height if height is not None else self.crop['height']
+        self.formats = self.config_formats(width=self.crop['width'], height=self.crop['height'])
+        current_frame_rate = self.get_frame_rate()
+        
+        self.cam.close()
+        self.cam = ic.TIS_CAM()
+        self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
+        self.cam.SetVideoFormat(Format=self.formats)
+        self.cam.SetFrameRate(current_frame_rate)
+        self.cam.StartLive()
+        
+    def get_formats(self):
+        return (self.crop['width'], self.crop['height'])
     
     def get_crop(self):
         return (self.crop['top'],
