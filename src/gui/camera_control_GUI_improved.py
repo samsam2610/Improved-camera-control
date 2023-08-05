@@ -1111,14 +1111,14 @@ class CamGUI(object):
             print('Calibration is not setup. Will attempt to load calibration file.')
             calibration_file = os.path.join(self.dir_output.get(), 'calibration.toml')
             
-        if not os.path.exists(calibration_file):
-            messagebox.showerror('Error', 'Calibration file not found!')
-            return
+
         
         from src.aniposelib.cameras import CameraGroup
         
         # Load the calibration file
         try:
+            # if not os.path.exists(calibration_file):
+            #     messagebox.showerror('Error', 'Calibration file not found!')
             self.cgroup_test = CameraGroup.load(calibration_file) # cgroup_test is loaded with the calibration file
             print('Calibration file loaded')
         except:
