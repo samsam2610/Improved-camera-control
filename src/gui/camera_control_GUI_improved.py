@@ -825,6 +825,8 @@ class CamGUI(object):
                         self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}; {len(row)}'
                         if num == 0:
                             self.calibration_current_duration_value.set(f'{time.perf_counter()-start_time:.2f}')
+                    else:
+                        print(f'No marker detected on cam {num} at frame {self.frame_count[num]}')
                     
                     # putting frame into the frame queue along with following information
                     self.frame_queue.put((frame_current,  # the frame itself
@@ -1888,7 +1890,7 @@ class CamGUI(object):
         self.force_frame_sync_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
         Hovertip(self.force_frame_sync_button, "Force frame sync for camera captured on threads")
 
-        self.toggle_continuous_mode = IntVar(value=0)
+        self.toggle_continuous_mode = IntVar(value=1)
         self.toggle_continuous_mode_button = Checkbutton(record_video_frame, text="Continuous Mode", variable=self.toggle_continuous_mode,
                                                          onvalue=1, offvalue=0, width=13)
         self.toggle_continuous_mode_button.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)
