@@ -169,7 +169,7 @@ class ICCam(ctypes.Structure):
         if error is not 1:
             print(f'Cam {self.cam_num} error: {error}')
         else:
-            print(f'Cam {self.cam_num} just took a picture'
+            print(f'Cam {self.cam_num} just took a picture')
         return cv2.flip(frame, 0)
 
     def get_image_dimensions(self):
