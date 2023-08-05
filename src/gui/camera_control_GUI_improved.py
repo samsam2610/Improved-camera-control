@@ -1110,8 +1110,6 @@ class CamGUI(object):
         except:
             print('Calibration is not setup. Will attempt to load calibration file.')
             calibration_file = os.path.join(self.dir_output.get(), 'calibration.toml')
-            
-
         
         from src.aniposelib.cameras import CameraGroup
         
