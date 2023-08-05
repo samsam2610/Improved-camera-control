@@ -664,7 +664,10 @@ class CamGUI(object):
         """
         if self.calibration_capture_toggle_status or termination:
             self.calibration_capture_toggle_status = False
-            
+            if self.toggle_continuous_mode.get() == 1:
+                for i in range(len(self.cam)):
+                    self.cam[i].turn_off_continuous_mode()
+                    
             print('Waiting for all the frames are done processing...')
             self.calibration_process_stats.set('Waiting for all the frames are done processing...')
             current_thread = threading.currentThread()
@@ -702,7 +705,11 @@ class CamGUI(object):
             # Setting capture toggle status
             self.recording_threads_status = []
             self.calibration_capture_toggle_status = True
-            
+           
+            if self.toggle_continuous_mode.get() == 1:
+                for i in range(len(self.cam)):
+                    self.cam[i].turn_on_continuous_mode()
+                    
             # Sync camera capture time using threading.Barrier
             barrier = threading.Barrier(len(self.cam))
             
