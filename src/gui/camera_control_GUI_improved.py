@@ -120,6 +120,7 @@ class CamGUI(object):
         self.fov_labels = ['top', 'left', 'height', 'width']
 
         self.test_calibration_live_toggle_status = []
+        self.calibration_toggle_status = False
         # Initialize GUI
         self.running_config = {'debug_mode': debug_mode, 'init_cam_bool': init_cam_bool}
         if self.running_config['init_cam_bool']:
