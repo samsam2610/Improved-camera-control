@@ -770,7 +770,7 @@ class CamGUI(object):
                 row = self.board_calibration.fill_points_rows([row])
                 self.all_rows[num].extend(row)
                 self.current_all_rows[num].extend(row)
-                self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
+                self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}; {len(row)}'
                 self.frame_acquired_count_label[num]['text'] = f'{self.frame_count[num]}'
                 self.vid_out[num].write(frame_current)
         
@@ -815,7 +815,7 @@ class CamGUI(object):
                         row = self.board_calibration.fill_points_rows([row])
                         self.all_rows[num].extend(row)
                         self.current_all_rows[num].extend(row)
-                        self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}'
+                        self.board_detected_count_label[num]['text'] = f'{len(self.all_rows[num])}; {len(row)}'
                         if num == 0:
                             self.calibration_current_duration_value.set(f'{time.perf_counter()-start_time:.2f}')
                     
