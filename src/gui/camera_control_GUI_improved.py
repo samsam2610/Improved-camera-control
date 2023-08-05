@@ -496,8 +496,8 @@ class CamGUI(object):
         """
         self.toggle_calibration_capture_button['state'] = state
         self.snap_calibration_button['state'] = state
-        self.recalibrate_button['state'] = state
-        self.update_calibration_button['state'] = state
+        # self.recalibrate_button['state'] = state
+        # self.update_calibration_button['state'] = state
         self.plot_calibration_error_button['state'] = state
         self.test_calibration_live_button['state'] = state
         
@@ -986,7 +986,7 @@ class CamGUI(object):
                 if self.recalibrate_status:
                     with open(self.rows_fname, 'rb') as f:
                         all_rows = pickle.load(f)
-                    print('Loaded rows from detections.pickle')
+                    print('Loaded rows from detections.pickle with size: ', len(all_rows))
                 
                 if self.update_calibration_status:
                     all_rows = copy.deepcopy(self.current_all_rows)
@@ -1124,7 +1124,7 @@ class CamGUI(object):
     # endregion Calibration
     
     # region Trigger recording
-    def setup_trigger_recording(self, overwrite=True):
+    def setup_trigger_recording(self, overwrite=False):
         if len(self.vid_out) > 0:
             vid_open_window = Tk()
             Label(vid_open_window,
@@ -1453,7 +1453,7 @@ class CamGUI(object):
 
             # number of cameras
             Label(select_cams_window, text="How many cameras?").grid(sticky="w", row=0, column=0)
-            self.number_of_cams = StringVar(value="1")
+            self.number_of_cams = IntVar(value=1)
             self.number_of_cams_entry = Entry(select_cams_window, textvariable=self.number_of_cams).\
                 grid(sticky="nsew", row=0, column=1)
             Button(select_cams_window, text="Set Cameras", command=select_cams_window.quit).\
@@ -1994,7 +1994,7 @@ class CamGUI(object):
             grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
         
-        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="disabled", width=15)
+        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="normal", width=15)
         self.recalibrate_button.\
             grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.recalibrate_button, "Press this button to calibrate using all the frames. ")
