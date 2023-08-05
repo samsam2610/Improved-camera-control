@@ -1994,7 +1994,7 @@ class CamGUI(object):
             grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
         
-        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="disabled", width=15)
+        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="normal", width=15)
         self.recalibrate_button.\
             grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
         Hovertip(self.recalibrate_button, "Press this button to calibrate using all the frames. ")
