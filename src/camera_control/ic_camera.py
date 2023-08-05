@@ -164,8 +164,10 @@ class ICCam(ctypes.Structure):
         return round(gain[0], 3)
 
     def get_image(self):
-        self.cam.SnapImage()
+        error = self.cam.SnapImage()
         frame = self.cam.GetImageEx()
+        if error==0:
+            print(f'Cam {self.cam_num} error: {error}')
         return cv2.flip(frame, 0)
 
     def get_image_dimensions(self):
