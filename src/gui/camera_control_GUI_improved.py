@@ -517,7 +517,7 @@ class CamGUI(object):
         
         return 1
 
-    def load_calibration_settings(self, draw_calibration_board=True):
+    def load_calibration_settings(self, draw_calibration_board=False):
         from src.gui.utils import load_config, get_calibration_board
         from pathlib import Path
         
