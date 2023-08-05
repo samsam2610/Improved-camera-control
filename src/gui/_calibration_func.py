@@ -41,12 +41,17 @@ def detect_raw_board_on_thread(self, num, barrier):
         frame_current = self.cam[num].get_image()
         if frame_current is not None:
             self.frame_count_test[num] += 1
-            drawn_frame = draw_axis(frame_current,
-                                            camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
-                                            dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
-                                            rotation=self.cgroup_test.cameras[num].get_rotation(),
-                                            translation=self.cgroup_test.cameras[num].get_translation(),
-                                            board=self.board_calibration.board, aruco_dict=aruco_dict, params=params)
+            if self.cgroup_test is not None:
+                drawn_frame = draw_axis(frame_current,
+                                                aruco_dict=aruco_dict, params=params,
+                                                camera_matrix=self.cgroup_test.cameras[num].get_camera_matrix(),
+                                                dist_coeff=self.cgroup_test.cameras[num].get_distortions(),
+                                                rotation=self.cgroup_test.cameras[num].get_rotation(),
+                                                translation=self.cgroup_test.cameras[num].get_translation(),
+                                                board=self.board_calibration.board)
+            else:
+                drawn_frame = draw_axis(frame_current, aruco_dict=aruco_dict, params=params)
+                
             if drawn_frame is not None:
                 frame_current = drawn_frame
             self.frame_queue.put((frame_current, num, self.frame_count_test[num]))
@@ -107,7 +112,7 @@ def draw_detection_on_thread(self, num):
               ''.join(traceback.format_tb(e.__traceback__)))
               
     
-def draw_axis(frame, camera_matrix, dist_coeff, rotation, translation, board, aruco_dict, params, verbose=True):
+def draw_axis(frame, aruco_dict, params, camera_matrix=None, dist_coeff=None, rotation=None, translation=None, board=None, verbose=True):
     """
     """
     try:
@@ -119,7 +124,12 @@ def draw_axis(frame, camera_matrix, dist_coeff, rotation, translation, board, ar
         if len(corners) != len(ids) or len(corners) == 0:
             print('Incorrect corner or no corner detected!')
             return None
-
+        
+        if camera_matrix is None or dist_coeff is None:
+            print('Camera matrix or distortion coefficients not provided!')
+            cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+            return frame
+        
         corners, ids, rejectedCorners, recoveredIdxs = cv2.aruco.refineDetectedMarkers(frame, board, corners, ids,
                                                                                        rejected_points, camera_matrix,
                                                                                        dist_coeff, parameters=params)

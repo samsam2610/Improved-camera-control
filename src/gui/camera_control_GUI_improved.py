@@ -1118,8 +1118,12 @@ class CamGUI(object):
         from src.aniposelib.cameras import CameraGroup
         
         # Load the calibration file
-        self.cgroup_test = CameraGroup.load(calibration_file) # cgroup_test is loaded with the calibration file
-        print('Calibration file loaded')
+        try:
+            self.cgroup_test = CameraGroup.load(calibration_file) # cgroup_test is loaded with the calibration file
+            print('Calibration file loaded')
+        except:
+            self.cgroup_test = None
+            print('Failed to load calibration file. Using none instead.')
         
         barrier = threading.Barrier(len(self.cam))
         t = []
