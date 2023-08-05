@@ -531,11 +531,10 @@ class CamGUI(object):
 
         self.calibration_process_stats.set('Loaded calibration board.')
 
-        # Check available detection file, if file available will delete it (for now)
         self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
         self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml')
         
-    def setup_calibration(self):
+    def setup_calibration(self, override=False):
         """
         Method: setup_calibration
 
@@ -587,11 +586,14 @@ class CamGUI(object):
             self.frame_process_threshold = 2
             self.queue_frame_threshold = 1000
             
-            # Check available detection file, if file available will delete it (for now)
-            self.clear_calibration_file(self.rows_fname)
-            self.clear_calibration_file(self.calibration_out)
-            self.rows_fname_available = False
-            
+            if override:
+                # Check available detection file, if file available will delete it (for now)
+                self.clear_calibration_file(self.rows_fname)
+                self.clear_calibration_file(self.calibration_out)
+                self.rows_fname_available = False
+            else:
+                self.rows_fname_available = os.path.exists(self.rows_fname)
+                
             # Set calibration parameter
             result = self.set_calibration_duration()
             if result == 0:
@@ -627,7 +629,7 @@ class CamGUI(object):
                 self.frame_times.append([])
 
             # check if file exists, ask to overwrite or change attempt number if it does
-            create_video_files(self, overwrite=True)
+            create_video_files(self, overwrite=override)
             create_output_files(self, subject_name='Sam')
 
             self.calibration_process_stats.set('Setting the frame sizes...')
