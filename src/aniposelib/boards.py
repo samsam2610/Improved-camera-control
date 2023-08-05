@@ -628,6 +628,7 @@ class CharucoBoard(CalibrationObject):
         else:
             gray = image
         
+        print(f'gray shape: {gray.shape}')
         corners, ids = self.detect_markers(image, camera, refine=True)
         if len(corners) > 0:
             ret, detectedCorners, detectedIds = aruco.interpolateCornersCharuco(corners, ids, gray, self.board)

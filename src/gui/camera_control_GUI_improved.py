@@ -825,7 +825,6 @@ class CamGUI(object):
                     self.frame_times[num].append(time.perf_counter())
                     self.frame_count[num] += 1
                     frame_current = self.cam[num].get_image()
-                    print(f'Cam {num} frame has shape {frame_current.shape}')
                     # detect the marker as the frame is acquired
                     corners, ids = self.board_calibration.detect_image(frame_current)
                     if corners is not None:
