@@ -166,7 +166,7 @@ class ICCam(ctypes.Structure):
     def get_image(self):
         error = self.cam.SnapImage()
         frame = self.cam.GetImageEx()
-        if error==0:
+        if error is not 1:
             print(f'Cam {self.cam_num} error: {error}')
         return cv2.flip(frame, 0)
 
