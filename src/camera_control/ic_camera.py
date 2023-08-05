@@ -90,12 +90,24 @@ class ICCam(ctypes.Structure):
         self.cam.StartLive()
    
     def config_formats(self, width, height):
-        if width % 4 != 0:
-            width = width - (width % 4)  # Adjust width to the nearest multiple of 4
-        if height % 4 != 0:
-            height = height - (height % 4)  # Adjust height to the nearest multiple of 4
+        width = int(width)
+        height = int(height)
 
-        return f'Y800 ({width}x{height})'
+        if width < 16:
+            width = int(4*round(width/4)) if width % 4 != 0 else width
+        else:
+            width = int(16*round(width/16)) if width % 16 != 0 else width
+        if height < 16:
+            height = int(4*round(height/4)) if height % 4 != 0 else height
+        else:
+            height = int(16*round(height/16)) if height % 16 != 0 else height
+
+        result = f"Y800 ({width}x{height})"
+        self.crop['width'] = width
+        self.crop['height'] = height
+
+        print(f'Cam {self.cam_num} video format set to {result}')
+        return result
    
     def set_formats(self, width=None, height=None):
         self.crop['width'] = width if width is not None else self.crop['width']
@@ -492,3 +504,5 @@ class VideoRecordingSession(ctypes.Structure):
         while self.recording_status:
             self.write_frame()
             time.sleep(0.005)
+            
+        self.write_frame() # write the last frame
