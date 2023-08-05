@@ -29,7 +29,7 @@ cam_details = json.load(open(dets_file, 'r'))
 
 class ICCam(ctypes.Structure):
 
-    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats='Y800 (1024x768)'):
+    def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats=None):
         '''
         Params
         ------
