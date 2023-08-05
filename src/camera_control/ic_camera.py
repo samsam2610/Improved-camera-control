@@ -168,8 +168,6 @@ class ICCam(ctypes.Structure):
         frame = self.cam.GetImageEx()
         if error is not 1:
             print(f'Cam {self.cam_num} error: {error}')
-        else:
-            print(f'Cam {self.cam_num} just took a picture')
         return cv2.flip(frame, 0)
 
     def get_image_dimensions(self):
@@ -495,7 +493,7 @@ class VideoRecordingSession(ctypes.Structure):
         # self.frame_num.append(frame_num)
         # with self.buffer_lock:
         self.frame_buffer.append((frame, time_data, frame_num))
-        
+        print(f'Cam {self.cam_num} frame {frame_num} acquired')
         return 1
     
     def start_processing(self):
