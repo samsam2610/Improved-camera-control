@@ -521,15 +521,25 @@ class CamGUI(object):
         from src.gui.utils import load_config, get_calibration_board
         from pathlib import Path
         
-        self.calibration_process_stats.set('Looking for config.toml directory ...')
+        calibration_stats_message = 'Looking for config.toml directory ...'
+        self.calibration_process_stats.set(calibration_stats_message)
+        print(calibration_stats_message)
+        
         path = Path(os.path.realpath(__file__))
         # Navigate to the outer parent directory and join the filename
         config_toml_path = os.path.normpath(str(path.parents[2] / 'config-files' / 'config.toml'))
         config_anipose = load_config(config_toml_path)
-        self.calibration_process_stats.set('Successfully found and loaded config. Determining calibration board ...')
+        calibration_stats_message = 'Found config.toml directory. Loading config ...'
+        print(calibration_stats_message)
+        
+        calibration_stats_message = 'Successfully found and loaded config. Determining calibration board ...'
+        self.calibration_process_stats.set(calibration_stats_message)
+        print(calibration_stats_message)
+        
         self.board_calibration = get_calibration_board(config=config_anipose)
-
-        self.calibration_process_stats.set('Loaded calibration board.')
+        calibration_stats_message = 'Successfully determined calibration board. Initializing camera calibration objects ...'
+        self.calibration_process_stats.set(calibration_stats_message)
+        print(calibration_stats_message)
 
         self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
         self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml')
