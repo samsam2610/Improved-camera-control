@@ -517,7 +517,7 @@ class CamGUI(object):
         
         return 1
 
-    def load_calibration_settings(self):
+    def load_calibration_settings(self, draw_calibration_board=True):
         from src.gui.utils import load_config, get_calibration_board
         from pathlib import Path
         
@@ -544,6 +544,12 @@ class CamGUI(object):
         self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
         self.calibration_out = os.path.join(self.dir_output.get(), 'calibration.toml')
         
+        board_dir = os.path.join(self.dir_output.get(), 'board.png')
+        if draw_calibration_board:
+            numx, numy = self.board_calibration.get_size()
+            size = numx*200, numy*200
+            img = self.board_calibration.draw(size)
+            cv2.imwrite(board_dir, img)
     def setup_calibration(self, override=False):
         """
         Method: setup_calibration
