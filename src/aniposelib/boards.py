@@ -549,7 +549,7 @@ class CharucoBoard(CalibrationObject):
         dkey = (marker_bits, dict_size)
         self.dictionary = aruco.getPredefinedDictionary(ARUCO_DICTS[dkey])
         
-        self.board = aruco.CharucoBoard((squaresX, squaresY), square_length, marker_length, self.dictionary)
+        self.board = aruco.CharucoBoard_create((squaresX, squaresY), square_length, marker_length, self.dictionary)
         
         total_size = (squaresX - 1) * (squaresY - 1)
         
@@ -589,7 +589,7 @@ class CharucoBoard(CalibrationObject):
         else:
             gray = image
         
-        params = aruco.DetectorParameters_create()
+        params = aruco.DetectorParameters()
         params.cornerRefinementMethod = aruco.CORNER_REFINE_CONTOUR
         params.adaptiveThreshWinSizeMin = 100
         params.adaptiveThreshWinSizeMax = 700
