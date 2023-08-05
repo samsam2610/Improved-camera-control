@@ -127,7 +127,7 @@ def save_vid(self, compress=False, delete=False, plotData=False):
                         'Video has been deleted, please set up a new video to take another recording.'
     
     if self.save_msg:
-        self.display_recorded_stats()
+        display_recorded_stats(self)
     
     self.vid_out = []
     self.frame_times = []
