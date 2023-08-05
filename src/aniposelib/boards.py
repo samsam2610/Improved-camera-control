@@ -589,7 +589,7 @@ class CharucoBoard(CalibrationObject):
         else:
             gray = image
         
-        params = aruco.DetectorParameters()
+        params = aruco.DetectorParameters_create()
         params.cornerRefinementMethod = aruco.CORNER_REFINE_CONTOUR
         params.adaptiveThreshWinSizeMin = 100
         params.adaptiveThreshWinSizeMax = 700
