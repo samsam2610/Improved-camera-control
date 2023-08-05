@@ -550,6 +550,7 @@ class CamGUI(object):
             size = numx*200, numy*200
             img = self.board_calibration.draw(size)
             cv2.imwrite(board_dir, img)
+            
     def setup_calibration(self, override=False):
         """
         Method: setup_calibration
