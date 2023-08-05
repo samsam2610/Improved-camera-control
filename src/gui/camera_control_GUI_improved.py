@@ -496,8 +496,8 @@ class CamGUI(object):
         """
         self.toggle_calibration_capture_button['state'] = state
         self.snap_calibration_button['state'] = state
-        self.recalibrate_button['state'] = state
-        self.update_calibration_button['state'] = state
+        # self.recalibrate_button['state'] = state
+        # self.update_calibration_button['state'] = state
         self.plot_calibration_error_button['state'] = state
         self.test_calibration_live_button['state'] = state
         
@@ -986,7 +986,7 @@ class CamGUI(object):
                 if self.recalibrate_status:
                     with open(self.rows_fname, 'rb') as f:
                         all_rows = pickle.load(f)
-                    print('Loaded rows from detections.pickle')
+                    print('Loaded rows from detections.pickle with size: ', len(all_rows))
                 
                 if self.update_calibration_status:
                     all_rows = copy.deepcopy(self.current_all_rows)
