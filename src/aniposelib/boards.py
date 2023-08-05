@@ -602,6 +602,7 @@ class CharucoBoard(CalibrationObject):
             ids = None
         
         if ids is None:
+            print("W: no markers found")
             return [], []
         
         if camera is None:
