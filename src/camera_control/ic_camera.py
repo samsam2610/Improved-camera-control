@@ -398,6 +398,7 @@ class VideoRecordingSession(ctypes.Structure):
         print(f'Cam {self.cam_num} internal recording status set to {status}')
         if status is True:
             self.start_processing()
+            self.reset_frame_buffer()
         return 1
     
     def set_params(self, video_file: str=None, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None, trackingCoords=None):
@@ -493,7 +494,17 @@ class VideoRecordingSession(ctypes.Structure):
         # self.frame_num.append(frame_num)
         # with self.buffer_lock:
         self.frame_buffer.append((frame, time_data, frame_num))
-        print(f'Cam {self.cam_num} frame {frame_num} acquired')
+        # print(f'Cam {self.cam_num} frame {frame_num} acquired')
+        return 1
+   
+    def reset_frame_buffer(self):
+        self.frame_buffer = deque(maxlen=50)
+        self.frame_buffer_length = 0
+        self.frame_count = 0
+        self.frame_times = []
+        self.frame_num = []
+        self.tracking_value = None
+        self.tracking_point = False
         return 1
     
     def start_processing(self):
