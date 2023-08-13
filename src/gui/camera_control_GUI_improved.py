@@ -1184,6 +1184,8 @@ class CamGUI(object):
         self.cam_name_no_space = []
         self.vid_file = []
         self.base_name = []
+        self.cycle_count = 0
+        self.dim = []
         
         if not os.path.isdir(os.path.normpath(self.dir_output.get())):
             os.makedirs(os.path.normpath(self.dir_output.get()))
@@ -1203,6 +1205,8 @@ class CamGUI(object):
                                                   self.base_name[i] +
                                                   self.attempt.get() +
                                                   '.avi'))
+            self.dim.append(self.cam[i].get_image_dimensions())
+            
         # check if file exists, ask to overwrite or change attempt number if it does
         for i in range(len(self.cam)):
             if i == 0:
@@ -1224,19 +1228,22 @@ class CamGUI(object):
                     
                     if self.overwrite:
                         self.vid_file[i] = os.path.normpath(
-                            self.dir_output.get() + '/' + self.base_name[i] + self.attempt.get() + '.avi')
+                            self.dir_output.get() + '/' +
+                            self.base_name[i] +
+                            str(self.cycle_count) + 'c' +
+                            self.attempt.get() + '.avi')
                     else:
                         return
             else:
                 # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
                 print('')
         
-            dim = self.cam[i].get_image_dimensions()
+            
             # fourcc = cv2.VideoWriter_fourcc(*)
             if self.tracking_points[i][0] is None:
-                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), dim))
+                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i]))
             else:
-                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), dim, self.tracking_points[i]))
+                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i], self.tracking_points[i]))
                 
             self.cam[i].set_frame_callback_video()
             
@@ -1322,8 +1329,43 @@ class CamGUI(object):
                 self.cam[num].set_recording_status(state=False)
                 print(f'Kill thread for cam {num}')
                 break
+            elif self.cam[num].get_timeout_status() == 0:
+                # If the timeout is reached, the camera will stop recording and save the video file, then restart the recording
+                # Currently, the timeout is set to 0.5 seconds, with additional 0.5 seconds for saving the video file
+                self.cam[num].set_recording_status(state=False)
+                self.save_trigger_recording_on_thread(num)
+                self.cam[num].set_recording_status(state=True)
+                print(f'Cam {num} timeout!')
             time.sleep(0.1)
     
+    def save_trigger_recording_on_thread(self, num):
+        time.sleep(0.5)
+        frame_times, frame_num, tracking_value = self.cam[num].release_video_file()
+        np.save(str(self.ts_file), np.array(frame_times))
+        np.savetxt(str(self.ts_file_csv), np.array(frame_times), delimiter=",")
+        
+        self.cycle_count += 1
+        self.vid_file[num] = os.path.normpath(
+                            self.dir_output.get() + '/' +
+                            self.base_name[num] +
+                            str(self.cycle_count) + 'c' +
+                            self.attempt.get() + '.avi')
+        if self.tracking_points[num][0] is None:
+            self.vid_out.append(self.cam[num].set_up_video_trigger(self.vid_file[num], self.video_codec, int(self.fps.get()), self.dim[num]))
+        else:
+            self.vid_out.append(self.cam[num].set_up_video_trigger(self.vid_file[num], self.video_codec, int(self.fps.get()), self.dim[num], self.tracking_points[num]))
+        
+        # So much copy and paste
+        # TODO: Refactor this, make it look less dumb
+        self.ts_file[num] =self.vid_file[num].replace('.avi', '.npy')
+        self.ts_file[num] = self.ts_file[num].replace(self.cam_name_no_space[num],
+                                                      'TIMESTAMPS_' + self.cam_name_no_space[num])
+                                                      
+        self.ts_file_csv[num] = self.vid_file[num].replace('.avi', '.csv')
+        self.ts_file_csv[num] = self.ts_file_csv[num].replace(self.cam_name_no_space[num],
+                                                              'TIMESTAMPS_' + self.cam_name_no_space[num])
+        
+                
     def save_trigger_recording(self, compress=False, delete=False):
         """
         Save the trigger recording.

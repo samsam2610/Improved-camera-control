@@ -318,6 +318,9 @@ class ICCam(ctypes.Structure):
         self.vid_file.set_recording_status(state)
         print(f'Cam {self.cam_num} recording status set to {state}')
         
+    def get_timeout_status(self):
+        return self.vid_file.timeout_status
+    
     def get_window_position(self):
         err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'] = self.cam.GetWindowPosition()
         if err != 1:
@@ -389,7 +392,8 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_times = []
         self.frame_num = []
         self.tracking_value = None
-    
+        self.recent_frame_time = None
+        
     def set_recording_status(self, status: bool):
         if self.vid_out is None:
             print(f'Cam {self.cam_num} video file not set up yet')
@@ -442,6 +446,8 @@ class VideoRecordingSession(ctypes.Structure):
             self.frame_count = 0
             self.buffer_lock = threading.Lock()
             self.recording_status = False
+            self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
+            self.timeout_start = None
 
         return 1
         
@@ -452,7 +458,9 @@ class VideoRecordingSession(ctypes.Structure):
         self.recording_status = False
         self.tracking_value = None
         self.tracking_point = False
-       
+        self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
+        self.timeout_start = None
+        
     def delete(self):
         os.remove(self.video_file)
         self.video_file = None
@@ -468,6 +476,8 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_num = []
         self.tracking_value = None
         self.tracking_point = False
+        self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
+        self.timeout_start = None
         return 1
     
     def get_current_stats(self):
@@ -489,12 +499,10 @@ class VideoRecordingSession(ctypes.Structure):
             #     self.tracking_value.append(cv2.getRectSubPix(frame, (1, 1), (x, y))[0, 0])
     
     def acquire_frame(self, frame, time_data, frame_num):
-        # self.vid_out.write(frame)
-        # self.frame_times.append(time_data)
-        # self.frame_num.append(frame_num)
-        # with self.buffer_lock:
         self.frame_buffer.append((frame, time_data, frame_num))
+        self.timeout_start = time_data
         # print(f'Cam {self.cam_num} frame {frame_num} acquired')
+        
         return 1
    
     def reset_frame_buffer(self):
@@ -505,6 +513,8 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_num = []
         self.tracking_value = None
         self.tracking_point = False
+        self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
+        self.timeout_start = None
         return 1
     
     def start_processing(self):
@@ -512,10 +522,17 @@ class VideoRecordingSession(ctypes.Structure):
         print(f'Cam {self.cam_num} thread is started')
         processing_thread = threading.Thread(target=self._process_frames, daemon=True)
         processing_thread.start()
+        self.timeout_status = 1
         
     def _process_frames(self):
         while self.recording_status:
             self.write_frame()
+            if self.timeout_status is 1 and self.timeout_start is not None:
+                if time.perf_counter() - self.timeout_start > 0.5:
+                    self.timeout_status = 0
+                    print(f'Cam {self.cam_num} timeout')
+                    self.write_frame()
+                    return -1
             time.sleep(0.005)
             
         self.write_frame() # write the last frame
