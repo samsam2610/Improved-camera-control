@@ -144,14 +144,21 @@ class ICCam(ctypes.Structure):
     def set_exposure(self, val):
         val = 1 if val > 1 else val
         val = 0 if val < 0 else val
-        self.cam.SetPropertyAbsoluteValue("Exposure", "Value", val)
+        try:
+            self.cam.SetPropertyAbsoluteValue("Exposure", "Value", val)
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception occurred:", type(e).__name__, "| Exception value:", e,
+                  ''.join(traceback.format_tb(e.__traceback__)))
 
     def set_gain(self, val):
         try:
             val = int(round(val))
             self.cam.SetPropertyAbsoluteValue("Gain", "Value", val)
-        except:
-            pass
+        except Exception as e:
+            traceback.print_exc()
+            print("Exception occurred:", type(e).__name__, "| Exception value:", e,
+                  ''.join(traceback.format_tb(e.__traceback__)))
 
     def get_exposure(self):
         exposure = [0]
