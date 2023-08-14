@@ -454,7 +454,7 @@ class VideoRecordingSession(ctypes.Structure):
             self.buffer_lock = threading.Lock()
             self.recording_status = False
             self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
-            self.timeout_start = None
+            self.timeout_start = 0
 
         return 1
         
@@ -466,7 +466,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.tracking_value = None
         self.tracking_point = False
         self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
-        self.timeout_start = None
+        self.timeout_start = 0
         
     def delete(self):
         os.remove(self.video_file)
@@ -484,7 +484,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.tracking_value = None
         self.tracking_point = False
         self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
-        self.timeout_start = None
+        self.timeout_start = 0
         return 1
     
     def get_current_stats(self):
@@ -521,7 +521,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.tracking_value = None
         self.tracking_point = False
         self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
-        self.timeout_start = None
+        self.timeout_start = 0
         return 1
     
     def start_processing(self):
@@ -536,7 +536,7 @@ class VideoRecordingSession(ctypes.Structure):
             self.write_frame()
             current_time_since_last_frame = time.perf_counter() - self.timeout_start
             print(f'Cam {self.cam_num} time since last frame: {current_time_since_last_frame}')
-            if (self.timeout_status == 1) and (self.timeout_start is not None):
+            if (self.timeout_status == 1) and (self.timeout_start != 0 ):
                 if current_time_since_last_frame > 0.5:
                     self.timeout_status = 0
                     print(f'Cam {self.cam_num} timeout')
