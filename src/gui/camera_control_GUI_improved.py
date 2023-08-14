@@ -1184,7 +1184,7 @@ class CamGUI(object):
         self.cam_name_no_space = []
         self.vid_file = []
         self.base_name = []
-        self.cycle_count = 0
+        self.cycle_count = []
         self.dim = []
         
         if not os.path.isdir(os.path.normpath(self.dir_output.get())):
@@ -1206,6 +1206,7 @@ class CamGUI(object):
                                                   self.attempt.get() +
                                                   '.avi'))
             self.dim.append(self.cam[i].get_image_dimensions())
+            self.cycle_count.append(0)
             
         # check if file exists, ask to overwrite or change attempt number if it does
         for i in range(len(self.cam)):
@@ -1344,11 +1345,11 @@ class CamGUI(object):
         np.save(str(self.ts_file[num]), np.array(frame_times))
         np.savetxt(str(self.ts_file_csv[num]), np.array(frame_times), delimiter=",")
         
-        self.cycle_count += 1
+        self.cycle_count[num] += 1
         self.vid_file[num] = os.path.normpath(
                             self.dir_output.get() + '/' +
                             self.base_name[num] +
-                            str(self.cycle_count) + 'c' +
+                            str(self.cycle_count[num]) + 'c' +
                             self.attempt.get() + '.avi')
         if self.tracking_points[num][0] is None:
             self.vid_out.append(self.cam[num].set_up_video_trigger(self.vid_file[num], self.video_codec, int(self.fps.get()), self.dim[num]))

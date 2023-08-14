@@ -535,7 +535,6 @@ class VideoRecordingSession(ctypes.Structure):
         while self.recording_status:
             self.write_frame()
             current_time_since_last_frame = time.perf_counter() - self.timeout_start
-            print(f'Cam {self.cam_num} timeout status: {self.timeout_status} with timeout start {self.timeout_start} and time since last frame {current_time_since_last_frame}')
             if (self.timeout_status == 1) and (self.timeout_start > 0 ):
                 print(f'Cam {self.cam_num} time since last frame: {current_time_since_last_frame}')
                 if current_time_since_last_frame > 0.5:
