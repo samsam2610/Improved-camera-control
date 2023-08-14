@@ -408,8 +408,8 @@ class VideoRecordingSession(ctypes.Structure):
         self.recording_status = status
         print(f'Cam {self.cam_num} internal recording status set to {status}')
         if status is True:
-            self.start_processing()
             self.reset_frame_buffer()
+            self.start_processing()
         return 1
     
     def set_params(self, video_file: str=None, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None, trackingCoords=None):
