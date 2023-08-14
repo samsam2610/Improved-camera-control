@@ -527,7 +527,7 @@ class VideoRecordingSession(ctypes.Structure):
     def _process_frames(self):
         while self.recording_status:
             self.write_frame()
-            if self.timeout_status is 1 and self.timeout_start is not None:
+            if (self.timeout_status == 1) and (self.timeout_start is not None):
                 if time.perf_counter() - self.timeout_start > 0.5:
                     self.timeout_status = 0
                     print(f'Cam {self.cam_num} timeout')
