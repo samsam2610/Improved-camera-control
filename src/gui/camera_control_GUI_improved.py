@@ -1231,7 +1231,7 @@ class CamGUI(object):
                         self.vid_file[i] = os.path.normpath(
                             self.dir_output.get() + '/' +
                             self.base_name[i] +
-                            str(self.cycle_count) + 'c' +
+                            str(self.cycle_count[i]) + 'c' +
                             self.attempt.get() + '.avi')
                     else:
                         return
