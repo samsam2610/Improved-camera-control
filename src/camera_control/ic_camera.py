@@ -508,7 +508,7 @@ class VideoRecordingSession(ctypes.Structure):
     def acquire_frame(self, frame, time_data, frame_num):
         self.frame_buffer.append((frame, time_data, frame_num))
         self.timeout_start = time_data
-        print(f'Cam {self.cam_num} frame {frame_num} acquired with time {time_data}')
+        # print(f'Cam {self.cam_num} frame {frame_num} acquired with time {time_data}')
         
         return 1
    
@@ -534,9 +534,9 @@ class VideoRecordingSession(ctypes.Structure):
     def _process_frames(self):
         while self.recording_status:
             self.write_frame()
+            current_time_since_last_frame = time.perf_counter() - self.timeout_start
+            print(f'Cam {self.cam_num} time since last frame: {current_time_since_last_frame}')
             if (self.timeout_status == 1) and (self.timeout_start is not None):
-                current_time_since_last_frame = time.perf_counter() - self.timeout_start
-                print(f'Cam {self.cam_num} time since last frame: {current_time_since_last_frame}')
                 if current_time_since_last_frame > 0.5:
                     self.timeout_status = 0
                     print(f'Cam {self.cam_num} timeout')
