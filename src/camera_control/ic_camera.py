@@ -508,7 +508,7 @@ class VideoRecordingSession(ctypes.Structure):
     def acquire_frame(self, frame, time_data, frame_num):
         self.frame_buffer.append((frame, time_data, frame_num))
         self.timeout_start = time_data
-        # print(f'Cam {self.cam_num} frame {frame_num} acquired')
+        print(f'Cam {self.cam_num} frame {frame_num} acquired with time {time_data}')
         
         return 1
    
