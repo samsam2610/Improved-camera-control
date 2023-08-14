@@ -1341,8 +1341,8 @@ class CamGUI(object):
     def save_trigger_recording_on_thread(self, num):
         time.sleep(0.5)
         frame_times, frame_num, tracking_value = self.cam[num].release_video_file()
-        np.save(str(self.ts_file), np.array(frame_times))
-        np.savetxt(str(self.ts_file_csv), np.array(frame_times), delimiter=",")
+        np.save(str(self.ts_file[num]), np.array(frame_times))
+        np.savetxt(str(self.ts_file_csv[num]), np.array(frame_times), delimiter=",")
         
         self.cycle_count += 1
         self.vid_file[num] = os.path.normpath(
