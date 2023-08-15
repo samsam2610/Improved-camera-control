@@ -1286,11 +1286,11 @@ class CamGUI(object):
             print('The cameras stopped gracefully!')
             self.recording_status.set('The cameras stopped gracefully!')
             
-            for i in range(len(self.cam)):
-                if self.cam[i].get_timeout_moment() == 0:
-                    self.save_trigger_recording(delete=True)
-                    print(f'No frame was captured since last trigger train. Deleting the videos')
-                    break
+            # for i in range(len(self.cam)):
+            #     if self.cam[i].get_timeout_moment() == 0:
+            #         self.save_trigger_recording(delete=True)
+            #         print(f'No frame was captured since last trigger train. Deleting the videos')
+            #         break
                     
             self.toggle_trigger_recording_status = IntVar(value=0)
             self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
@@ -1337,13 +1337,13 @@ class CamGUI(object):
                 self.cam[num].set_recording_status(state=False)
                 print(f'Kill thread for cam {num}')
                 break
-            elif self.cam[num].get_timeout_status() == 0:
-                # If the timeout is reached, the camera will stop recording and save the video file, then restart the recording
-                # Currently, the timeout is set to 0.5 seconds, with additional 0.5 seconds for saving the video file
-                self.cam[num].set_recording_status(state=False)
-                self.save_trigger_recording_on_thread(num)
-                self.cam[num].set_recording_status(state=True)
-                print(f'Cam {num} timeout!')
+            # elif self.cam[num].get_timeout_status() == 0:
+            #     # If the timeout is reached, the camera will stop recording and save the video file, then restart the recording
+            #     # Currently, the timeout is set to 0.5 seconds, with additional 0.5 seconds for saving the video file
+            #     self.cam[num].set_recording_status(state=False)
+            #     self.save_trigger_recording_on_thread(num)
+            #     self.cam[num].set_recording_status(state=True)
+            #     print(f'Cam {num} timeout!')
             time.sleep(0.1)
     
     def save_trigger_recording_on_thread(self, num):
