@@ -360,17 +360,17 @@ class ICCam(ctypes.Structure):
     
     def set_flip_vertical(self, state: bool=True):
         if state:
-            print(f'Getting offset value for {self.cam_num}')
-            self.x_offset, self.y_offset = self.get_partial_scan()
+            # print(f'Getting offset value for {self.cam_num}')
+            # self.x_offset, self.y_offset = self.get_partial_scan()
             
             print(f'Flipping vertical for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
-            self.set_partial_scan(y_offset=self.crop['top'])
+            # self.set_partial_scan(y_offset=self.crop['top'])
         else:
             print(f'Flipping vertical back for {self.cam_num}')
             self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
-            if self.y_offset is not None:
-                self.set_partial_scan(y_offset=self.y_offset)
+            # if self.y_offset is not None:
+            #     self.set_partial_scan(y_offset=self.y_offset)
             
     def get_flip_vertical(self):
         flip_vertical = [0]
