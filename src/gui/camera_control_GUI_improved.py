@@ -1285,6 +1285,13 @@ class CamGUI(object):
             self.recording_trigger_toggle_status = False
             print('The cameras stopped gracefully!')
             self.recording_status.set('The cameras stopped gracefully!')
+            
+            for i in range(len(self.cam)):
+                if self.cam[i].get_timeout_moment() == 0:
+                    self.save_trigger_recording(delete=True)
+                    print(f'No frame was captured since last trigger train. Deleting the videos')
+                    break
+                    
             self.toggle_trigger_recording_status = IntVar(value=0)
             self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
         else:

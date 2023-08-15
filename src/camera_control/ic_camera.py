@@ -327,6 +327,10 @@ class ICCam(ctypes.Structure):
         
     def get_timeout_status(self):
         return self.vid_file.timeout_status
+   
+    def get_timeout_start_moment(self):
+        # Print the moment the first frame was captured, 0 if no frames captured
+        return self.vid_file.timeout_start
     
     def get_window_position(self):
         err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'] = self.cam.GetWindowPosition()
@@ -536,7 +540,7 @@ class VideoRecordingSession(ctypes.Structure):
             self.write_frame()
             current_time_since_last_frame = time.perf_counter() - self.timeout_start
             if (self.timeout_status == 1) and (self.timeout_start > 0 ):
-                print(f'Cam {self.cam_num} time since last frame: {current_time_since_last_frame}')
+                # print(f'Cam {self.cam_num} time since last frame: {current_time_since_last_frame}')
                 if current_time_since_last_frame > 0.5:
                     self.timeout_status = 0
                     print(f'Cam {self.cam_num} timeout')
