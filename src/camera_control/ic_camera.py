@@ -510,8 +510,9 @@ class VideoRecordingSession(ctypes.Structure):
             #     self.tracking_value.append(cv2.getRectSubPix(frame, (1, 1), (x, y))[0, 0])
     
     def acquire_frame(self, frame, time_data, frame_num):
-        self.frame_buffer.append((frame, time_data, frame_num))
-        self.timeout_start = time_data
+        if self.recording_status:
+            self.frame_buffer.append((frame, time_data, frame_num))
+            self.timeout_start = time_data
         # print(f'Cam {self.cam_num} frame {frame_num} acquired with time {time_data}')
         
         return 1
