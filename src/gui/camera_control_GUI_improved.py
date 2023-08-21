@@ -1238,9 +1238,7 @@ class CamGUI(object):
             else:
                 # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
                 print('')
-        
             
-            # fourcc = cv2.VideoWriter_fourcc(*)
             if self.tracking_points[i][0] is None:
                 self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i]))
             else:
@@ -1320,6 +1318,7 @@ class CamGUI(object):
                 self.recording_trigger_thread.append(threading.Thread(target=self.enable_trigger_on_thread, args=(i, barrier), name=thread_name))
                 self.recording_trigger_thread[-1].daemon = True
                 self.recording_trigger_thread[-1].start()
+                self.video_file_indicator[i]['bg'] = 'green'
     
     def enable_trigger_on_thread(self, num, barrier):
         try:
@@ -1417,6 +1416,10 @@ class CamGUI(object):
                 np.savetxt(str(self.ts_file_csv[i]), np.array(frame_time_list[i]), delimiter=",")
                 saved_files.append(self.vid_file[i])
                 saved_files.append(self.ts_file[i])
+            
+            # Change label to show current file name
+            self.video_file_status[i]['text'] = ""
+            self.video_file_indicator[i]['bg'] = 'gray'
         
         if len(saved_files) > 0:
             if len(frame_times) > 1:
