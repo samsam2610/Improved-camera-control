@@ -1696,7 +1696,7 @@ class CamGUI(object):
             #
             # fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             # fov_settings_frame.pack_propagate(False)
-            # cur_row += 1
+            cur_row += 1
         
             # framerate list frame
             framerate_frame = Frame(self.window, borderwidth=1, relief="raised")
