@@ -1671,32 +1671,32 @@ class CamGUI(object):
                                 'width': IntVar()}
             self.fov_dict.append(fov_current_dict)
             
-            fov_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
-            Label(fov_settings_frame, text='Top').grid(row=0, column=0, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['top'], width=5).\
-                grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
-
-            Label(fov_settings_frame, text='Left').grid(row=0, column=2, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['left'], width=5).\
-                grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
-            
-            Label(fov_settings_frame, text='Width').grid(row=1, column=0, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['width'], width=5).\
-                grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
-            
-            Label(fov_settings_frame, text='Height').grid(row=1, column=2, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['height'], width=5).\
-                grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
-            
-            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=10)
-            reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
-            
-            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=10)
-            set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
-
-            fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
-            fov_settings_frame.pack_propagate(False)
-            cur_row += 1
+            # fov_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
+            # Label(fov_settings_frame, text='Top').grid(row=0, column=0, padx=5, pady=3)
+            # Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['top'], width=5).\
+            #     grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+            #
+            # Label(fov_settings_frame, text='Left').grid(row=0, column=2, padx=5, pady=3)
+            # Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['left'], width=5).\
+            #     grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
+            #
+            # Label(fov_settings_frame, text='Width').grid(row=1, column=0, padx=5, pady=3)
+            # Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['width'], width=5).\
+            #     grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+            #
+            # Label(fov_settings_frame, text='Height').grid(row=1, column=2, padx=5, pady=3)
+            # Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['height'], width=5).\
+            #     grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
+            #
+            # reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=10)
+            # reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
+            #
+            # set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=10)
+            # set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
+            #
+            # fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
+            # fov_settings_frame.pack_propagate(False)
+            # cur_row += 1
         
             # framerate list frame
             framerate_frame = Frame(self.window, borderwidth=1, relief="raised")
