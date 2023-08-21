@@ -1184,6 +1184,8 @@ class CamGUI(object):
         self.cam_name_no_space = []
         self.vid_file = []
         self.base_name = []
+        self.cycle_count = []
+        self.dim = []
         
         if not os.path.isdir(os.path.normpath(self.dir_output.get())):
             os.makedirs(os.path.normpath(self.dir_output.get()))
@@ -1203,6 +1205,9 @@ class CamGUI(object):
                                                   self.base_name[i] +
                                                   self.attempt.get() +
                                                   '.avi'))
+            self.dim.append(self.cam[i].get_image_dimensions())
+            self.cycle_count.append(0)
+            
         # check if file exists, ask to overwrite or change attempt number if it does
         for i in range(len(self.cam)):
             if i == 0:
@@ -1224,19 +1229,20 @@ class CamGUI(object):
                     
                     if self.overwrite:
                         self.vid_file[i] = os.path.normpath(
-                            self.dir_output.get() + '/' + self.base_name[i] + self.attempt.get() + '.avi')
+                            self.dir_output.get() + '/' +
+                            self.base_name[i] +
+                            str(self.cycle_count[i]) + 'c' +
+                            self.attempt.get() + '.avi')
                     else:
                         return
             else:
                 # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
                 print('')
-        
-            dim = self.cam[i].get_image_dimensions()
-            # fourcc = cv2.VideoWriter_fourcc(*)
-            if self.tracking_points[i][0] is None:
-                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), dim))
-            else:
-                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), dim, self.tracking_points[i]))
+            
+            # if self.tracking_points[i][0] is None:
+            self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i]))
+            # else:
+            #     self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i], self.tracking_points[i]))
                 
             self.cam[i].set_frame_callback_video()
             
@@ -1265,6 +1271,7 @@ class CamGUI(object):
         if self.recording_trigger_toggle_status or force_termination:
             for i in range(len(self.cam)):
                 self.recording_trigger_status[i] = False
+                self.video_file_indicator[i]['bg'] = 'yellow'
                 
             print('Waiting for all the frames are done processing...')
             self.recording_status.set('Waiting for all the frames are done processing...')
@@ -1277,6 +1284,13 @@ class CamGUI(object):
             self.recording_trigger_toggle_status = False
             print('The cameras stopped gracefully!')
             self.recording_status.set('The cameras stopped gracefully!')
+            
+            # for i in range(len(self.cam)):
+            #     if self.cam[i].get_timeout_moment() == 0:
+            #         self.save_trigger_recording(delete=True)
+            #         print(f'No frame was captured since last trigger train. Deleting the videos')
+            #         break
+                    
             self.toggle_trigger_recording_status = IntVar(value=0)
             self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
         else:
@@ -1305,6 +1319,7 @@ class CamGUI(object):
                 self.recording_trigger_thread.append(threading.Thread(target=self.enable_trigger_on_thread, args=(i, barrier), name=thread_name))
                 self.recording_trigger_thread[-1].daemon = True
                 self.recording_trigger_thread[-1].start()
+                self.video_file_indicator[i]['bg'] = 'green'
     
     def enable_trigger_on_thread(self, num, barrier):
         try:
@@ -1322,8 +1337,43 @@ class CamGUI(object):
                 self.cam[num].set_recording_status(state=False)
                 print(f'Kill thread for cam {num}')
                 break
+            # elif self.cam[num].get_timeout_status() == 0:
+            #     # If the timeout is reached, the camera will stop recording and save the video file, then restart the recording
+            #     # Currently, the timeout is set to 0.5 seconds, with additional 0.5 seconds for saving the video file
+            #     self.cam[num].set_recording_status(state=False)
+            #     self.save_trigger_recording_on_thread(num)
+            #     self.cam[num].set_recording_status(state=True)
+            #     print(f'Cam {num} timeout!')
             time.sleep(0.1)
     
+    def save_trigger_recording_on_thread(self, num):
+        time.sleep(0.5)
+        frame_times, frame_num, tracking_value = self.cam[num].release_video_file()
+        np.save(str(self.ts_file[num]), np.array(frame_times))
+        np.savetxt(str(self.ts_file_csv[num]), np.array(frame_times), delimiter=",")
+        
+        self.cycle_count[num] += 1
+        self.vid_file[num] = os.path.normpath(
+                            self.dir_output.get() + '/' +
+                            self.base_name[num] +
+                            str(self.cycle_count[num]) + 'c' +
+                            self.attempt.get() + '.avi')
+        if self.tracking_points[num][0] is None:
+            self.vid_out.append(self.cam[num].set_up_video_trigger(self.vid_file[num], self.video_codec, int(self.fps.get()), self.dim[num]))
+        else:
+            self.vid_out.append(self.cam[num].set_up_video_trigger(self.vid_file[num], self.video_codec, int(self.fps.get()), self.dim[num], self.tracking_points[num]))
+        
+        # So much copy and paste
+        # TODO: Refactor this, make it look less dumb
+        self.ts_file[num] =self.vid_file[num].replace('.avi', '.npy')
+        self.ts_file[num] = self.ts_file[num].replace(self.cam_name_no_space[num],
+                                                      'TIMESTAMPS_' + self.cam_name_no_space[num])
+                                                      
+        self.ts_file_csv[num] = self.vid_file[num].replace('.avi', '.csv')
+        self.ts_file_csv[num] = self.ts_file_csv[num].replace(self.cam_name_no_space[num],
+                                                              'TIMESTAMPS_' + self.cam_name_no_space[num])
+        
+                
     def save_trigger_recording(self, compress=False, delete=False):
         """
         Save the trigger recording.
@@ -1367,6 +1417,10 @@ class CamGUI(object):
                 np.savetxt(str(self.ts_file_csv[i]), np.array(frame_time_list[i]), delimiter=",")
                 saved_files.append(self.vid_file[i])
                 saved_files.append(self.ts_file[i])
+            
+            # Change label to show current file name
+            self.video_file_status[i]['text'] = ""
+            self.video_file_indicator[i]['bg'] = 'gray'
         
         if len(saved_files) > 0:
             if len(frame_times) > 1:
@@ -1621,31 +1675,31 @@ class CamGUI(object):
                                 'width': IntVar()}
             self.fov_dict.append(fov_current_dict)
             
-            fov_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
-            Label(fov_settings_frame, text='Top').grid(row=0, column=0, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['top'], width=5).\
-                grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
-
-            Label(fov_settings_frame, text='Left').grid(row=0, column=2, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['left'], width=5).\
-                grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
-            
-            Label(fov_settings_frame, text='Width').grid(row=1, column=0, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['width'], width=5).\
-                grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
-            
-            Label(fov_settings_frame, text='Height').grid(row=1, column=2, padx=5, pady=3)
-            Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['height'], width=5).\
-                grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
-            
-            reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=10)
-            reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
-            
-            set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=10)
-            set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
-
-            fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
-            fov_settings_frame.pack_propagate(False)
+            # fov_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
+            # Label(fov_settings_frame, text='Top').grid(row=0, column=0, padx=5, pady=3)
+            # Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['top'], width=5).\
+            #     grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+            #
+            # Label(fov_settings_frame, text='Left').grid(row=0, column=2, padx=5, pady=3)
+            # Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['left'], width=5).\
+            #     grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
+            #
+            # Label(fov_settings_frame, text='Width').grid(row=1, column=0, padx=5, pady=3)
+            # Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['width'], width=5).\
+            #     grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+            #
+            # Label(fov_settings_frame, text='Height').grid(row=1, column=2, padx=5, pady=3)
+            # Spinbox(fov_settings_frame, from_=0, to=1e100, increment=1, textvariable=self.fov_dict[i]['height'], width=5).\
+            #     grid(sticky="nsew", row=1, column=3, padx=5, pady=3)
+            #
+            # reset_fov_button = Button(fov_settings_frame, text="Reset FOV", command=lambda index_cam=i: get_fov(self, index_cam), width=10)
+            # reset_fov_button.grid(sticky="nsew", row=0, column=5, padx=5, pady=3)
+            #
+            # set_fov_button = Button(fov_settings_frame, text="Set FOV", command=lambda index_cam=i: set_fov(self, index_cam), width=10)
+            # set_fov_button.grid(sticky="nsew", row=1, column=5, padx=5, pady=3)
+            #
+            # fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
+            # fov_settings_frame.pack_propagate(False)
             cur_row += 1
         
             # framerate list frame
@@ -1718,36 +1772,37 @@ class CamGUI(object):
                 grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
             partial_scan_frame.pack_propagate(False)
 
-            coord_analysis_frame = Frame(self.window, borderwidth=1, relief="raised")
-            
-            check_frame_coor_button = Button(coord_analysis_frame, text="Check Frame Coord", command=lambda index_cam=i: check_frame_coord(self, index_cam), width=15)
-            check_frame_coor_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
-            
-            coord_track_frame = Frame(coord_analysis_frame)
-            Label(coord_track_frame, text="X: "). \
-                grid(row=0, column=0, sticky="w", padx=1, pady=0)
-            self.x_tracking_value.append(IntVar())
-            x_tracking_entry = Spinbox(coord_track_frame, from_=0, to=1e100, increment=1, textvariable=self.x_tracking_value[i], width=5)
-            x_tracking_entry.grid(row=0, column=1, sticky="w", padx=1, pady=0)
-
-            Label(coord_track_frame, text="Y: "). \
-                grid(row=0, column=2, sticky="w", padx=1, pady=0)
-            self.y_tracking_value.append(IntVar())
-            y_tracking_entry = Spinbox(coord_track_frame, from_=0, to=1e100, increment=1, textvariable=self.y_tracking_value[i], width=5)
-            y_tracking_entry.grid(row=0, column=3, sticky="w", padx=1, pady=0)
-
-            self.tracking_points.append([None, None])
-            Button(coord_track_frame, text="Track", command=lambda index_cam=i: track_frame_coord(self, index_cam), width=10). \
-                grid(row=0, column=4, sticky="w", padx=1, pady=0)
-            
-            Button(coord_track_frame, text="Reset", command=lambda index_cam=i: reset_track_frame_coord(self, index_cam), width=10). \
-                grid(row=0, column=5, sticky="w", padx=1, pady=0)
-            
-            coord_track_frame.grid(row=1, column=0, padx=3, pady=3, sticky="nsew")
-            coord_track_frame.pack_propagate(False)
-            
-            coord_analysis_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
-            coord_analysis_frame.pack_propagate(False)
+            # Frame for tracking a pixel with coordinate in the frame
+            # coord_analysis_frame = Frame(self.window, borderwidth=1, relief="raised")
+            #
+            # check_frame_coor_button = Button(coord_analysis_frame, text="Check Frame Coord", command=lambda index_cam=i: check_frame_coord(self, index_cam), width=15)
+            # check_frame_coor_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
+            #
+            # coord_track_frame = Frame(coord_analysis_frame)
+            # Label(coord_track_frame, text="X: "). \
+            #     grid(row=0, column=0, sticky="w", padx=1, pady=0)
+            # self.x_tracking_value.append(IntVar())
+            # x_tracking_entry = Spinbox(coord_track_frame, from_=0, to=1e100, increment=1, textvariable=self.x_tracking_value[i], width=5)
+            # x_tracking_entry.grid(row=0, column=1, sticky="w", padx=1, pady=0)
+            #
+            # Label(coord_track_frame, text="Y: "). \
+            #     grid(row=0, column=2, sticky="w", padx=1, pady=0)
+            # self.y_tracking_value.append(IntVar())
+            # y_tracking_entry = Spinbox(coord_track_frame, from_=0, to=1e100, increment=1, textvariable=self.y_tracking_value[i], width=5)
+            # y_tracking_entry.grid(row=0, column=3, sticky="w", padx=1, pady=0)
+            #
+            # self.tracking_points.append([None, None])
+            # Button(coord_track_frame, text="Track", command=lambda index_cam=i: track_frame_coord(self, index_cam), width=10). \
+            #     grid(row=0, column=4, sticky="w", padx=1, pady=0)
+            #
+            # Button(coord_track_frame, text="Reset", command=lambda index_cam=i: reset_track_frame_coord(self, index_cam), width=10). \
+            #     grid(row=0, column=5, sticky="w", padx=1, pady=0)
+            #
+            # coord_track_frame.grid(row=1, column=0, padx=3, pady=3, sticky="nsew")
+            # coord_track_frame.pack_propagate(False)
+            #
+            # coord_analysis_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
+            # coord_analysis_frame.pack_propagate(False)
             
             cur_row += 1
             camera_status_frame = Frame(self.window)
@@ -1770,12 +1825,12 @@ class CamGUI(object):
             camera_status_frame.pack_propagate(False)
 
             # tracking point status
-            tracking_point_frame = Frame(self.window)
-            self.tracking_points_status.append(Label(tracking_point_frame, text="Not Tracked", width=30, justify="left", anchor="w"))
-            self.tracking_points_status[i].grid(row=0, column=0, columnspan=3, sticky="w", padx=1, pady=0)
-            
-            tracking_point_frame.grid(row=cur_row, column=2, padx=2, pady=0, sticky="w")
-            tracking_point_frame.pack_propagate(False)
+            # tracking_point_frame = Frame(self.window)
+            # self.tracking_points_status.append(Label(tracking_point_frame, text="Not Tracked", width=30, justify="left", anchor="w"))
+            # self.tracking_points_status[i].grid(row=0, column=0, columnspan=3, sticky="w", padx=1, pady=0)
+            #
+            # tracking_point_frame.grid(row=cur_row, column=2, padx=2, pady=0, sticky="w")
+            # tracking_point_frame.pack_propagate(False)
             
             cur_row += 1
 
