@@ -1820,12 +1820,12 @@ class CamGUI(object):
             camera_status_frame.pack_propagate(False)
 
             # tracking point status
-            tracking_point_frame = Frame(self.window)
-            self.tracking_points_status.append(Label(tracking_point_frame, text="Not Tracked", width=30, justify="left", anchor="w"))
-            self.tracking_points_status[i].grid(row=0, column=0, columnspan=3, sticky="w", padx=1, pady=0)
-            
-            tracking_point_frame.grid(row=cur_row, column=2, padx=2, pady=0, sticky="w")
-            tracking_point_frame.pack_propagate(False)
+            # tracking_point_frame = Frame(self.window)
+            # self.tracking_points_status.append(Label(tracking_point_frame, text="Not Tracked", width=30, justify="left", anchor="w"))
+            # self.tracking_points_status[i].grid(row=0, column=0, columnspan=3, sticky="w", padx=1, pady=0)
+            #
+            # tracking_point_frame.grid(row=cur_row, column=2, padx=2, pady=0, sticky="w")
+            # tracking_point_frame.pack_propagate(False)
             
             cur_row += 1
 
