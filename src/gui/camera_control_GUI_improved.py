@@ -1271,6 +1271,7 @@ class CamGUI(object):
         if self.recording_trigger_toggle_status or force_termination:
             for i in range(len(self.cam)):
                 self.recording_trigger_status[i] = False
+                self.video_file_indicator[i]['bg'] = 'yellow'
                 
             print('Waiting for all the frames are done processing...')
             self.recording_status.set('Waiting for all the frames are done processing...')
