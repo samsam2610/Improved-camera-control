@@ -1239,10 +1239,10 @@ class CamGUI(object):
                 # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
                 print('')
             
-            if self.tracking_points[i][0] is None:
-                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i]))
-            else:
-                self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i], self.tracking_points[i]))
+            # if self.tracking_points[i][0] is None:
+            #     self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i]))
+            # else:
+            self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i], self.tracking_points[i]))
                 
             self.cam[i].set_frame_callback_video()
             
