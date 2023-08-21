@@ -51,8 +51,9 @@ class ICCam(ctypes.Structure):
         self.cam.open(self.cam.GetDevices()[cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
         self.windowPos = {'x': None, 'y': None, 'width': None, 'height': None}
-        self.add_filters()
+        # self.add_filters()
         # self.set_ROI()
+        self.set_formats()
         self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
         self.x_offset = None
         self.y_offset = None
