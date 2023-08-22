@@ -1422,6 +1422,8 @@ class CamGUI(object):
             self.video_file_status[i]['text'] = ""
             self.video_file_indicator[i]['bg'] = 'gray'
         
+        self.toggle_trigger_recording()
+        
         if len(saved_files) > 0:
             if len(frame_times) > 1:
                 cam0_times = np.array(frame_time_list[0])
