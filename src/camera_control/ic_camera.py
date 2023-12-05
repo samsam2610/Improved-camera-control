@@ -305,7 +305,7 @@ class ICCam(ctypes.Structure):
         """
         
         if not self.cam.callback_registered:
-            print('Cam {self.cam_num} callback not registered yet')
+            print(f'Cam {self.cam_num} callback not registered yet')
             print(f'Setting up video callback function pointer for cam {self.cam_num}')
             CallbackfunctionPtr = self.create_frame_callback_video()
 
@@ -453,7 +453,7 @@ class VideoRecordingSession(ctypes.Structure):
             self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
             self.frame_times = []
             self.frame_num = []
-            self.frame_buffer = deque(maxlen=50)
+            self.frame_buffer = deque(maxlen=250)
             self.frame_buffer_length = 0
             self.frame_count = 0
             self.buffer_lock = threading.Lock()
