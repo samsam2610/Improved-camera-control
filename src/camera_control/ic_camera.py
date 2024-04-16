@@ -189,14 +189,17 @@ class ICCam(ctypes.Structure):
         height = self.cam.GetVideoFormatHeight()
         return (width, height)
 
-    def enable_trigger(self):
+    def enable_trigger(self, legacy=False):
         # print(f'Cam {self.cam_num} is starting. Please wait...')
         # result = self.cam.StartLive()
         # print(f'Cam {self.cam_num} started with result: {result}')
+        """
+        With legacy set to True, the camera will not use the frame ready callback function
+        """
         
         result = self.cam.SetPropertySwitch("Trigger", "Enable", True)
         print(f'Cam {self.cam_num} trigger enabled with result: {result}')
-        if not self.cam.callback_registered:
+        if not self.cam.callback_registered and not legacy:
             # self.cam.SetFrameReadyCallback()
             self.set_frame_callback_video()
             
@@ -519,7 +522,7 @@ class VideoRecordingSession(ctypes.Structure):
         return 1
    
     def reset_frame_buffer(self):
-        self.frame_buffer = deque(maxlen=50)
+        self.frame_buffer = deque(maxlen=250)
         self.frame_buffer_length = 0
         self.frame_count = 0
         self.frame_times = []
