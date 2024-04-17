@@ -475,13 +475,13 @@ class TIS_CAM(object):
         return strin.encode("utf-8")
     
     def GetCallbackFunc(self, FrameCallBack: Callable=None):
-        handle_ptr = self._handle
+        # handle_ptr = self._handle
         
         if FrameCallBack is None:
             def FrameCallBack(handle_ptr, pBuffer, frame_num, pData):
                 self._frame['ready'] = True
                 self._frame['num'] = frame_num
-                print("Frame number: ", frame_num)
+
         
         return TIS_GrabberDLL.FRAMEREADYCALLBACK(FrameCallBack)
    
