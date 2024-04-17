@@ -200,7 +200,9 @@ class ICCam(ctypes.Structure):
         result = self.cam.SetPropertySwitch("Trigger", "Enable", True)
         print(f'Cam {self.cam_num} trigger enabled with result: {result}')
         if legacy:
-            self.cam.SetFrameReadyCallback()
+            result = self.cam.SetFrameReadyCallback()
+            print(f'Cam {self.cam_num} frame ready callback set with result: {result}')
+            
         else:
             self.set_frame_callback_video()
             
@@ -294,12 +296,6 @@ class ICCam(ctypes.Structure):
             np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
             pData.acquire_frame(frame=np_frame, time_data=callback_time, frame_num=framenumber)
        
-        return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
-    
-    def create_frame_callback_video_legacy(self):
-        def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
-            pass
-        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
     def set_frame_callback_video(self):
