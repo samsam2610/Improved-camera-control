@@ -445,7 +445,9 @@ class CamGUI(object):
                 self.trigger_status_indicator[num]['bg'] = 'yellow'
                 trigger_start_time = time.perf_counter()
                 self.cam[num].enable_trigger(legacy=True)
+                print(f"Trigger enabled for camera {num}")
                 self.cam[num].frame_ready()
+                print(f"Frame ready for camera {num}")
                 self.frame_times[num].append(time.perf_counter())
                 trigger_wait_time = time.perf_counter() - trigger_start_time
                 self.trigger_status_label[num]['text'] = f'Trigger received. Waited {trigger_wait_time:.4f}s...'
