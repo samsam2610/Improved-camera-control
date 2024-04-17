@@ -202,6 +202,8 @@ class ICCam(ctypes.Structure):
         if not self.cam.callback_registered and not legacy:
             # self.cam.SetFrameReadyCallback()
             self.set_frame_callback_video()
+        elif legacy is True:
+            self.cam.SetFrameReadyCallback()
             
     def frame_ready(self):
         self.cam.ResetFrameReady()
@@ -287,18 +289,13 @@ class ICCam(ctypes.Structure):
             np_frame = np.frombuffer(image.contents, dtype=np.uint8)
             np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
             pData.acquire_frame(frame=np_frame, time_data=callback_time, frame_num=framenumber)
-            # write_thread = threading.Thread(target=pData.write, args=(np_frame, callback_time, framenumber))
-            # write_thread.daemon = True
-            # write_thread.start()
-            # np_frame = cv2.flip(np_frame, 0)
-            # pData.write(frame=np.ndarray(buffer=image.contents,
-            #                         dtype=np.uint8,
-            #                         shape=(pData.height,
-            #                            pData.width,
-            #                            pData.bitsperpixel)),
-            #             time_data=time.perf_counter(),
-            #             frame_num=framenumber)
        
+        return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
+    
+    def create_frame_callback_video_legacy(self):
+        def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
+            pass
+        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
     def set_frame_callback_video(self):
