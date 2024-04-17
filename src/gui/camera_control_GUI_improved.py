@@ -446,8 +446,8 @@ class CamGUI(object):
                 self.trigger_status_label[num]['text'] = 'Waiting for trigger...'
                 self.trigger_status_indicator[num]['bg'] = 'yellow'
                 trigger_start_time = time.perf_counter()
-                old_frame_rate = self.cam[num].get_frame_rate()
-                self.cam[num].set_frame_rate(30)
+                # old_frame_rate = self.cam[num].get_frame_rate()
+                # self.cam[num].set_frame_rate(30)
                 self.cam[num].enable_trigger(legacy=True)
                 print(f"Trigger enabled for camera {num}")
                 self.cam[num].frame_ready()
@@ -456,7 +456,7 @@ class CamGUI(object):
                 trigger_wait_time = time.perf_counter() - trigger_start_time
                 self.trigger_status_label[num]['text'] = f'Trigger received. Waited {trigger_wait_time:.4f}s...'
                 self.trigger_status_indicator[num]['bg'] = 'green'
-                self.cam[num].set_frame_rate(old_frame_rate)
+                # self.cam[num].set_frame_rate(old_frame_rate)
                 self.cam[num].disable_trigger(legacy=True)
                 start_in_one = math.trunc(time.perf_counter()) + 1
                 while time.perf_counter() < start_in_one:
