@@ -210,13 +210,17 @@ class ICCam(ctypes.Structure):
         self.cam.WaitTillFrameReady(100000)
 
     def disable_trigger(self, legacy=False):
+        if legacy is true:
+            result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
+            print(f'Cam {self.cam_num} trigger disabled with result: {result}')
+            return result
+            
         print(f'Cam {self.cam_num} is being suspended. Please wait...')
         result = self.cam.SuspendLive()
         print(f'Cam {self.cam_num} stopped with result: {result}')
         
-        if legacy:
-            result = self.cam.SetContinuousMode(1)
-            print(f'Cam {self.cam_num} continuous mode set with result: {result}')
+        result = self.cam.SetContinuousMode(1)
+        print(f'Cam {self.cam_num} continuous mode set with result: {result}')
  
         #
         result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
