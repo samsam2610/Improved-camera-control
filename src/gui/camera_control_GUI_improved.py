@@ -395,6 +395,7 @@ class CamGUI(object):
                                                   '.avi'))
             self.trigger_status_label[num]['text'] = 'Trigger Ready'
             self.trigger_status_indicator[num]['bg'] = 'red'
+            self.frame_times.append([])
 
         create_video_files(self)
         create_output_files(self, subject_name=subject_name)
