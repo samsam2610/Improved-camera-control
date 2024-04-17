@@ -518,12 +518,12 @@ class TIS_CAM(object):
             :returns: int -- frame number that was announced as ready.
             """
         if timeout:
-            start = time.clock()
-            elapsed = (time.clock() - start) * 1000
+            start = time.perf_counter()
+            elapsed = (time.perf_counter() - start) * 1000
             while not self._frame['ready'] and elapsed < timeout:
                 
                 time.sleep(0.001)
-                elapsed = (time.clock() - start) * 1000
+                elapsed = (time.perf_counter() - start) * 1000
         else:
             while not self._frame['ready']:
                 time.sleep(0.001)
