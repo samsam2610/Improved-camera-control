@@ -481,6 +481,7 @@ class TIS_CAM(object):
             def FrameCallBack(handle_ptr, pBuffer, frame_num, pData):
                 self._frame['ready'] = True
                 self._frame['num'] = frame_num
+                print("Frame number: ", frame_num)
         
         return TIS_GrabberDLL.FRAMEREADYCALLBACK(FrameCallBack)
    
