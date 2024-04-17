@@ -199,11 +199,10 @@ class ICCam(ctypes.Structure):
         
         result = self.cam.SetPropertySwitch("Trigger", "Enable", True)
         print(f'Cam {self.cam_num} trigger enabled with result: {result}')
-        if not self.cam.callback_registered:
-            if legacy:
-                self.cam.SetFrameReadyCallback()
-            else:
-                self.set_frame_callback_video()
+        if legacy:
+            self.cam.SetFrameReadyCallback()
+        else:
+            self.set_frame_callback_video()
             
     def frame_ready(self):
         self.cam.ResetFrameReady()
