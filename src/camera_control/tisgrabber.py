@@ -475,8 +475,7 @@ class TIS_CAM(object):
         return strin.encode("utf-8")
     
     def GetCallbackFunc(self, FrameCallBack: Callable=None):
-        # handle_ptr = self._handle
-        
+        handle_ptr = self._handle
         if FrameCallBack is None:
             def FrameCallBack(handle_ptr, pBuffer, frame_num, pData):
                 self._frame['ready'] = True
@@ -519,12 +518,12 @@ class TIS_CAM(object):
             :returns: int -- frame number that was announced as ready.
             """
         if timeout:
-            start = time.perf_counter()
-            elapsed = (time.perf_counter() - start) * 1000
+            start = time.clock()
+            elapsed = (time.clock() - start) * 1000
             while not self._frame['ready'] and elapsed < timeout:
                 
                 time.sleep(0.001)
-                elapsed = (time.perf_counter() - start) * 1000
+                elapsed = (time.clock() - start) * 1000
         else:
             while not self._frame['ready']:
                 time.sleep(0.001)
