@@ -210,7 +210,7 @@ class ICCam(ctypes.Structure):
         self.cam.WaitTillFrameReady(100000)
 
     def disable_trigger(self, legacy=False):
-        if legacy is true:
+        if legacy is True:
             result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
             print(f'Cam {self.cam_num} trigger disabled with result: {result}')
             return result
