@@ -449,8 +449,6 @@ class CamGUI(object):
                 self.cam[num].enable_trigger(legacy=True)
                 print(f"Trigger enabled for camera {num}")
                 self.cam[num].frame_ready()
-                if barrier is not None:
-                        barrier.wait()
                 print(f"Frame ready for camera {num}")
                 self.frame_times[num].append(time.perf_counter())
                 trigger_wait_time = time.perf_counter() - trigger_start_time
