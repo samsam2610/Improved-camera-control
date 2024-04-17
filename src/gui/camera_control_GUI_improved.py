@@ -375,6 +375,7 @@ class CamGUI(object):
         self.vid_file = []
         self.base_name = []
         self.cam_name_no_space = []
+        self.frame_times = []
 
         subject_name, dir_name = generate_folder()
         if subject_name is None:
