@@ -452,7 +452,7 @@ class CamGUI(object):
                 trigger_wait_time = time.perf_counter() - trigger_start_time
                 self.trigger_status_label[num]['text'] = f'Trigger received. Waited {trigger_wait_time:.4f}s...'
                 self.trigger_status_indicator[num]['bg'] = 'green'
-                self.cam[num].disable_trigger(legacy=True)
+                self.cam[num].disable_trigger()
                 start_in_one = math.trunc(time.perf_counter()) + 1
                 while time.perf_counter() < start_in_one:
                     pass

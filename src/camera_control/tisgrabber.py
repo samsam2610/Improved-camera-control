@@ -521,7 +521,6 @@ class TIS_CAM(object):
             start = time.perf_counter()
             elapsed = (time.perf_counter() - start) * 1000
             while not self._frame['ready'] and elapsed < timeout:
-                print(f'elapsed: {elapsed} with frame ready is {self._frame["ready"]}')
                 time.sleep(0.001)
                 elapsed = (time.perf_counter() - start) * 1000
         else:
