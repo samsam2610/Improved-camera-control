@@ -198,6 +198,7 @@ class ICCam(ctypes.Structure):
         print(f'Cam {self.cam_num} trigger enabled with result: {result}')
         if legacy:
             if not self.cam.callback_registered:
+                self.frame_data = FrameData()
                 self.set_frame_callback_legacy()
         
         elif not self.cam.callback_registered:
@@ -320,6 +321,7 @@ class ICCam(ctypes.Structure):
     
     def create_frame_callback_legacy(self):
         def frame_callback_video(handle_ptr, pBuffer, frame_number, pData):
+            print('Frame callback function legacy - received')
             pData.set_frame_ready(frame_number)
         
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
@@ -347,7 +349,6 @@ class ICCam(ctypes.Structure):
     def get_frame_ready(self):
         self.frame_data.reset()
         self.frame_data.wait_for_frame()
-        
     
     def set_recording_status(self, state=False):
         self.vid_file.set_recording_status(state)
@@ -608,7 +609,7 @@ class FrameData(ctypes.Structure):
             start = time.perf_counter()
             elapsed = (time.perf_counter() - start) * 1000
             while not self.frame_ready and elapsed < timeout:
-                
+                print(f'Waiting for frame {self.frame_num} to be ready')
                 time.sleep(0.001)
                 elapsed = (time.perf_counter() - start) * 1000
         else:
