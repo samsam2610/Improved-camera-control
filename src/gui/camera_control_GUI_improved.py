@@ -449,6 +449,7 @@ class CamGUI(object):
                 # old_frame_rate = self.cam[num].get_frame_rate()
                 # self.cam[num].set_frame_rate(30)
                 self.cam[num].enable_trigger(legacy=True)
+                self.cam[num].turn_off_continuous_mode()
                 print(f"Trigger enabled for camera {num}")
                 self.cam[num].get_frame_ready()
                 print(f"Frame ready for camera {num}")
