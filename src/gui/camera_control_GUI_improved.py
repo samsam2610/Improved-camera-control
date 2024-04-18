@@ -450,7 +450,7 @@ class CamGUI(object):
                 # self.cam[num].set_frame_rate(30)
                 self.cam[num].enable_trigger(legacy=True)
                 print(f"Trigger enabled for camera {num}")
-                self.cam[num].frame_ready()
+                self.cam[num].get_frame_ready()
                 print(f"Frame ready for camera {num}")
                 self.frame_times[num].append(time.perf_counter())
                 trigger_wait_time = time.perf_counter() - trigger_start_time
