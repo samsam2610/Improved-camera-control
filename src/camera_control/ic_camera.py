@@ -610,7 +610,7 @@ class FrameData(ctypes.Structure):
             elapsed = (time.perf_counter() - start) * 1000
             while not self.frame_ready and elapsed < timeout:
                 print(f'Waiting for frame {self.frame_num} to be ready')
-                time.sleep(0.001)
+                # time.sleep(0.001)
                 elapsed = (time.perf_counter() - start) * 1000
         else:
             while not self.frame_ready:
