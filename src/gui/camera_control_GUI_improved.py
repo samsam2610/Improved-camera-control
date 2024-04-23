@@ -375,6 +375,7 @@ class CamGUI(object):
         self.vid_file = []
         self.base_name = []
         self.cam_name_no_space = []
+        self.frame_times = []
 
         subject_name, dir_name = generate_folder()
         if subject_name is None:
@@ -395,6 +396,7 @@ class CamGUI(object):
                                                   '.avi'))
             self.trigger_status_label[num]['text'] = 'Trigger Ready'
             self.trigger_status_indicator[num]['bg'] = 'red'
+            self.frame_times.append([])
 
         create_video_files(self)
         create_output_files(self, subject_name=subject_name)
@@ -444,13 +446,19 @@ class CamGUI(object):
                 self.trigger_status_label[num]['text'] = 'Waiting for trigger...'
                 self.trigger_status_indicator[num]['bg'] = 'yellow'
                 trigger_start_time = time.perf_counter()
-                self.cam[num].enable_trigger()
-                self.cam[num].frame_ready()
+                # old_frame_rate = self.cam[num].get_frame_rate()
+                # self.cam[num].set_frame_rate(30)
+                self.cam[num].enable_trigger(legacy=True)
+                self.cam[num].turn_off_continuous_mode()
+                print(f"Trigger enabled for camera {num}")
+                self.cam[num].get_frame_ready()
+                print(f"Frame ready for camera {num}")
                 self.frame_times[num].append(time.perf_counter())
                 trigger_wait_time = time.perf_counter() - trigger_start_time
                 self.trigger_status_label[num]['text'] = f'Trigger received. Waited {trigger_wait_time:.4f}s...'
                 self.trigger_status_indicator[num]['bg'] = 'green'
-                self.cam[num].disable_trigger()
+                # self.cam[num].set_frame_rate(old_frame_rate)
+                self.cam[num].disable_trigger(legacy=True)
                 start_in_one = math.trunc(time.perf_counter()) + 1
                 while time.perf_counter() < start_in_one:
                     pass
@@ -1421,6 +1429,8 @@ class CamGUI(object):
             # Change label to show current file name
             self.video_file_status[i]['text'] = ""
             self.video_file_indicator[i]['bg'] = 'gray'
+        
+        self.toggle_trigger_recording()
         
         if len(saved_files) > 0:
             if len(frame_times) > 1:

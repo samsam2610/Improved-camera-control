@@ -20,7 +20,6 @@ import copy
 import threading
 from collections import deque
 
-
 path = Path(os.path.realpath(__file__))
 # Navigate to the outer parent directory and join the filename
 dets_file = os.path.normpath(str(path.parents[2] / 'config-files' / 'camera_details.json'))
@@ -28,7 +27,7 @@ cam_details = json.load(open(dets_file, 'r'))
 
 
 class ICCam(ctypes.Structure):
-
+    
     def __init__(self, cam_num=0, rotate=None, crop=None, exposure=None, gain=None, formats=None):
         '''
         Params
@@ -38,7 +37,7 @@ class ICCam(ctypes.Structure):
         crop = dict; contains ints named top, left, height, width for cropping
             default = None, uses default parameters specific to camera
         '''
-
+        
         self.cam_num = cam_num
         self.rotate = rotate if rotate is not None else cam_details[str(self.cam_num)]['rotate']
         self.crop = crop if crop is not None else cam_details[str(self.cam_num)]['crop']
@@ -55,9 +54,10 @@ class ICCam(ctypes.Structure):
         # self.set_ROI()
         self.set_formats()
         self.vid_file = VideoRecordingSession(cam_num=self.cam_num)
+        self.frame_data = FrameData()
         self.x_offset = None
         self.y_offset = None
-
+    
     def add_filters(self, top=None, left=None, height=None, width=None):
         top = top if top is not None else self.crop['top']
         left = left if left is not None else self.crop['left']
@@ -68,7 +68,7 @@ class ICCam(ctypes.Structure):
             h_r = self.cam.CreateFrameFilter(b'Rotate Flip')
             self.cam.AddFrameFilter(h_r)
             self.cam.FilterSetParameter(h_r, b'Rotation Angle', self.rotate)
-
+        
         h_c = self.cam.CreateFrameFilter(b'ROI')
         self.cam.AddFrameFilter(h_c)
         self.cam.FilterSetParameter(h_c, b'Top', top)
@@ -76,7 +76,7 @@ class ICCam(ctypes.Structure):
         self.cam.FilterSetParameter(h_c, b'Height', height)
         self.cam.FilterSetParameter(h_c, b'Width', width)
         self.size = (self.crop['width'], self.crop['height'])
-
+    
     def set_crop(self, top=None, left=None, height=None, width=None):
         self.crop['top'] = top if top is not None else self.crop['top']
         self.crop['left'] = left if left is not None else self.crop['left']
@@ -89,27 +89,27 @@ class ICCam(ctypes.Structure):
         self.add_filters()
         # self.set_ROI()
         self.cam.StartLive()
-   
+    
     def config_formats(self, width, height):
         width = int(width)
         height = int(height)
-
+        
         if width < 16:
-            width = int(4*round(width/4)) if width % 4 != 0 else width
+            width = int(4 * round(width / 4)) if width % 4 != 0 else width
         else:
-            width = int(16*round(width/16)) if width % 16 != 0 else width
+            width = int(16 * round(width / 16)) if width % 16 != 0 else width
         if height < 16:
-            height = int(4*round(height/4)) if height % 4 != 0 else height
+            height = int(4 * round(height / 4)) if height % 4 != 0 else height
         else:
-            height = int(16*round(height/16)) if height % 16 != 0 else height
-
+            height = int(16 * round(height / 16)) if height % 16 != 0 else height
+        
         result = f"Y800 ({width}x{height})"
         self.crop['width'] = width
         self.crop['height'] = height
-
+        
         print(f'Cam {self.cam_num} video format set to {result}')
         return result
-   
+    
     def set_formats(self, width=None, height=None):
         self.crop['width'] = width if width is not None else self.crop['width']
         self.crop['height'] = height if height is not None else self.crop['height']
@@ -122,26 +122,23 @@ class ICCam(ctypes.Structure):
         self.cam.SetVideoFormat(Format=self.formats)
         self.cam.SetFrameRate(current_frame_rate)
         self.cam.StartLive()
-        
+    
     def get_formats(self):
         return (self.crop['width'], self.crop['height'])
     
     def get_crop(self):
-        return (self.crop['top'],
-                self.crop['left'],
-                self.crop['height'],
-                self.crop['width'])
-        
+        return (self.crop['top'], self.crop['left'], self.crop['height'], self.crop['width'])
+    
     def set_frame_rate(self, fps):
         result = self.cam.SetFrameRate(fps)
         return result
-
+    
     def get_frame_rate(self):
         return self.cam.GetFrameRate()
     
     def get_frame_rate_list(self):
         return self.cam.GetAvailableFrameRates()
-        
+    
     def set_exposure(self, val):
         val = 1 if val > 1 else val
         val = 0 if val < 0 else val
@@ -151,7 +148,7 @@ class ICCam(ctypes.Structure):
             traceback.print_exc()
             print("Exception occurred:", type(e).__name__, "| Exception value:", e,
                   ''.join(traceback.format_tb(e.__traceback__)))
-
+    
     def set_gain(self, val):
         try:
             val = int(round(val))
@@ -160,24 +157,24 @@ class ICCam(ctypes.Structure):
             traceback.print_exc()
             print("Exception occurred:", type(e).__name__, "| Exception value:", e,
                   ''.join(traceback.format_tb(e.__traceback__)))
-
+    
     def get_exposure(self):
         exposure = [0]
         self.cam.GetPropertyAbsoluteValue("Exposure", "Value", exposure)
         return round(exposure[0], 5)
-
+    
     def get_gain(self):
         gain = [0]
         self.cam.GetPropertyAbsoluteValue("Gain", "Value", gain)
         return round(gain[0], 3)
-
+    
     def get_image(self):
         error = self.cam.SnapImage()
         frame = self.cam.GetImageEx()
         if error != 1:
             print(f'Cam {self.cam_num} error: {error}')
         return cv2.flip(frame, 0)
-
+    
     def get_image_dimensions(self):
         im = self.get_image()
         height = im.shape[0]
@@ -188,47 +185,59 @@ class ICCam(ctypes.Structure):
         width = self.cam.GetVideoFormatWidth()
         height = self.cam.GetVideoFormatHeight()
         return (width, height)
-
-    def enable_trigger(self):
+    
+    def enable_trigger(self, legacy=False):
         # print(f'Cam {self.cam_num} is starting. Please wait...')
         # result = self.cam.StartLive()
         # print(f'Cam {self.cam_num} started with result: {result}')
+        """
+        With legacy set to True, the camera will not use the frame ready callback function
+        """
         
         result = self.cam.SetPropertySwitch("Trigger", "Enable", True)
         print(f'Cam {self.cam_num} trigger enabled with result: {result}')
-        if not self.cam.callback_registered:
-            # self.cam.SetFrameReadyCallback()
+        if legacy:
+            if not self.cam.callback_registered:
+                self.frame_data = FrameData()
+                self.set_frame_callback_legacy()
+        
+        elif not self.cam.callback_registered:
             self.set_frame_callback_video()
-            
+    
     def frame_ready(self):
         self.cam.ResetFrameReady()
         self.cam.WaitTillFrameReady(100000)
-
-    def disable_trigger(self):
+    
+    def disable_trigger(self, legacy=False):
+        if legacy is True:
+            result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
+            print(f'Cam {self.cam_num} trigger disabled with result: {result}')
+            return result
+        
         print(f'Cam {self.cam_num} is being suspended. Please wait...')
         result = self.cam.SuspendLive()
         print(f'Cam {self.cam_num} stopped with result: {result}')
         
         result = self.cam.SetContinuousMode(1)
         print(f'Cam {self.cam_num} continuous mode set with result: {result}')
-      
+        
         #
         result = self.cam.SetPropertySwitch("Trigger", "Enable", False)
         print(f'Cam {self.cam_num} trigger disabled with result: {result}')
-
+        
         result = self.cam.StartLive()
         print(f'Cam {self.cam_num} started again with result: {result}')
-
+    
     def set_auto_center(self, value):
         self.cam.SetPropertySwitch("Partial scan", "Auto-center", value)
-        
+    
     def set_partial_scan(self, x_offset=None, y_offset=None):
         if x_offset is not None:
             self.cam.SetPropertyValue("Partial scan", "X Offset", x_offset)
-            
+        
         if y_offset is not None:
             self.cam.SetPropertyValue("Partial scan", "Y Offset", y_offset)
-            
+    
     def get_partial_scan(self):
         x_offset = self.cam.GetPropertyValue("Partial scan", "X Offset")
         y_offset = self.cam.GetPropertyValue("Partial scan", "Y Offset")
@@ -244,12 +253,13 @@ class ICCam(ctypes.Structure):
         polarity = [0]
         self.cam.GetPropertySwitch("Trigger", "Polarity", Value=polarity)
         return polarity[0]
-
+    
     def set_up_video_trigger(self, video_file, fourcc, fps, dim, trackingCoords=None):
         if self.vid_file is not None:
             self.vid_file.release()
         buffer_size, width, height, bpp = self.cam.GetFrameData()
-        self.vid_file.set_params(video_file=video_file, fourcc=fourcc, fps=fps, dim=dim, buffer_size=buffer_size, width=width, height=height, bitsperpixel=bpp, trackingCoords=trackingCoords)
+        self.vid_file.set_params(video_file=video_file, fourcc=fourcc, fps=fps, dim=dim, buffer_size=buffer_size,
+                                 width=width, height=height, bitsperpixel=bpp, trackingCoords=trackingCoords)
         print(f'Trigger capturing mode vid file is ready for {self.cam_num}')
         return self.vid_file
     
@@ -258,7 +268,7 @@ class ICCam(ctypes.Structure):
             self.vid_file.delete()
             self.vid_file.reset()
             print(f'Trigger capturing mode vid file is deleted for cam {self.cam_num}')
-            
+    
     def release_video_file(self):
         if self.vid_file is not None:
             frame_times = copy.deepcopy(self.vid_file.frame_times)
@@ -274,28 +284,15 @@ class ICCam(ctypes.Structure):
             return frame_times, frame_num, tracking_value
         else:
             return None, None, None
-            
+    
     def create_frame_callback_video(self):
         def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
             callback_time = time.perf_counter()
-            image = ctypes.cast(pBuffer,
-                                ctypes.POINTER(
-                                    ctypes.c_ubyte * pData.buffer_size))
+            image = ctypes.cast(pBuffer, ctypes.POINTER(ctypes.c_ubyte * pData.buffer_size))
             np_frame = np.frombuffer(image.contents, dtype=np.uint8)
             np_frame = np_frame.reshape((pData.height, pData.width, pData.bitsperpixel))
             pData.acquire_frame(frame=np_frame, time_data=callback_time, frame_num=framenumber)
-            # write_thread = threading.Thread(target=pData.write, args=(np_frame, callback_time, framenumber))
-            # write_thread.daemon = True
-            # write_thread.start()
-            # np_frame = cv2.flip(np_frame, 0)
-            # pData.write(frame=np.ndarray(buffer=image.contents,
-            #                         dtype=np.uint8,
-            #                         shape=(pData.height,
-            #                            pData.width,
-            #                            pData.bitsperpixel)),
-            #             time_data=time.perf_counter(),
-            #             frame_num=framenumber)
-       
+        
         return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
     
     def set_frame_callback_video(self):
@@ -305,10 +302,10 @@ class ICCam(ctypes.Structure):
         """
         
         if not self.cam.callback_registered:
-            print('Cam {self.cam_num} callback not registered yet')
+            print(f'Cam {self.cam_num} callback not registered yet')
             print(f'Setting up video callback function pointer for cam {self.cam_num}')
             CallbackfunctionPtr = self.create_frame_callback_video()
-
+            
             if self.vid_file is None:
                 print(f'Cam {self.cam_num} video file is not set up yet')
                 return 0
@@ -321,29 +318,62 @@ class ICCam(ctypes.Structure):
             print(f'Cam {self.cam_num} callback already registered')
         
         print(f'Cam {self.cam_num} video callback set up {self.cam.callback_registered}')
+    
+    def create_frame_callback_legacy(self):
+        def frame_callback_video(handle_ptr, pBuffer, frame_number, pData):
+            print('Frame callback function legacy - received')
+            pData.set_frame_ready(frame_number)
         
+        return ic.TIS_GrabberDLL.FRAMEREADYCALLBACK(frame_callback_video)
+    
+    def set_frame_callback_legacy(self):
+        """
+        Set up the frame callback function legacy pointer for the camera
+        Be careful to set it only once, otherwise it will hang the camera.
+        """
+        
+        if not self.cam.callback_registered:
+            print(f'Cam {self.cam_num} callback not registered yet')
+            print(f'Setting up video callback function legacy pointer for cam {self.cam_num}')
+            CallbackfunctionPtr = self.create_frame_callback_legacy()
+            
+            result = self.cam.SetFrameReadyCallback(CallbackfunctionPtr, self.frame_data)
+            print(f'Cam {self.cam_num} frame ready callback legacy result: {result}')
+            
+            return 1
+        else:
+            print(f'Cam {self.cam_num} callback legacy already registered')
+        
+        print(f'Cam {self.cam_num} video callback legacy set up {self.cam.callback_registered}')
+        
+    def get_frame_ready(self):
+        self.frame_data.reset()
+        self.frame_data.wait_for_frame()
+    
     def set_recording_status(self, state=False):
         self.vid_file.set_recording_status(state)
         print(f'Cam {self.cam_num} recording status set to {state}')
-        
+    
     def get_timeout_status(self):
         return self.vid_file.timeout_status
-   
+    
     def get_timeout_start_moment(self):
         # Print the moment the first frame was captured, 0 if no frames captured
         return self.vid_file.timeout_start
     
     def get_window_position(self):
-        err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'] = self.cam.GetWindowPosition()
+        err, self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos[
+            'height'] = self.cam.GetWindowPosition()
         if err != 1:
             print("Error getting window position")
-            
+    
     def set_window_position(self, x=None, y=None, width=None, height=None):
         self.windowPos['x'] = x if x is not None else self.windowPos['x']
         self.windowPos['y'] = y if y is not None else self.windowPos['y']
         self.windowPos['width'] = width if width is not None else self.windowPos['width']
         self.windowPos['height'] = height if height is not None else self.windowPos['height']
-        self.cam.SetWindowPosition(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
+        self.cam.SetWindowPosition(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'],
+                                   self.windowPos['height'])
     
     def turn_off_continuous_mode(self):
         # self.get_window_position()
@@ -351,7 +381,7 @@ class ICCam(ctypes.Structure):
         self.cam.SetContinuousMode(0)
         self.cam.StartLive()
         return 1
-        
+    
     def turn_on_continuous_mode(self):
         # self.get_window_position()
         self.cam.SuspendLive()
@@ -359,25 +389,23 @@ class ICCam(ctypes.Structure):
         self.cam.StartLive()
         return 1
     
-    def set_flip_vertical(self, state: bool=True):
+    def set_flip_vertical(self, state: bool = True):
         if state:
             # print(f'Getting offset value for {self.cam_num}')
             # self.x_offset, self.y_offset = self.get_partial_scan()
             
             print(f'Flipping vertical for {self.cam_num}')
-            self.cam.SetPropertySwitch("Flip Vertical", "Enable", True)
-            # self.set_partial_scan(y_offset=self.crop['top'])
+            self.cam.SetPropertySwitch("Flip Vertical", "Enable",
+                                       True)  # self.set_partial_scan(y_offset=self.crop['top'])
         else:
             print(f'Flipping vertical back for {self.cam_num}')
-            self.cam.SetPropertySwitch("Flip Vertical", "Enable", False)
-            # if self.y_offset is not None:
-            #     self.set_partial_scan(y_offset=self.y_offset)
-            
+            self.cam.SetPropertySwitch("Flip Vertical", "Enable",
+                                       False)  # if self.y_offset is not None:  #     self.set_partial_scan(y_offset=self.y_offset)
+    
     def get_flip_vertical(self):
         flip_vertical = [0]
         self.cam.GetPropertySwitch("Flip Vertical", "Value", flip_vertical)
         return flip_vertical[0]
-    
     
     def start(self, show_display=1, setPosition=False):
         self.cam.SetContinuousMode(0)
@@ -388,24 +416,27 @@ class ICCam(ctypes.Structure):
         
         if setPosition:
             if self.windowPos['x'] is not None:
-                self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'], self.windowPos['height'])
-
+                self.set_window_position(self.windowPos['x'], self.windowPos['y'], self.windowPos['width'],
+                                         self.windowPos['height'])
+    
     def close(self, getPosition=False):
         if getPosition:
             self.get_window_position()
         self.cam.StopLive()
-        
+
 
 class VideoRecordingSession(ctypes.Structure):
     def __init__(self, cam_num):
+        self.fourcc = None
         self.cam_num = cam_num
         self.recording_status = False
         self.vid_out = None
         self.frame_times = []
         self.frame_num = []
+        self.frame_ready = False
         self.tracking_value = None
         self.recent_frame_time = None
-        
+    
     def set_recording_status(self, status: bool):
         if self.vid_out is None:
             print(f'Cam {self.cam_num} video file not set up yet')
@@ -417,7 +448,8 @@ class VideoRecordingSession(ctypes.Structure):
             self.start_processing()
         return 1
     
-    def set_params(self, video_file: str=None, fourcc: str=None, fps: int=None, dim=None, buffer_size: int=None, width=None, height=None, bitsperpixel=None, trackingCoords=None):
+    def set_params(self, video_file: str = None, fourcc: str = None, fps: int = None, dim=None, buffer_size: int = None,
+                   width=None, height=None, bitsperpixel=None, trackingCoords=None):
         if fourcc is not None:
             self.fourcc = cv2.VideoWriter_fourcc(*fourcc)
         
@@ -429,16 +461,16 @@ class VideoRecordingSession(ctypes.Structure):
         
         if buffer_size is not None:
             self.buffer_size = buffer_size
-            
+        
         if width is not None:
             self.width = width
         
         if height is not None:
             self.height = height
-            
+        
         if bitsperpixel is not None:
             self.bitsperpixel = bitsperpixel
-            
+        
         if trackingCoords is not None:
             self.tracking_x_value = trackingCoords[0]
             self.tracking_y_value = trackingCoords[1]
@@ -453,16 +485,16 @@ class VideoRecordingSession(ctypes.Structure):
             self.vid_out = cv2.VideoWriter(self.video_file, self.fourcc, self.fps, self.dim)
             self.frame_times = []
             self.frame_num = []
-            self.frame_buffer = deque(maxlen=50)
+            self.frame_buffer = deque(maxlen=250)
             self.frame_buffer_length = 0
             self.frame_count = 0
             self.buffer_lock = threading.Lock()
             self.recording_status = False
-            self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
+            self.timeout_status = -1  # -1 = not set, 0 = timeout, 1 = no timeout
             self.timeout_start = 0
-
-        return 1
         
+        return 1
+    
     def reset(self):
         self.vid_out = None
         self.frame_times = []
@@ -470,13 +502,13 @@ class VideoRecordingSession(ctypes.Structure):
         self.recording_status = False
         self.tracking_value = None
         self.tracking_point = False
-        self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
+        self.timeout_status = -1  # -1 = not set, 0 = timeout, 1 = no timeout
         self.timeout_start = 0
-        
+    
     def delete(self):
         os.remove(self.video_file)
         self.video_file = None
-        
+    
     def release(self):
         if self.vid_out is None:
             print(f'Cam {self.cam_num} video file not set up yet')
@@ -488,7 +520,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_num = []
         self.tracking_value = None
         self.tracking_point = False
-        self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
+        self.timeout_status = -1  # -1 = not set, 0 = timeout, 1 = no timeout
         self.timeout_start = 0
         return 1
     
@@ -504,11 +536,7 @@ class VideoRecordingSession(ctypes.Structure):
             self.frame_times.append(time_data)
             self.frame_num.append(frame_num)
             self.frame_buffer_length = len(self.frame_buffer)
-            self.frame_count += 1
-            # if self.tracking_point:
-            #     x = self.tracking_x_value
-            #     y = self.tracking_y_value
-            #     self.tracking_value.append(cv2.getRectSubPix(frame, (1, 1), (x, y))[0, 0])
+            self.frame_count += 1  # if self.tracking_point:  #     x = self.tracking_x_value  #     y = self.tracking_y_value  #     self.tracking_value.append(cv2.getRectSubPix(frame, (1, 1), (x, y))[0, 0])
     
     def acquire_frame(self, frame, time_data, frame_num):
         if self.recording_status:
@@ -517,16 +545,16 @@ class VideoRecordingSession(ctypes.Structure):
         # print(f'Cam {self.cam_num} frame {frame_num} acquired with time {time_data}')
         
         return 1
-   
+    
     def reset_frame_buffer(self):
-        self.frame_buffer = deque(maxlen=50)
+        self.frame_buffer = deque(maxlen=250)
         self.frame_buffer_length = 0
         self.frame_count = 0
         self.frame_times = []
         self.frame_num = []
         self.tracking_value = None
         self.tracking_point = False
-        self.timeout_status = -1 # -1 = not set, 0 = timeout, 1 = no timeout
+        self.timeout_status = -1  # -1 = not set, 0 = timeout, 1 = no timeout
         self.timeout_start = 0
         return 1
     
@@ -536,7 +564,7 @@ class VideoRecordingSession(ctypes.Structure):
         processing_thread = threading.Thread(target=self._process_frames, daemon=True)
         processing_thread.start()
         self.timeout_status = 1
-        
+    
     def _process_frames(self):
         while self.recording_status:
             self.write_frame()
@@ -549,5 +577,44 @@ class VideoRecordingSession(ctypes.Structure):
             #         self.write_frame()
             #         return -1
             time.sleep(0.005)
+        
+        self.write_frame()  # write the last frame
+
+
+class FrameData(ctypes.Structure):
+    def __init__(self):
+        self.frame_ready = False
+        self.frame_num = 0
+    
+    def reset(self):
+        self.frame_ready = False
+        self.frame_num = 0
+        return 1
+    
+    def set_frame_ready(self, frame_num):
+        self.frame_ready = True
+        self.frame_num = frame_num
+        return 1
+    
+    def wait_for_frame(self, timeout=0):
+        """
+            Wait until the devices announces a frame as being ready.
+            Requires register_frame_ready_callback() being called.
             
-        self.write_frame() # write the last frame
+            :param timeout: int -- timeout in milliseconds. Set to 0 for no timeout.
+            
+            :returns: int -- frame number that was announced as ready.
+            """
+        if timeout:
+            start = time.perf_counter()
+            elapsed = (time.perf_counter() - start) * 1000
+            while not self.frame_ready and elapsed < timeout:
+                print(f'Waiting for frame {self.frame_num} to be ready')
+                # time.sleep(0.001)
+                elapsed = (time.perf_counter() - start) * 1000
+        else:
+            while not self.frame_ready:
+                time.sleep(0.001)
+        
+        print(f'Frame {self.frame_num} is ready')
+        return self.frame_num
