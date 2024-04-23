@@ -32,6 +32,9 @@ import matplotlib.ticker as ticker
 import matplotlib.animation as animation
 from matplotlib import style
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from typing import List
+
+from src.camera_control.ic_camera import ICCam
 
 import cv2
 import ffmpy
@@ -145,6 +148,7 @@ class CamGUI(object):
 
         self.window = None
         self.calibration_capture_toggle_status = False
+        self.cam: List[ICCam] = []
         self.selectCams()
         
     def browse_output(self):
@@ -160,8 +164,7 @@ class CamGUI(object):
         setup_window = Tk()
         Label(setup_window, text="Setting up camera, please wait...").pack()
         setup_window.update()
-        from src.camera_control.ic_camera import ICCam
-
+        
         if bool(self.toggle_video_recording_status.get()):
             setup_window.destroy()
             cam_on_window = Tk()
