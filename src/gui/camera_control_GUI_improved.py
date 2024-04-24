@@ -2112,8 +2112,8 @@ class CamGUI(object):
         self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
         Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
         
-        self.setup_trigger_synapse_recording_button = Button(experimental_functions_frame, text="Setup Synapse Videos", width=14, command=self.setup_trigger_synapse_recording)
-        self.setup_trigger_synapse_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
+        self.setup_trigger_synapse_recording_button = Button(experimental_functions_frame, text="Setup Synapse", width=14, command=self.setup_trigger_synapse_recording)
+        self.setup_trigger_synapse_recording_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
         Hovertip(self.setup_trigger_synapse_recording_button, "Setup the video recording sync with Synapse and using trigger")
 
         self.toggle_trigger_recording_status = IntVar(value=0)
