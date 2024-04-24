@@ -379,7 +379,8 @@ class CamGUI(object):
         self.base_name = []
         self.cam_name_no_space = []
         self.frame_times = []
-
+        
+        # Getting latest synapse folder data
         subject_name, dir_name = generate_folder()
         if subject_name is None:
             subject_name = 'Sam'
@@ -1263,6 +1264,105 @@ class CamGUI(object):
         self.recording_trigger_toggle_status = False
         self.setup = True
         
+    def setup_trigger_synapse_recording(self, overwrite=False):
+        if len(self.vid_out) > 0:
+            vid_open_window = Tk()
+            Label(vid_open_window,
+                  text="Video is currently open! \n"
+                       "Please release the current video (click 'Save Video', even if no frames have been recorded)"
+                       " before setting up a new one.").pack()
+            Button(vid_open_window, text="Ok", command=lambda: vid_open_window.quit()).pack()
+            vid_open_window.mainloop()
+            vid_open_window.destroy()
+            return
+
+        # check if camera set up
+        if len(self.cam) == 0:
+            show_camera_error(self)
+            return
+        
+        self.trigger_on = 0
+        da_fps = str(self.fps.get())
+        month = datetime.datetime.now().month
+        month = str(month) if month >= 10 else '0' + str(month)
+        day = datetime.datetime.now().day
+        day = str(day) if day >= 10 else '0' + str(day)
+        year = str(datetime.datetime.now().year)
+        date = year + '-' + month + '-' + day
+        
+        self.cam_name_no_space = []
+        self.vid_file = []
+        self.base_name = []
+        self.cycle_count = []
+        self.dim = []
+       
+        # Getting latest synapse folder data
+        subject_name, dir_name = generate_folder()
+        if subject_name is None:
+            subject_name = 'Sam'
+            
+        for i in range(len(self.cam)):
+            temp_exposure = str(round(math.log2(1/float(self.exposure[i].get()))))
+            temp_gain = str(round(float(self.gain[i].get())))
+            self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+            self.base_name.append(self.cam_name_no_space[i] + '_'
+                                  + subject_name + '_'
+                                  + self.setup_name.get() + '_'
+                                  + date + '_'
+                                  + str(int(da_fps)) + 'f'
+                                  + temp_exposure + 'e'
+                                  + temp_gain + 'g')
+            self.vid_file.append(os.path.normpath(dir_name + '/' +
+                                                  self.base_name[i] +
+                                                  self.attempt.get() +
+                                                  '.avi'))
+            self.dim.append(self.cam[i].get_image_dimensions())
+            self.cycle_count.append(0)
+            
+        # check if file exists, ask to overwrite or change attempt number if it does
+        for i in range(len(self.cam)):
+            if i == 0:
+                self.overwrite = overwrite
+                if os.path.isfile(self.vid_file[i]) and not self.overwrite:
+                    self.ask_overwrite = Tk()
+                    
+                    def quit_overwrite(ow):
+                        self.overwrite = ow
+                        self.ask_overwrite.quit()
+                    
+                    Label(self.ask_overwrite,
+                          text="File already exists with attempt number = " + self.attempt.get() + ".\nWould you like to overwrite the file? ").pack()
+                    Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
+                    Button(self.ask_overwrite, text="Cancel & pick new attempt number",
+                           command=lambda: quit_overwrite(False)).pack()
+                    self.ask_overwrite.mainloop()
+                    self.ask_overwrite.destroy()
+                    
+                    if self.overwrite:
+                        self.vid_file[i] = os.path.normpath(
+                            self.dir_output.get() + '/' +
+                            self.base_name[i] +
+                            str(self.cycle_count[i]) + 'c' +
+                            self.attempt.get() + '.avi')
+                    else:
+                        return
+            else:
+                # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
+                print('')
+            
+            # if self.tracking_points[i][0] is None:
+            self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i]))
+            # else:
+            #     self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i], self.tracking_points[i]))
+            
+            self.cam[i].set_frame_callback_video()
+            
+        subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
+        create_output_files(self, subject_name=subject_name)
+        
+        self.recording_trigger_toggle_status = False
+        self.setup = True
+        
     def toggle_trigger_recording(self, force_termination=False):
         
         """
@@ -2011,6 +2111,10 @@ class CamGUI(object):
         self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=14, command=self.setup_trigger_recording)
         self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
         Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
+        
+        self.setup_trigger_synapse_recording_button = Button(experimental_functions_frame, text="Setup Synapse Videos", width=14, command=self.setup_trigger_synapse_recording)
+        self.setup_trigger_synapse_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
+        Hovertip(self.setup_trigger_synapse_recording_button, "Setup the video recording sync with Synapse and using trigger")
 
         self.toggle_trigger_recording_status = IntVar(value=0)
         self.toggle_trigger_recording_button = Button(experimental_functions_frame, text="Capture Disabled",
