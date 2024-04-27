@@ -576,7 +576,7 @@ class VideoRecordingSession(ctypes.Structure):
             #         print(f'Cam {self.cam_num} timeout')
             #         self.write_frame()
             #         return -1
-            time.sleep(0.005)
+            time.sleep(0.00005)
         
         self.write_frame()  # write the last frame
 
