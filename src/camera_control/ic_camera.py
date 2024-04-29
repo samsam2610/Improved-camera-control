@@ -186,6 +186,8 @@ class ICCam(ctypes.Structure):
         height = self.cam.GetVideoFormatHeight()
         return (width, height)
     
+    
+    
     def enable_trigger(self, legacy=False):
         # print(f'Cam {self.cam_num} is starting. Please wait...')
         # result = self.cam.StartLive()
@@ -284,6 +286,12 @@ class ICCam(ctypes.Structure):
             return frame_times, frame_num, tracking_value
         else:
             return None, None, None
+        
+    def get_current_frame_num(self):
+        """
+        Get the current frame number of the video file
+        """
+        return self.vid_file.frame_num
     
     def create_frame_callback_video(self):
         def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
