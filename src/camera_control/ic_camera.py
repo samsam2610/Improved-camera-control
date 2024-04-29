@@ -291,6 +291,9 @@ class ICCam(ctypes.Structure):
         """
         Get the current frame number of the video file
         """
+        if self.vid_file is None or len(self.vid_file.frame_num) == 0:
+            print(f'Cam {self.cam_num} video file is not set up yet')
+            return 0
         return self.vid_file.frame_num
     
     def create_frame_callback_video(self):
