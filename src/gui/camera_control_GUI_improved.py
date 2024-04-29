@@ -1380,6 +1380,9 @@ class CamGUI(object):
         toggle_trigger_recording()
         """
         if self.recording_trigger_toggle_status or force_termination:
+            """
+            If the trigger recording is enabled, the method will disable it and update the GUI elements accordingly.
+            """
             for i in range(len(self.cam)):
                 self.recording_trigger_status[i] = False
                 self.video_file_indicator[i]['bg'] = 'yellow'
@@ -1405,6 +1408,9 @@ class CamGUI(object):
             self.toggle_trigger_recording_status = IntVar(value=0)
             self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
         else:
+            """
+            If the trigger recording is disabled, the method will enable it and update the GUI elements accordingly.
+            """
             if self.setup is False:
                 print('Please setup the trigger recording first!')
                 return None
@@ -1439,8 +1445,8 @@ class CamGUI(object):
             print(f'Barrier broken for cam {num}. Failed to sync start the trigger. Please try again!')
             return None
         
-        self.cam[num].enable_trigger()
         self.cam[num].turn_off_continuous_mode()
+        self.cam[num].enable_trigger()
         self.cam[num].set_recording_status(state=True)
         while self.recording_trigger_toggle_status:
             if not self.recording_trigger_status[num]:
@@ -2069,7 +2075,7 @@ class CamGUI(object):
         Hovertip(self.toggle_video_recording_button, "Start/Stop recording video")
         
         # set recording properties
-        self.force_frame_sync = IntVar(value=1)
+        self.force_frame_sync = IntVar(value=0)
         self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_frame_sync,
                                                    onvalue=1, offvalue=0, width=13)
         self.force_frame_sync_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
