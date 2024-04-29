@@ -532,6 +532,7 @@ class VideoRecordingSession(ctypes.Structure):
         self.frame_buffer_length = len(self.frame_buffer)
         while self.frame_buffer_length > 0:
             frame, time_data, frame_num = self.frame_buffer.popleft()
+            print(f'Current frame buffer length: {self.frame_buffer_length}')
             self.vid_out.write(frame)
             self.frame_times.append(time_data)
             self.frame_num.append(frame_num)
