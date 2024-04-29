@@ -521,6 +521,10 @@ class VideoRecordingSession(ctypes.Structure):
         if self.vid_out is None:
             print(f'Cam {self.cam_num} video file not set up yet')
             return None
+        if len(self.frame_buffer) > 0:
+            print(f'Cam {self.cam_num} releasing video file with {len(self.frame_buffer)} frames remaining, writing them now')
+            self.write_frame()
+            
         self.vid_out.release()
         self.vid_out = None
         self.recording_status = False
