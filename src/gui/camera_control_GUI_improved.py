@@ -1439,10 +1439,6 @@ class CamGUI(object):
                 self.recording_trigger_thread[-1].start()
                 self.video_file_indicator[i]['bg'] = 'green'
             
-            self.recording_trigger_thread.append(threading.Thread(target=self.monitor_trigger_recording))
-            self.recording_trigger_thread[-1].daemon = True
-            self.recording_trigger_thread[-1].start()
-    
     def enable_trigger_on_thread(self, num, barrier):
         try:
             barrier.wait(timeout=10)
