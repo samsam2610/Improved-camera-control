@@ -591,10 +591,7 @@ class VideoRecordingSession(ctypes.Structure):
             #         self.write_frame()
             #         return -1
             time.sleep(0.00005)
-        print(f'Cam {self.cam_num} thread is stopping, current frame count: {self.frame_count}')
         self.write_frame()  # write the last frame
-        print(f'Cam {self.cam_num} thread is stopped, current frame count: {self.frame_count}')
-
 
 class FrameData(ctypes.Structure):
     def __init__(self):
