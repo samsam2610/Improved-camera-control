@@ -1472,7 +1472,7 @@ class CamGUI(object):
         while self.recording_trigger_toggle_status:
             vids_frame_num = [self.cam[i].get_current_frame_count() for i in range(len(self.cam))]
             current_frame_num_diff = vids_frame_num[1] - vids_frame_num[0]
-            if all([diff == 0 for diff in current_frame_num_diff]) is False:
+            if current_frame_num_diff > 0:
                 print(f'Frame number difference: {current_frame_num_diff}')
     
     def save_trigger_recording_on_thread(self, num):
