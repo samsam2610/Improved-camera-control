@@ -121,7 +121,7 @@ class ICCam(ctypes.Structure):
         self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
         # self.cam.SetFrameRate(current_frame_rate)
-        self.cam.set_frame_rate_highest() # set the highest frame rate to decrease drop frame rate
+        self.set_frame_rate_highest() # set the highest frame rate to decrease drop frame rate
         self.cam.StartLive()
         
     
