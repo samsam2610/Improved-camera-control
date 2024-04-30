@@ -120,8 +120,10 @@ class ICCam(ctypes.Structure):
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
-        self.cam.SetFrameRate(current_frame_rate)
+        # self.cam.SetFrameRate(current_frame_rate)
+        self.cam.set_frame_rate_highest() # set the highest frame rate to decrease drop frame rate
         self.cam.StartLive()
+        
     
     def get_formats(self):
         return (self.crop['width'], self.crop['height'])
@@ -131,6 +133,11 @@ class ICCam(ctypes.Structure):
     
     def set_frame_rate(self, fps):
         result = self.cam.SetFrameRate(fps)
+        return result
+    
+    def set_frame_rate_highest(self):
+        frame_rates = self.get_frame_rate_list()
+        result = self.cam.SetFrameRate(max(frame_rates))
         return result
     
     def get_frame_rate(self):
