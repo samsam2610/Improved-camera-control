@@ -2330,7 +2330,11 @@ if __name__ == "__main__":
         else:
             # Create an instance of the CamGUI class with the parsed arguments
             try:
-                cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool, output_dir=args.output_dir)
+                
+                if args.output_dir is not None:
+                    cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool, output_dir=args.output_dir)
+                else:
+                    cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
                 cam_gui.runGUI()
             except Exception as e:
                 print("Error creating CamGUI instance: %s" % str(e))
