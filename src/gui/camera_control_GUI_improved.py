@@ -150,6 +150,9 @@ class CamGUI(object):
             
         if kwargs.get('output_dir') is not None:
             self.output_dir = kwargs.get('output_dir')
+            self.is_output_dir_custom = True
+        else:
+            self.is_output_dir_custom = False
 
         self.window = None
         self.calibration_capture_toggle_status = False
@@ -226,7 +229,11 @@ class CamGUI(object):
         self.flip_vertical[num].set(bool(flip_vertical))
        
         # reset output directory
-        self.dir_output.set(self.output_entry['values'][cam_num])
+        if not self.is_output_dir_custom:
+            self.dir_output.set(self.output_entry['values'][cam_num])
+        else:
+            self.dir_output.set(self.output_dir)
+        
         setup_window.destroy()
 
     def release_trigger(self):
