@@ -150,6 +150,7 @@ class CamGUI(object):
             
         if kwargs.get('output_dir') is not None:
             self.output_dir = kwargs.get('output_dir')
+            print(f"Output directory set to {self.output_dir}")
             self.is_output_dir_custom = True
         else:
             self.is_output_dir_custom = False
