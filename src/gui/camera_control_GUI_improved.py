@@ -51,9 +51,11 @@ from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, g
 from os_handler import *
 
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
+
+
 class CamGUI(object):
 
-    def __init__(self, debug_mode=False, init_cam_bool=True):
+    def __init__(self, debug_mode=False, init_cam_bool=True, **kwargs):
         # GUI placeholders
         self.format_list = ['Y16 (256x4)', 'Y16 (320x240)', 'Y16 (320x480)', 'Y16 (352x240)', 'Y16 (352x288)',
                             'Y16 (384x288)', 'Y16 (640x240)', 'Y16 (640x288)', 'Y16 (640x480)', 'Y16 (704x576)',
@@ -145,6 +147,9 @@ class CamGUI(object):
         for i in range(self.cam_details['cams']):
             self.cam_names = self.cam_names + (self.cam_details[str(i)]['name'],)
             self.output_dir = self.output_dir + (self.cam_details[str(i)]['output_dir'],)
+            
+        if kwargs.get('output_dir') is not None:
+            self.output_dir = kwargs.get('output_dir')
 
         self.window = None
         self.calibration_capture_toggle_status = False
@@ -2301,6 +2306,7 @@ if __name__ == "__main__":
     parser.add_argument("-ni", "--no-init-cam", action="store_false", dest="init_cam_bool",
                         help="Disable camera initialization")
     parser.add_argument("-t", "--test", action="store_true", dest="test_mode", help="Enable test mode")
+    parser.add_argument("-odir", "--output-dir", action="store", dest="output_dir", type=str, help="Output directory for video recording")
 
     # Parse the command-line arguments
     args = parser.parse_args()
