@@ -2314,7 +2314,7 @@ if __name__ == "__main__":
     parser.add_argument("-ni", "--no-init-cam", action="store_false", dest="init_cam_bool",
                         help="Disable camera initialization")
     parser.add_argument("-t", "--test", action="store_true", dest="test_mode", help="Enable test mode")
-    parser.add_argument("-odir", "--output-dir", action="store", dest="output_dir", type=str, help="Output directory for video recording")
+    parser.add_argument("-odir", "--output-dir", action="store", dest="output_dir", type=str, default=None, help="Output directory for video recording")
 
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -2330,7 +2330,7 @@ if __name__ == "__main__":
         else:
             # Create an instance of the CamGUI class with the parsed arguments
             try:
-                cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
+                cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool, output_dir=args.output_dir)
                 cam_gui.runGUI()
             except Exception as e:
                 print("Error creating CamGUI instance: %s" % str(e))
