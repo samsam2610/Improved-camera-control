@@ -575,6 +575,8 @@ class CamGUI(object):
             size = numx*200, numy*200
             img = self.board_calibration.draw(size)
             cv2.imwrite(board_dir, img)
+        
+        return config_anipose
             
     def setup_calibration(self, override=False):
         """
@@ -606,11 +608,21 @@ class CamGUI(object):
         self.calibration_process_stats.set('Initializing calibration process...')
         from src.gui.utils import load_config, get_calibration_board
         if self.running_config['debug_mode']:
-            self.load_calibration_settings()
+            config_anipose = self.load_calibration_settings()
             
             self.calibration_process_stats.set('Initializing camera calibration objects ...')
             from src.aniposelib.cameras import CameraGroup
-            self.cgroup = CameraGroup.from_names(self.cam_names)
+            import re
+            
+            # Get cam names from the config file
+            cam_regex = config_anipose['triangulation']['regex']
+            cam_names = []
+            for name in self.cam_names:
+                match = re.match(cam_regex, name)
+                if match:
+                    cam_names.append(match.groups()[0])
+            
+            self.cgroup = CameraGroup.from_names(cam_names)
             self.calibration_process_stats.set('Initialized camera object.')
             self.frame_count = []
             self.all_rows = []

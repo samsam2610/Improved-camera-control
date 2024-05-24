@@ -5,6 +5,8 @@ create conda environment with `conda env create -f improved_camera_env.yml --nam
 
 activate environment with `conda activate improved_camera_env`
 
+run `pip install -e .` in the root directory of the project.
+
 then run `python write_camera_details.py` and `python write_calib_details.py` (generates config files for defaults)
 
 then should work with `python cort_camera_control_gui.py` or any of the cam_gui.py files
