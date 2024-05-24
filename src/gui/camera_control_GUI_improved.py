@@ -615,7 +615,7 @@ class CamGUI(object):
             import re
             
             # Get cam names from the config file
-            cam_regex = config_anipose['triangulation']['regex']
+            cam_regex = config_anipose['triangulation']['cam_regex']
             cam_names = []
             for name in self.cam_names:
                 match = re.match(cam_regex, name)
