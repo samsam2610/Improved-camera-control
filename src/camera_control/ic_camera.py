@@ -120,8 +120,10 @@ class ICCam(ctypes.Structure):
         self.cam = ic.TIS_CAM()
         self.cam.open(self.cam.GetDevices()[self.cam_num].decode())
         self.cam.SetVideoFormat(Format=self.formats)
-        self.cam.SetFrameRate(current_frame_rate)
+        # self.cam.SetFrameRate(current_frame_rate)
+        self.set_frame_rate_highest() # set the highest frame rate to decrease drop frame rate
         self.cam.StartLive()
+        
     
     def get_formats(self):
         return (self.crop['width'], self.crop['height'])
@@ -131,6 +133,11 @@ class ICCam(ctypes.Structure):
     
     def set_frame_rate(self, fps):
         result = self.cam.SetFrameRate(fps)
+        return result
+    
+    def set_frame_rate_highest(self):
+        frame_rates = self.get_frame_rate_list()
+        result = self.cam.SetFrameRate(max(frame_rates))
         return result
     
     def get_frame_rate(self):
@@ -185,6 +192,8 @@ class ICCam(ctypes.Structure):
         width = self.cam.GetVideoFormatWidth()
         height = self.cam.GetVideoFormatHeight()
         return (width, height)
+    
+    
     
     def enable_trigger(self, legacy=False):
         # print(f'Cam {self.cam_num} is starting. Please wait...')
@@ -284,6 +293,12 @@ class ICCam(ctypes.Structure):
             return frame_times, frame_num, tracking_value
         else:
             return None, None, None
+        
+    def get_current_frame_count(self):
+        """
+        Get the current frame number of the video file
+        """
+        return self.vid_file.frame_count
     
     def create_frame_callback_video(self):
         def frame_callback_video(handle_ptr, pBuffer, framenumber, pData):
@@ -513,6 +528,10 @@ class VideoRecordingSession(ctypes.Structure):
         if self.vid_out is None:
             print(f'Cam {self.cam_num} video file not set up yet')
             return None
+        if len(self.frame_buffer) > 0:
+            print(f'Cam {self.cam_num} releasing video file with {len(self.frame_buffer)} frames remaining, writing them now')
+            self.write_frame()
+            
         self.vid_out.release()
         self.vid_out = None
         self.recording_status = False
@@ -530,8 +549,10 @@ class VideoRecordingSession(ctypes.Structure):
     def write_frame(self):
         # with self.buffer_lock:
         self.frame_buffer_length = len(self.frame_buffer)
-        while self.frame_buffer_length > 0:
+        while len(self.frame_buffer) > 0:
             frame, time_data, frame_num = self.frame_buffer.popleft()
+            # if self.frame_buffer_length > 1:
+                # print(f'Cam {self.cam_num} writing frame {frame_num} with time {time_data}, buffer length {self.frame_buffer_length}')
             self.vid_out.write(frame)
             self.frame_times.append(time_data)
             self.frame_num.append(frame_num)
@@ -576,10 +597,8 @@ class VideoRecordingSession(ctypes.Structure):
             #         print(f'Cam {self.cam_num} timeout')
             #         self.write_frame()
             #         return -1
-            time.sleep(0.005)
-        
+            time.sleep(0.00005)
         self.write_frame()  # write the last frame
-
 
 class FrameData(ctypes.Structure):
     def __init__(self):

@@ -32,6 +32,9 @@ import matplotlib.ticker as ticker
 import matplotlib.animation as animation
 from matplotlib import style
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from typing import List
+
+from src.camera_control.ic_camera import ICCam
 
 import cv2
 import ffmpy
@@ -48,9 +51,11 @@ from _camera_settings_func import get_frame_rate_list, set_gain, set_exposure, g
 from os_handler import *
 
 # noinspection PyNoneFunctionAssignment,PyAttributeOutsideInit
+
+
 class CamGUI(object):
 
-    def __init__(self, debug_mode=False, init_cam_bool=True):
+    def __init__(self, debug_mode=False, init_cam_bool=True, **kwargs):
         # GUI placeholders
         self.format_list = ['Y16 (256x4)', 'Y16 (320x240)', 'Y16 (320x480)', 'Y16 (352x240)', 'Y16 (352x288)',
                             'Y16 (384x288)', 'Y16 (640x240)', 'Y16 (640x288)', 'Y16 (640x480)', 'Y16 (704x576)',
@@ -142,9 +147,17 @@ class CamGUI(object):
         for i in range(self.cam_details['cams']):
             self.cam_names = self.cam_names + (self.cam_details[str(i)]['name'],)
             self.output_dir = self.output_dir + (self.cam_details[str(i)]['output_dir'],)
+            
+        if kwargs.get('output_dir') is not None:
+            self.output_dir = kwargs.get('output_dir')
+            print(f"Output directory set to {self.output_dir}")
+            self.is_output_dir_custom = True
+        else:
+            self.is_output_dir_custom = False
 
         self.window = None
         self.calibration_capture_toggle_status = False
+        self.cam: List[ICCam] = []
         self.selectCams()
         
     def browse_output(self):
@@ -160,8 +173,7 @@ class CamGUI(object):
         setup_window = Tk()
         Label(setup_window, text="Setting up camera, please wait...").pack()
         setup_window.update()
-        from src.camera_control.ic_camera import ICCam
-
+        
         if bool(self.toggle_video_recording_status.get()):
             setup_window.destroy()
             cam_on_window = Tk()
@@ -218,7 +230,11 @@ class CamGUI(object):
         self.flip_vertical[num].set(bool(flip_vertical))
        
         # reset output directory
-        self.dir_output.set(self.output_entry['values'][cam_num])
+        if not self.is_output_dir_custom:
+            self.dir_output.set(self.output_entry['values'][cam_num])
+        else:
+            self.dir_output.set(self.output_dir)
+        
         setup_window.destroy()
 
     def release_trigger(self):
@@ -376,7 +392,8 @@ class CamGUI(object):
         self.base_name = []
         self.cam_name_no_space = []
         self.frame_times = []
-
+        
+        # Getting latest synapse folder data
         subject_name, dir_name = generate_folder()
         if subject_name is None:
             subject_name = 'Sam'
@@ -558,6 +575,8 @@ class CamGUI(object):
             size = numx*200, numy*200
             img = self.board_calibration.draw(size)
             cv2.imwrite(board_dir, img)
+        
+        return config_anipose
             
     def setup_calibration(self, override=False):
         """
@@ -589,11 +608,21 @@ class CamGUI(object):
         self.calibration_process_stats.set('Initializing calibration process...')
         from src.gui.utils import load_config, get_calibration_board
         if self.running_config['debug_mode']:
-            self.load_calibration_settings()
+            config_anipose = self.load_calibration_settings()
             
             self.calibration_process_stats.set('Initializing camera calibration objects ...')
             from src.aniposelib.cameras import CameraGroup
-            self.cgroup = CameraGroup.from_names(self.cam_names)
+            import re
+            
+            # Get cam names from the config file
+            cam_regex = config_anipose['triangulation']['cam_regex']
+            cam_names = []
+            for name in self.cam_names:
+                match = re.match(cam_regex, name)
+                if match:
+                    cam_names.append(match.groups()[0])
+            
+            self.cgroup = CameraGroup.from_names(cam_names)
             self.calibration_process_stats.set('Initialized camera object.')
             self.frame_count = []
             self.all_rows = []
@@ -1260,6 +1289,105 @@ class CamGUI(object):
         self.recording_trigger_toggle_status = False
         self.setup = True
         
+    def setup_trigger_synapse_recording(self, overwrite=False):
+        if len(self.vid_out) > 0:
+            vid_open_window = Tk()
+            Label(vid_open_window,
+                  text="Video is currently open! \n"
+                       "Please release the current video (click 'Save Video', even if no frames have been recorded)"
+                       " before setting up a new one.").pack()
+            Button(vid_open_window, text="Ok", command=lambda: vid_open_window.quit()).pack()
+            vid_open_window.mainloop()
+            vid_open_window.destroy()
+            return
+
+        # check if camera set up
+        if len(self.cam) == 0:
+            show_camera_error(self)
+            return
+        
+        self.trigger_on = 0
+        da_fps = str(self.fps.get())
+        month = datetime.datetime.now().month
+        month = str(month) if month >= 10 else '0' + str(month)
+        day = datetime.datetime.now().day
+        day = str(day) if day >= 10 else '0' + str(day)
+        year = str(datetime.datetime.now().year)
+        date = year + '-' + month + '-' + day
+        
+        self.cam_name_no_space = []
+        self.vid_file = []
+        self.base_name = []
+        self.cycle_count = []
+        self.dim = []
+       
+        # Getting latest synapse folder data
+        subject_name, dir_name = generate_folder()
+        if subject_name is None:
+            subject_name = 'Sam'
+            
+        for i in range(len(self.cam)):
+            temp_exposure = str(round(math.log2(1/float(self.exposure[i].get()))))
+            temp_gain = str(round(float(self.gain[i].get())))
+            self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+            self.base_name.append(self.cam_name_no_space[i] + '_'
+                                  + subject_name + '_'
+                                  + self.setup_name.get() + '_'
+                                  + date + '_'
+                                  + str(int(da_fps)) + 'f'
+                                  + temp_exposure + 'e'
+                                  + temp_gain + 'g')
+            self.vid_file.append(os.path.normpath(dir_name + '/' +
+                                                  self.base_name[i] +
+                                                  self.attempt.get() +
+                                                  '.avi'))
+            self.dim.append(self.cam[i].get_image_dimensions())
+            self.cycle_count.append(0)
+            
+        # check if file exists, ask to overwrite or change attempt number if it does
+        for i in range(len(self.cam)):
+            if i == 0:
+                self.overwrite = overwrite
+                if os.path.isfile(self.vid_file[i]) and not self.overwrite:
+                    self.ask_overwrite = Tk()
+                    
+                    def quit_overwrite(ow):
+                        self.overwrite = ow
+                        self.ask_overwrite.quit()
+                    
+                    Label(self.ask_overwrite,
+                          text="File already exists with attempt number = " + self.attempt.get() + ".\nWould you like to overwrite the file? ").pack()
+                    Button(self.ask_overwrite, text="Overwrite", command=lambda: quit_overwrite(True)).pack()
+                    Button(self.ask_overwrite, text="Cancel & pick new attempt number",
+                           command=lambda: quit_overwrite(False)).pack()
+                    self.ask_overwrite.mainloop()
+                    self.ask_overwrite.destroy()
+                    
+                    if self.overwrite:
+                        self.vid_file[i] = os.path.normpath(
+                            self.dir_output.get() + '/' +
+                            self.base_name[i] +
+                            str(self.cycle_count[i]) + 'c' +
+                            self.attempt.get() + '.avi')
+                    else:
+                        return
+            else:
+                # self.vid_file[i] = self.vid_file[0].replace(cam_name_nospace[0], cam_name_nospace[i])
+                print('')
+            
+            # if self.tracking_points[i][0] is None:
+            self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i]))
+            # else:
+            #     self.vid_out.append(self.cam[i].set_up_video_trigger(self.vid_file[i], self.video_codec, int(self.fps.get()), self.dim[i], self.tracking_points[i]))
+            
+            self.cam[i].set_frame_callback_video()
+            
+        subject_name = self.subject.get() + '_' + date + '_' + self.attempt.get()
+        create_output_files(self, subject_name=subject_name)
+        
+        self.recording_trigger_toggle_status = False
+        self.setup = True
+        
     def toggle_trigger_recording(self, force_termination=False):
         
         """
@@ -1277,6 +1405,9 @@ class CamGUI(object):
         toggle_trigger_recording()
         """
         if self.recording_trigger_toggle_status or force_termination:
+            """
+            If the trigger recording is enabled, the method will disable it and update the GUI elements accordingly.
+            """
             for i in range(len(self.cam)):
                 self.recording_trigger_status[i] = False
                 self.video_file_indicator[i]['bg'] = 'yellow'
@@ -1302,6 +1433,9 @@ class CamGUI(object):
             self.toggle_trigger_recording_status = IntVar(value=0)
             self.toggle_trigger_recording_button.config(text="Capture Off", background="red")
         else:
+            """
+            If the trigger recording is disabled, the method will enable it and update the GUI elements accordingly.
+            """
             if self.setup is False:
                 print('Please setup the trigger recording first!')
                 return None
@@ -1322,13 +1456,14 @@ class CamGUI(object):
             self.recording_trigger_status = [True for i in range(len(self.cam))]
             self.recording_trigger_toggle_status = True
 
+            
             for i in range(len(self.cam)):
                 thread_name = f"Cam {i + 1} thread"
                 self.recording_trigger_thread.append(threading.Thread(target=self.enable_trigger_on_thread, args=(i, barrier), name=thread_name))
                 self.recording_trigger_thread[-1].daemon = True
                 self.recording_trigger_thread[-1].start()
                 self.video_file_indicator[i]['bg'] = 'green'
-    
+            
     def enable_trigger_on_thread(self, num, barrier):
         try:
             barrier.wait(timeout=10)
@@ -1336,8 +1471,8 @@ class CamGUI(object):
             print(f'Barrier broken for cam {num}. Failed to sync start the trigger. Please try again!')
             return None
         
-        self.cam[num].enable_trigger()
         self.cam[num].turn_off_continuous_mode()
+        self.cam[num].enable_trigger()
         self.cam[num].set_recording_status(state=True)
         while self.recording_trigger_toggle_status:
             if not self.recording_trigger_status[num]:
@@ -1353,6 +1488,15 @@ class CamGUI(object):
             #     self.cam[num].set_recording_status(state=True)
             #     print(f'Cam {num} timeout!')
             time.sleep(0.1)
+            
+    def monitor_trigger_recording(self):
+        previous_frame_num_diff = 0
+        while self.recording_trigger_toggle_status:
+            vids_frame_num = [self.cam[i].get_current_frame_count() for i in range(len(self.cam))]
+            current_frame_num_diff = vids_frame_num[1] - vids_frame_num[0]
+            if current_frame_num_diff > 0 and current_frame_num_diff != previous_frame_num_diff:
+                print(f'Frame number difference: {current_frame_num_diff}')
+                previous_frame_num_diff = current_frame_num_diff
     
     def save_trigger_recording_on_thread(self, num):
         time.sleep(0.5)
@@ -1966,7 +2110,7 @@ class CamGUI(object):
         Hovertip(self.toggle_video_recording_button, "Start/Stop recording video")
         
         # set recording properties
-        self.force_frame_sync = IntVar(value=1)
+        self.force_frame_sync = IntVar(value=0)
         self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_frame_sync,
                                                    onvalue=1, offvalue=0, width=13)
         self.force_frame_sync_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
@@ -2008,6 +2152,10 @@ class CamGUI(object):
         self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=14, command=self.setup_trigger_recording)
         self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
         Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
+        
+        self.setup_trigger_synapse_recording_button = Button(experimental_functions_frame, text="Setup Synapse", width=14, command=self.setup_trigger_synapse_recording)
+        self.setup_trigger_synapse_recording_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
+        Hovertip(self.setup_trigger_synapse_recording_button, "Setup the video recording sync with Synapse and using trigger")
 
         self.toggle_trigger_recording_status = IntVar(value=0)
         self.toggle_trigger_recording_button = Button(experimental_functions_frame, text="Capture Disabled",
@@ -2178,6 +2326,7 @@ if __name__ == "__main__":
     parser.add_argument("-ni", "--no-init-cam", action="store_false", dest="init_cam_bool",
                         help="Disable camera initialization")
     parser.add_argument("-t", "--test", action="store_true", dest="test_mode", help="Enable test mode")
+    parser.add_argument("-odir", "--output-dir", action="store", dest="output_dir", type=str, default=None, help="Output directory for video recording")
 
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -2193,7 +2342,11 @@ if __name__ == "__main__":
         else:
             # Create an instance of the CamGUI class with the parsed arguments
             try:
-                cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
+                
+                if args.output_dir is not None:
+                    cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool, output_dir=args.output_dir)
+                else:
+                    cam_gui = CamGUI(debug_mode=args.debug_mode, init_cam_bool=args.init_cam_bool)
                 cam_gui.runGUI()
             except Exception as e:
                 print("Error creating CamGUI instance: %s" % str(e))
