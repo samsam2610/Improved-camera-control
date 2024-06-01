@@ -34,8 +34,6 @@ from matplotlib import style
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from typing import List
 
-from src.camera_control.ic_camera import ICCam
-
 import cv2
 import ffmpy
 import numpy as np
@@ -169,6 +167,8 @@ class CamGUI(object):
         print("Changed FourCC code:", self.video_codec)
 
     def init_cam(self, num):
+        from src.camera_control.ic_camera import ICCam
+        
         # create pop up window during setup
         setup_window = Tk()
         Label(setup_window, text="Setting up camera, please wait...").pack()
@@ -1691,7 +1691,7 @@ class CamGUI(object):
 
             # number of cameras
             Label(select_cams_window, text="How many cameras?").grid(sticky="w", row=0, column=0)
-            self.number_of_cams = IntVar(value=1)
+            self.number_of_cams = StringVar(value="1")
             self.number_of_cams_entry = Entry(select_cams_window, textvariable=self.number_of_cams).\
                 grid(sticky="nsew", row=0, column=1)
             Button(select_cams_window, text="Set Cameras", command=select_cams_window.quit).\
@@ -1701,7 +1701,10 @@ class CamGUI(object):
         else:
             self.number_of_cams_entry = "2"
             self.number_of_cams = 2
-
+        
+        if not isinstance(self.number_of_cams, int):
+            self.number_of_cams = int(self.number_of_cams.get())
+            
         for i in range(self.number_of_cams):
             self.cam.append(None)
             self.cam_name.append([])
