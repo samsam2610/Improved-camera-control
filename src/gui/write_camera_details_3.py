@@ -36,13 +36,22 @@ cam_1 = {'name': 'cam2',
          'offset': {'x': 366, 'y': 300},
          'output_dir': 'C:\\Data folder'}
 
+cam_2 = {'name': 'cam3',
+         'crop': {'top': 130, 'left': 92, 'height': 400, 'width': 704},
+         'rotate': 0,
+         'exposure': 0.0001,
+         'gain': 20,
+         'offset': {'x': 366, 'y': 300},
+         'output_dir': 'C:\\Data folder'}
+
 subs = ['test1', 'test2', 'test3']  # optional, can manually enter subject for each session.
 
 labview = ['Dev1/port0/line0']  # optional, can manually enter for each session
 
-details = {'cams': 2,
+details = {'cams': 3,
            '0': cam_0,
            '1': cam_1,
+           '2': cam_2,
            'subjects': subs,
            'labview': labview}
 
