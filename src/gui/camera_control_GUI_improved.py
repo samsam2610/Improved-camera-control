@@ -1951,7 +1951,7 @@ class CamGUI(object):
                 grid(row=1, column=5, sticky="w", padx=0, pady=3)
             
             partial_scan_frame.\
-                grid(row=cur_row, column=3, padx=1, pady=0, sticky="nsew")
+                grid(row=cur_row, column=3, padx=1, pady=3, sticky="nsew")
             partial_scan_frame.pack_propagate(False)
 
             # Frame for tracking a pixel with coordinate in the frame
