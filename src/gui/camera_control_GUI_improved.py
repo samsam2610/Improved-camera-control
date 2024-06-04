@@ -2157,11 +2157,11 @@ class CamGUI(object):
         cur_row += 1
 
         experimental_functions_frame = Frame(self.window)
-        self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=10, command=self.setup_trigger_recording)
+        self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=14, command=self.setup_trigger_recording)
         self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=4, pady=3)
         Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
         
-        self.setup_trigger_synapse_recording_button = Button(experimental_functions_frame, text="Setup Synapse", width=10, command=self.setup_trigger_synapse_recording)
+        self.setup_trigger_synapse_recording_button = Button(experimental_functions_frame, text="Setup Synapse", width=14, command=self.setup_trigger_synapse_recording)
         self.setup_trigger_synapse_recording_button.grid(sticky="nsew", row=1, column=0, padx=4, pady=3)
         Hovertip(self.setup_trigger_synapse_recording_button, "Setup the video recording sync with Synapse and using trigger")
 
@@ -2171,15 +2171,15 @@ class CamGUI(object):
         self.toggle_trigger_recording_button.grid(sticky="nsew", row=0, column=1, padx=4, pady=3)
         Hovertip(self.toggle_trigger_recording_button, "Start/Stop listening to trigger to capture frame")
 
-        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Videos", state="normal", width=10, command=self.save_trigger_recording)
+        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Videos", state="normal", width=14, command=self.save_trigger_recording)
         self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=4, pady=3)
         Hovertip(self.save_trigger_recording_button, "Save the trigger recording to file")
 
-        self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=10, command=lambda: self.save_trigger_recording(delete=True))
+        self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=14, command=lambda: self.save_trigger_recording(delete=True))
         self.delete_trigger_recording_button.grid(sticky="nsew", row=0, column=3, padx=4, pady=3)
         Hovertip(self.delete_trigger_recording_button, "Delete the trigger recording")
 
-        self.display_trigger_recording_stats = Button(experimental_functions_frame, text="Display stats", state="normal", width=10, command=self.display_recorded_stats)
+        self.display_trigger_recording_stats = Button(experimental_functions_frame, text="Display stats", state="normal", width=14, command=self.display_recorded_stats)
         self.display_trigger_recording_stats.grid(sticky="nsew", row=0, column=4, padx=4, pady=3)
         Hovertip(self.display_trigger_recording_stats, "Display stats of recorded videos")
 
