@@ -1722,7 +1722,7 @@ class CamGUI(object):
         
         if not isinstance(self.number_of_cams, int):
             self.number_of_cams = int(self.number_of_cams.get())
-
+        
         for i in range(self.number_of_cams):
             # drop down menu to select camera
             # Camera recording status frame
@@ -1734,22 +1734,42 @@ class CamGUI(object):
             # label for trigger status
             self.trigger_status_indicator.append(Label(camera_record_status_frame, text="Trigger status: ", bg="gray"))
             self.trigger_status_indicator[i]. \
-                grid(row=0, column=1, sticky="w", padx=5, pady=3)
+                grid(row=0, column=1, sticky="w", padx=2, pady=3)
             self.trigger_status_label.append(Label(camera_record_status_frame, text="Disabled", width=10, anchor="w"))
             self.trigger_status_label[i]. \
-                grid(row=0, column=2, columnspan=3, sticky="w", padx=5, pady=3)
+                grid(row=0, column=2, columnspan=3, sticky="w", padx=2, pady=3)
             
             camera_record_status_frame.grid(row=cur_row, column=0, padx=1, pady=1, sticky="w")
-
+            
             # Add status of the camera and its video setting to the frame
             video_file_status_frame = Frame(self.window)
             self.video_file_indicator.append(Label(video_file_status_frame, text="Video File: ", width=8, justify="left", anchor="w", bg='gray'))
             self.video_file_indicator[i].grid(sticky="w", row=0, column=1, padx=3, pady=3)
 
-            self.video_file_status.append(Label(video_file_status_frame, text="Not Available", width=40, justify="left", anchor="w"))
+            self.video_file_status.append(Label(video_file_status_frame, text="Not Available", width=30, justify="left", anchor="w"))
             self.video_file_status[i].grid(sticky="w", row=0, column=2, columnspan=3, padx=0, pady=0)
 
-            video_file_status_frame.grid(row=cur_row, column=1, padx=1, pady=1, sticky="w")
+            video_file_status_frame.grid(row=cur_row, column=3, padx=1, pady=1, sticky="w")
+            
+            # Add frame status
+            camera_status_frame = Frame(self.window)
+            # label for frame acquired count
+            Label(camera_status_frame, text="Frame acquired #: "). \
+                grid(row=0, column=0, sticky="w", padx=2, pady=0)
+            self.frame_acquired_count_label.append(Label(camera_status_frame, text="0", width=5))
+            self.frame_acquired_count_label[i]. \
+                grid(row=0, column=1, sticky="nw", padx=2, pady=0)
+
+            # label for frame acquired count
+            Label(camera_status_frame, text="Detected board #: "). \
+                grid(row=1, column=0, sticky="w", padx=2, pady=0)
+            self.board_detected_count_label.append(Label(camera_status_frame, text="0", width=5))
+            self.board_detected_count_label[i]. \
+                grid(row=1, column=1, sticky="nw", padx=2, pady=0)
+            
+            camera_status_frame. \
+                grid(row=cur_row, column=2, padx=1, pady=0, sticky="w")
+            camera_status_frame.pack_propagate(False)
             
             cur_row += 1
 
@@ -1765,7 +1785,7 @@ class CamGUI(object):
 
             # initialize camera button
             self.camera_init_button.append(Button(init_camera_frame, text=f"Initialize Camera {i+1}", command=lambda index_cam=i: self.init_cam(index_cam), width=14))
-            self.camera_init_button[i].grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+            self.camera_init_button[i].grid(sticky="nsew", row=0, column=2, padx=2, pady=3)
 
             # format
             format_frame = Frame(init_camera_frame)
@@ -1785,45 +1805,50 @@ class CamGUI(object):
             
             # Set camera format
             Button(init_camera_frame, text="Set Format", command=lambda index_cam=i: set_formats(self, index_cam), width=14).\
-                grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
+                grid(sticky="nsew", row=1, column=2, padx=2, pady=3)
             
-            init_camera_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nsew")
+            init_camera_frame.grid(row=cur_row, column=0, padx=1, pady=3, sticky="nsew")
             init_camera_frame.pack_propagate(False)
 
             # change exposure
             capture_settings_frame = Frame(self.window, borderwidth=1, relief="raised")
             Label(capture_settings_frame, text='Exposure (s):', width=10, justify="left", anchor="w").\
-                grid(row=0, column=0, sticky="nsew", padx=5, pady=3)
+                grid(row=0, column=0, sticky="nsew", padx=2, pady=3)
             
             self.exposure.append(DoubleVar())
             self.exposure_entry.append(Spinbox(capture_settings_frame, from_=0.0001, to=1, increment=0.0001, textvariable=self.exposure[i], width=7, justify="left"))
-            self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, columnspan=2, padx=5, pady=3)
+            self.exposure_entry[i].grid(sticky="nsew", row=0, column=1, columnspan=2, padx=2, pady=3)
 
-            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: set_exposure(self, index_cam), width=14).\
-                grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
-            
-            self.exposure_current_label.append(Label(capture_settings_frame, text=f"Current: {self.exposure[i].get()} (-{str(round(math.log2(1/float((self.exposure[i].get())))))}) s", width=18, justify="left", anchor="w"))
-            self.exposure_current_label[i].grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
+            Button(capture_settings_frame, text=f"Set Exposure {i+1}", command=lambda index_cam=i: set_exposure(self, index_cam), width=8).\
+                grid(sticky="nsew", row=0, column=3, padx=2, pady=3)
             
             # change gain
             Label(capture_settings_frame, text='Gain (db):', width=8, justify="left", anchor="w").\
-                grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
+                grid(sticky="nsew", row=1, column=0, padx=2, pady=3)
                 
             self.gain.append(DoubleVar())
-            self.gain_entry.append(Spinbox(capture_settings_frame, from_=0, to=50, increment=0.1, textvariable=self.gain[i], width=7, justify="left"))
+            self.gain_entry.append(Spinbox(capture_settings_frame, from_=0, to=50, increment=0.1, textvariable=self.gain[i], width=5, justify="left"))
             self.gain_entry[i].\
-                grid(sticky="nsew", row=1, column=1, columnspan=2, padx=5, pady=3)
+                grid(sticky="nsew", row=1, column=1, columnspan=2, padx=2, pady=3)
             
-            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda index_cam=i: set_gain(self, index_cam), width=14).\
-                grid(sticky="nsew", row=1, column=3, pady=3, padx=5)
-            
-            self.gain_current_label.append(Label(capture_settings_frame, text=f"Current: {self.gain[i].get()} db", width=15, justify="left", anchor="w"))
-            self.gain_current_label[i].grid(sticky="nsew", row=1, column=4, padx=5, pady=3)
-            
+            Button(capture_settings_frame, text=f"Set Gain {i+1}", command=lambda index_cam=i: set_gain(self, index_cam), width=8).\
+                grid(sticky="nsew", row=1, column=3, pady=3, padx=2)
+        
             capture_settings_frame.\
-                grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
+                grid(row=cur_row, column=1, padx=1, pady=3, sticky="nsew")
             
             capture_settings_frame.pack_propagate(False)
+            
+            # Add exposure and gain current settings
+            current_capture_settings_frame = Frame(self.window)
+            self.exposure_current_label.append(Label(current_capture_settings_frame, text=f"Current exposure: {self.exposure[i].get()} (-{str(round(math.log2(1/float((self.exposure[i].get())))))}) s", width=22, justify="left", anchor="w"))
+            self.exposure_current_label[i].grid(sticky="nw", row=0, column=0, columnspan=2, padx=2, pady=3)
+            
+            self.gain_current_label.append(Label(current_capture_settings_frame, text=f"Current gain: {self.gain[i].get()} db", width=15, justify="left", anchor="w"))
+            self.gain_current_label[i].grid(sticky="nw", row=1, column=0, padx=2, pady=3)
+            
+            current_capture_settings_frame.grid(row=cur_row-1, column=1, padx=1, pady=1, sticky="w")
+            current_capture_settings_frame.pack_propagate(False)
             
             # set FOV format
             fov_current_dict = {'top': IntVar(),
@@ -1857,39 +1882,39 @@ class CamGUI(object):
             #
             # fov_settings_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             # fov_settings_frame.pack_propagate(False)
-            cur_row += 1
+            # cur_row += 1
         
             # framerate list frame
             framerate_frame = Frame(self.window, borderwidth=1, relief="raised")
             Label(framerate_frame, text="Frame Rate (fps): ").\
-                grid(row=0, column=0, sticky="w", padx=5, pady=3)
+                grid(row=0, column=0, sticky="w", padx=0, pady=3)
             self.framerate.append(IntVar())
-            self.framerate_list.append(ttk.Combobox(framerate_frame, textvariable=self.framerate[i], width=5, justify="left"))
+            self.framerate_list.append(ttk.Combobox(framerate_frame, textvariable=self.framerate[i], width=3, justify="left"))
             self.framerate_list[i]['value'] = [100, 200]
             self.framerate_list[i].current(0)
-            self.framerate_list[i].grid(row=0, column=1, sticky="w", padx=5, pady=3)
+            self.framerate_list[i].grid(row=0, column=1, sticky="w", padx=2, pady=3)
             
-            Button(framerate_frame, text="Update Frame Rate", command=lambda index_cam=i: set_frame_rate(self, index_cam), width=14).\
-                grid(row=0, column=3, sticky="nsew", padx=3, pady=3)
+            Button(framerate_frame, text="Update Frame Rate", command=lambda index_cam=i: set_frame_rate(self, index_cam), width=12).\
+                grid(row=0, column=3, sticky="nsew", padx=2, pady=3)
            
             Label(framerate_frame, text="Current Frame Rate: ").\
-                    grid(row=1, column=0, sticky="w", padx=5, pady=3)
+                    grid(row=1, column=0, sticky="w", padx=0, pady=3)
             self.current_framerate.append(IntVar())
-            Label(framerate_frame, textvariable=self.current_framerate[i], width=5).\
-                    grid(row=1, column=1, sticky="w", padx=5, pady=3)
+            Label(framerate_frame, textvariable=self.current_framerate[i], width=3).\
+                    grid(row=1, column=1, sticky="w", padx=2, pady=3)
             
             self.polarity.append(IntVar())
             Checkbutton(framerate_frame, text="Trigger Polarity", variable=self.polarity[i], command=lambda index_cam=i: toggle_polarity(self, index_cam), onvalue=1, offvalue=0).\
-                grid(row=1, column=3, sticky="w", padx=5, pady=3)
+                grid(row=1, column=3, sticky="w", padx=2, pady=3)
  
             framerate_frame.\
-                grid(row=cur_row, column=0, padx=2, pady=3, sticky="nsew")
+                grid(row=cur_row, column=2, padx=1, pady=3, sticky="nsew")
             framerate_frame.pack_propagate(False)
             
             # partial offset scan box
             partial_scan_frame = Frame(self.window, borderwidth=1, relief="raised")
             Label(partial_scan_frame, text="X Offset (px): ").\
-                grid(row=0, column=0, sticky="w", padx=5, pady=3)
+                grid(row=0, column=0, sticky="w", padx=2, pady=3)
             
             try:
                 current_x_offset = self.cam_details[i]['offset']['x']
@@ -1897,13 +1922,13 @@ class CamGUI(object):
             except:
                 self.x_offset_value.append(DoubleVar())
             self.x_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, orient=HORIZONTAL, resolution=1, variable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: set_x_offset(self, index_cam, idx), width=6, length=150))
-            self.x_offset_scale[i].grid(row=0, column=1, columnspan=2, sticky="new", padx=5, pady=3)
+            self.x_offset_scale[i].grid(row=0, column=1, columnspan=2, sticky="new", padx=2, pady=3)
             
             self.x_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.x_offset_value[i], command=lambda index_cam=i, idx=i: set_x_offset(self, index_cam, idx), width=5))
-            self.x_offset_spinbox[i].grid(row=0, column=4, columnspan=1, sticky="w", padx=5, pady=3)
+            self.x_offset_spinbox[i].grid(row=0, column=4, columnspan=1, sticky="w", padx=2, pady=3)
             
             Label(partial_scan_frame, text="Y Offset (px): ").\
-                grid(row=1, column=0, sticky="w", padx=5, pady=3)
+                grid(row=1, column=0, sticky="w", padx=2, pady=3)
             
             try:
                 current_y_offset = self.cam_details[i]['offset']['y']
@@ -1912,21 +1937,21 @@ class CamGUI(object):
                 self.y_offset_value.append(DoubleVar())
             self.y_offset_value.append(DoubleVar())
             self.y_offset_scale.append(Scale(partial_scan_frame, from_=0.0, to=200.0, resolution=1, orient=HORIZONTAL, variable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: set_y_offset(self, index_cam, idx), width=6, length=150))
-            self.y_offset_scale[i].grid(row=1, column=1, columnspan=2, sticky="nw", padx=5, pady=3)
+            self.y_offset_scale[i].grid(row=1, column=1, columnspan=2, sticky="nw", padx=2, pady=3)
             
             self.y_offset_spinbox.append(Spinbox(partial_scan_frame, from_=0.0, to=100.0, increment=1, textvariable=self.y_offset_value[i], command=lambda index_cam=i, idx=i: set_y_offset(self, index_cam, idx), width=5))
-            self.y_offset_spinbox[i].grid(row=1, column=4, columnspan=1, sticky="w", padx=5, pady=3)
+            self.y_offset_spinbox[i].grid(row=1, column=4, columnspan=1, sticky="w", padx=2, pady=3)
             
             self.auto_center.append(IntVar())
             Checkbutton(partial_scan_frame, text="Auto-center", variable=self.auto_center[i], command=lambda index_cam=i: toggle_auto_center(self, index_cam)).\
-                grid(row=0, column=5, sticky="w", padx=5, pady=3)
+                grid(row=0, column=5, sticky="w", padx=0, pady=3)
             
             self.flip_vertical.append(BooleanVar())
             Checkbutton(partial_scan_frame, text="Flip Vertical", variable=self.flip_vertical[i], command=lambda index_cam=i: toggle_flip_vertical(self, index_cam)).\
-                grid(row=1, column=5, sticky="w", padx=5, pady=3)
+                grid(row=1, column=5, sticky="w", padx=0, pady=3)
             
             partial_scan_frame.\
-                grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
+                grid(row=cur_row, column=3, padx=1, pady=0, sticky="nsew")
             partial_scan_frame.pack_propagate(False)
 
             # Frame for tracking a pixel with coordinate in the frame
@@ -1960,26 +1985,6 @@ class CamGUI(object):
             #
             # coord_analysis_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
             # coord_analysis_frame.pack_propagate(False)
-            
-            cur_row += 1
-            camera_status_frame = Frame(self.window)
-            # label for frame acquired count
-            Label(camera_status_frame, text="Frame acquired #: "). \
-                grid(row=0, column=0, sticky="w", padx=5, pady=0)
-            self.frame_acquired_count_label.append(Label(camera_status_frame, text="0", width=5))
-            self.frame_acquired_count_label[i]. \
-                grid(row=0, column=1, sticky="nw", padx=5, pady=0)
-
-            # label for frame acquired count
-            Label(camera_status_frame, text="Detected board #: "). \
-                grid(row=0, column=2, sticky="w", padx=5, pady=0)
-            self.board_detected_count_label.append(Label(camera_status_frame, text="0", width=5))
-            self.board_detected_count_label[i]. \
-                grid(row=0, column=3, sticky="nw", padx=5, pady=0)
-            
-            camera_status_frame. \
-                grid(row=cur_row, column=0, padx=2, pady=0, sticky="w")
-            camera_status_frame.pack_propagate(False)
 
             # tracking point status
             # tracking_point_frame = Frame(self.window)
@@ -2009,34 +2014,34 @@ class CamGUI(object):
         
         # Subject name
         Label(video_name_frame, text="Subject: ").\
-            grid(sticky="nw", row=0, column=0, padx=3, pady=0)
+            grid(sticky="nw", row=0, column=0, padx=2, pady=0)
         self.subject = StringVar(value='Mouse')
         self.subject_entry = ttk.Combobox(video_name_frame, textvariable=self.subject, width=5)
         self.subject_entry['values'] = tuple(self.mouse_list)
         self.subject_entry.\
-            grid(sticky="nw", row=0, column=1, padx=3, pady=0)
+            grid(sticky="nw", row=0, column=1, padx=2, pady=0)
 
         # Experimental setup
         Label(video_name_frame, text="Setup: ").\
-            grid(sticky="nw", row=0, column=2, padx=3, pady=0)
+            grid(sticky="nw", row=0, column=2, padx=2, pady=0)
         self.setup_name = StringVar(value='Test')
         self.setup_entry = Entry(video_name_frame, textvariable=self.setup_name, width=10)
         self.setup_entry.\
-            grid(sticky="nw", row=0, column=3, padx=3, pady=0)
+            grid(sticky="nw", row=0, column=3, padx=2, pady=0)
         
         # attempt
-        Label(video_name_frame, text="Attempt: ").grid(sticky="nw", row=0, column=4, padx=3, pady=0)
+        Label(video_name_frame, text="Attempt: ").grid(sticky="nw", row=0, column=4, padx=2, pady=0)
         self.attempt = StringVar(value="1")
-        self.attempt_entry = ttk.Combobox(video_name_frame, textvariable=self.attempt, width=5)
+        self.attempt_entry = ttk.Combobox(video_name_frame, textvariable=self.attempt, width=2)
         self.attempt_entry['values'] = tuple(range(1, 10))
         self.attempt_entry.\
-            grid(sticky="nw", row=0, column=5, padx=3, pady=0)
+            grid(sticky="nw", row=0, column=5, padx=2, pady=0)
         
-        video_name_frame.grid(row=0, column=0, padx=5, pady=3, columnspan=4, sticky="nsew")
+        video_name_frame.grid(row=0, column=0, padx=2, pady=3, columnspan=4, sticky="nsew")
         
         # type frame rate
         Label(video_info_frame, text="Frame Rate: ").\
-            grid(sticky="nw", row=1, column=0, padx=5, pady=3)
+            grid(sticky="nw", row=1, column=0, padx=2, pady=3)
         self.fps = StringVar()
         self.fps_entry = Entry(video_info_frame, textvariable=self.fps, width=5)
         self.fps_entry.insert(END, '200')
@@ -2045,7 +2050,7 @@ class CamGUI(object):
 
         # select video encoder codec
         Label(video_info_frame, text="Video codec:").\
-            grid(sticky="nw", row=1, column=2, padx=5, pady=3)
+            grid(sticky="nw", row=1, column=2, padx=2, pady=3)
         self.video_codec = StringVar()
         self.video_codec_entry = ttk.Combobox(video_info_frame,
                                               value=self.fourcc_codes,
@@ -2053,21 +2058,21 @@ class CamGUI(object):
         self.video_codec_entry.set("XVID")  # default codec
         self.video_codec_entry.bind("<<ComboboxSelected>>", self.browse_codec)
         self.video_codec_entry.\
-            grid(sticky="nww", row=1, column=3, padx=5, pady=3)
+            grid(sticky="nww", row=1, column=3, padx=2, pady=3)
         self.video_codec = self.video_codec_entry.get()  # add default video codec
         Hovertip(self.video_codec_entry, "Select video codec for video recording")
 
         # output directory
         Label(video_info_frame, text="Output Directory: ", width=15, justify="left", anchor="w").\
-            grid(sticky="nw", row=3, column=0, padx=5, pady=3)
+            grid(sticky="nw", row=3, column=0, padx=2, pady=3)
         self.dir_output = StringVar()
         self.output_entry = ttk.Combobox(video_info_frame, textvariable=self.dir_output, width=15)
         self.output_entry['values'] = self.output_dir
         self.output_entry.\
-            grid(sticky="nw", row=3, column=1, columnspan=2, padx=5, pady=3)
+            grid(sticky="nw", row=3, column=1, columnspan=2, padx=2, pady=3)
         self.browse_dir_button = Button(video_info_frame, text="Browse", command=self.browse_output)
         self.browse_dir_button.\
-            grid(sticky="nw", row=3, column=3, padx=5, pady=3)
+            grid(sticky="nw", row=3, column=3, padx=2, pady=3)
         Hovertip(self.browse_dir_button, "Select output directory for video recording")
         video_info_frame.grid(row=cur_row, column=0, padx=2, pady=3, sticky="nsew")
 
@@ -2077,25 +2082,25 @@ class CamGUI(object):
         
         setup_video_frame = Frame(self.window, borderwidth=1, relief="raised")
         Button(setup_video_frame, text="Setup Recording", command=self.set_up_vid, width=14).\
-            grid(sticky="nsew", row=0, column=0, columnspan=1, rowspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=0, column=0, columnspan=1, rowspan=1, padx=2, pady=3)
         Button(setup_video_frame, text="Setup Trigger", command=self.set_up_vid_trigger, width=14).\
-            grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=1, column=0, columnspan=1, padx=2, pady=3)
         Button(setup_video_frame, text="Sync With Synapse", command=self.set_up_vid_trigger_synapse, width=14).\
-            grid(sticky="nsew", row=2, column=0, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=2, column=0, columnspan=1, padx=2, pady=3)
         # trigger
         self.trigger_on = IntVar(value=0)
         self.trigger_button_on = Radiobutton(setup_video_frame, text=" Trigger On", selectcolor='green', indicatoron=0,
                                              variable=self.trigger_on, value=1)
         self.trigger_button_on.\
-            grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+            grid(sticky="nsew", row=0, column=1, padx=2, pady=3)
         self.trigger_button_off = Radiobutton(setup_video_frame, text="Trigger Off", selectcolor='red', indicatoron=0,
                                               variable=self.trigger_on, value=0)
         self.trigger_button_off.\
-            grid(sticky="nsew", row=1, column=1, padx=5, pady=3)
+            grid(sticky="nsew", row=1, column=1, padx=2, pady=3)
         
         self.release_trigger_button = Button(setup_video_frame, text="Release Trigger", command=self.release_trigger)
         self.release_trigger_button.\
-            grid(sticky="nsew", row=2, column=1, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=2, column=1, columnspan=1, padx=2, pady=3)
         Hovertip(self.release_trigger_button, "Release trigger to if stuck in trigger mode")
         
         setup_video_frame.grid(row=cur_row, column=1, padx=2, pady=3, sticky="nsew")
@@ -2109,34 +2114,34 @@ class CamGUI(object):
         self.toggle_video_recording_status = IntVar(value=0)
         self.toggle_video_recording_button = Button(record_video_frame, text="Capture Disabled",
                                                     background="red", state="disabled", width=14, command=self.toggle_video_recording)
-        self.toggle_video_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
+        self.toggle_video_recording_button.grid(sticky="nsew", row=0, column=0, padx=2, pady=3)
         Hovertip(self.toggle_video_recording_button, "Start/Stop recording video")
         
         # set recording properties
         self.force_frame_sync = IntVar(value=0)
         self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_frame_sync,
-                                                   onvalue=1, offvalue=0, width=13)
-        self.force_frame_sync_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
+                                                   onvalue=1, offvalue=0, width=10)
+        self.force_frame_sync_button.grid(sticky="nsew", row=1, column=0, padx=2, pady=3)
         Hovertip(self.force_frame_sync_button, "Force frame sync for camera captured on threads")
 
         self.toggle_continuous_mode = IntVar(value=1)
         self.toggle_continuous_mode_button = Checkbutton(record_video_frame, text="Continuous Mode", variable=self.toggle_continuous_mode,
-                                                         onvalue=1, offvalue=0, width=13)
-        self.toggle_continuous_mode_button.grid(sticky="nsew", row=2, column=0, padx=5, pady=3)
+                                                         onvalue=1, offvalue=0, width=10)
+        self.toggle_continuous_mode_button.grid(sticky="nsew", row=2, column=0, padx=2, pady=3)
         Hovertip(self.toggle_continuous_mode_button, "Toggle continuous mode during video recording")
         
         # save videos
         self.release_vid0 = Button(record_video_frame, text="Save Video",
-                                   command=lambda: save_vid(self, compress=False), width=14).\
-            grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+                                   command=lambda: save_vid(self, compress=False), width=10).\
+            grid(sticky="nsew", row=0, column=2, padx=2, pady=3)
 
         self.release_vid2 = Button(record_video_frame, text="Delete Video",
-                                   command=lambda: save_vid(self, delete=True), width=14)
-        self.release_vid2.grid(sticky="nsew", row=1, column=2, padx=5, pady=3)
+                                   command=lambda: save_vid(self, delete=True), width=10)
+        self.release_vid2.grid(sticky="nsew", row=1, column=2, padx=2, pady=3)
         Hovertip(self.release_vid2, "Delete video if not needed")
     
         self.display_stats_button = Button(record_video_frame, text="Display stats", command=lambda: display_recorded_stats(self), width=10)
-        self.display_stats_button.grid(sticky="nsew", row=2, column=2, columnspan=1, padx=5, pady=3)
+        self.display_stats_button.grid(sticky="nsew", row=2, column=2, columnspan=1, padx=2, pady=3)
         Hovertip(self.display_stats_button, "Display stats of recorded videos")
 
         record_video_frame.grid(row=cur_row, column=2, padx=2, pady=3, sticky="nsew")
@@ -2152,30 +2157,30 @@ class CamGUI(object):
         cur_row += 1
 
         experimental_functions_frame = Frame(self.window)
-        self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=14, command=self.setup_trigger_recording)
-        self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=5, pady=3)
+        self.setup_trigger_recording_button = Button(experimental_functions_frame, text="Setup Videos", width=10, command=self.setup_trigger_recording)
+        self.setup_trigger_recording_button.grid(sticky="nsew", row=0, column=0, padx=2, pady=3)
         Hovertip(self.setup_trigger_recording_button, "Setup the video recording using trigger")
         
-        self.setup_trigger_synapse_recording_button = Button(experimental_functions_frame, text="Setup Synapse", width=14, command=self.setup_trigger_synapse_recording)
-        self.setup_trigger_synapse_recording_button.grid(sticky="nsew", row=1, column=0, padx=5, pady=3)
+        self.setup_trigger_synapse_recording_button = Button(experimental_functions_frame, text="Setup Synapse", width=10, command=self.setup_trigger_synapse_recording)
+        self.setup_trigger_synapse_recording_button.grid(sticky="nsew", row=1, column=0, padx=2, pady=3)
         Hovertip(self.setup_trigger_synapse_recording_button, "Setup the video recording sync with Synapse and using trigger")
 
         self.toggle_trigger_recording_status = IntVar(value=0)
         self.toggle_trigger_recording_button = Button(experimental_functions_frame, text="Capture Disabled",
                                                       background="red", state="normal", width=14, command=self.toggle_trigger_recording)
-        self.toggle_trigger_recording_button.grid(sticky="nsew", row=0, column=1, padx=5, pady=3)
+        self.toggle_trigger_recording_button.grid(sticky="nsew", row=0, column=1, padx=2, pady=3)
         Hovertip(self.toggle_trigger_recording_button, "Start/Stop listening to trigger to capture frame")
 
-        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Videos", state="normal", width=14, command=self.save_trigger_recording)
-        self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=5, pady=3)
+        self.save_trigger_recording_button = Button(experimental_functions_frame, text="Save Videos", state="normal", width=10, command=self.save_trigger_recording)
+        self.save_trigger_recording_button.grid(sticky="nsew", row=0, column=2, padx=2, pady=3)
         Hovertip(self.save_trigger_recording_button, "Save the trigger recording to file")
 
-        self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=14, command=lambda: self.save_trigger_recording(delete=True))
-        self.delete_trigger_recording_button.grid(sticky="nsew", row=0, column=3, padx=5, pady=3)
+        self.delete_trigger_recording_button = Button(experimental_functions_frame, text="Delete Videos", state="normal", width=10, command=lambda: self.save_trigger_recording(delete=True))
+        self.delete_trigger_recording_button.grid(sticky="nsew", row=0, column=3, padx=2, pady=3)
         Hovertip(self.delete_trigger_recording_button, "Delete the trigger recording")
 
-        self.display_trigger_recording_stats = Button(experimental_functions_frame, text="Display stats", state="normal", width=14, command=self.display_recorded_stats)
-        self.display_trigger_recording_stats.grid(sticky="nsew", row=0, column=4, padx=5, pady=3)
+        self.display_trigger_recording_stats = Button(experimental_functions_frame, text="Display stats", state="normal", width=10, command=self.display_recorded_stats)
+        self.display_trigger_recording_stats.grid(sticky="nsew", row=0, column=4, padx=2, pady=3)
         Hovertip(self.display_trigger_recording_stats, "Display stats of recorded videos")
 
         experimental_functions_frame.grid(row=cur_row, column=0, columnspan=3, padx=2, pady=3, sticky="nw")
@@ -2214,41 +2219,45 @@ class CamGUI(object):
         calibration_duration_frame = Frame(calibration_frame)
         Label(calibration_duration_frame, text="Capture Duration(s): ").\
             grid(sticky="nsew", row=0, column=0, columnspan=1, padx=0, pady=0)
-        self.calibration_duration_entry = Entry(calibration_duration_frame, width=3)
+        self.calibration_duration_entry = Entry(calibration_duration_frame, width=2)
         self.calibration_duration_entry.insert(0, "30")
         self.calibration_duration_entry.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
         calibration_duration_frame.grid(row=0, column=0, padx=0, pady=3, sticky="nsew")
         
         self.setup_calibration_button = Button(calibration_frame, text="Setup Calibration", command=self.setup_calibration, width=3)
         self.setup_calibration_button.\
-            grid(sticky="nsew", row=1, column=0, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=1, column=0, columnspan=1, padx=2, pady=3)
         Hovertip(self.setup_calibration_button, "Press this button to setup calibration. ")
 
         self.toggle_calibration_capture_button = Button(calibration_frame, text="Capture Off", command=self.toggle_calibration_capture,
                                                             background="red", state="disabled", width=10)
         self.toggle_calibration_capture_button.\
-            grid(sticky="nsew", row=0, column=1, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=0, column=1, columnspan=1, padx=2, pady=3)
         Hovertip(self.toggle_calibration_capture_button, "Press this button to start capturing frames for calibration. ")
         
         self.snap_calibration_button = Button(calibration_frame, text="Snap Frame", command=self.snap_calibration_frame, state="disabled", width=10)
         self.snap_calibration_button.\
-            grid(sticky="nsew", row=1, column=1, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=1, column=1, columnspan=1, padx=2, pady=3)
         Hovertip(self.snap_calibration_button, "Press this button to snap a frame for calibration. ")
         
-        self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled", width=15)
-        self.update_calibration_button.\
-            grid(sticky="nsew", row=1, column=2, columnspan=1, padx=5, pady=3)
-        Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
+        # self.update_calibration_button = Button(calibration_frame, text="Update Calibration", command=self.update_calibration, state="disabled", width=10)
+        # self.update_calibration_button.\
+        #     grid(sticky="nsew", row=1, column=2, columnspan=1, padx=2, pady=3)
+        # Hovertip(self.update_calibration_button, "Press this button calibrate using the frames in the buffer. ")
         
-        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="normal", width=15)
+        self.test_calibration_live_button = Button(calibration_frame, text="Try Calibration", command=self.toggle_test_calibration_live, state="normal", width=10)
+        self.test_calibration_live_button.\
+            grid(sticky="nsew", row=1, column=2, columnspan=1, padx=2, pady=3)
+        
+        self.recalibrate_button = Button(calibration_frame, text="Full Calibration", command=self.recalibrate, state="normal", width=10)
         self.recalibrate_button.\
-            grid(sticky="nsew", row=0, column=2, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=0, column=2, columnspan=1, padx=2, pady=3)
         Hovertip(self.recalibrate_button, "Press this button to calibrate using all the frames. ")
         
         self.init_matrix_check = IntVar(value=0)
         self.init_matrix_checkbutton = Checkbutton(calibration_frame, text="Re-Init Matrix", variable=self.init_matrix_check,
                                                 onvalue=1, offvalue=0, width=11)
-        self.init_matrix_checkbutton.grid(sticky="nw", row=0, column=3, padx=5, pady=3)
+        self.init_matrix_checkbutton.grid(sticky="nw", row=0, column=3, padx=2, pady=3)
         Hovertip(self.init_matrix_checkbutton, "Check this button to force re-initialize the calibration matrix. ")
         
         added_board_frame = Frame(calibration_frame)
@@ -2257,24 +2266,19 @@ class CamGUI(object):
         self.added_board_value = StringVar(value="0")
         self.added_board_label = Label(added_board_frame, width=5, textvariable=self.added_board_value)
         self.added_board_label.grid(sticky="nsew", row=0, column=1, columnspan=1, padx=0, pady=0)
-        added_board_frame.grid(row=1, column=3, padx=0, pady=3, sticky="nsew")
+        added_board_frame.grid(row=1, column=4, padx=0, pady=3, sticky="nsew")
         
         self.plot_calibration_error_button = Button(calibration_frame, text="Plot Calibration Error", command=self.plot_calibration_error)
         self.plot_calibration_error_button.\
-            grid(sticky="nsew", row=0, column=4, columnspan=1, padx=5, pady=3)
+            grid(sticky="nsew", row=0, column=4, columnspan=1, padx=2, pady=3)
         Hovertip(self.plot_calibration_error_button, "Press this button to plot the calibration error. ")
         
-        test_calibration_frame = Frame(calibration_frame)
-        self.test_calibration_live_button = Button(test_calibration_frame, text="Try Calibration", command=self.toggle_test_calibration_live, state="normal", width=12)
-        self.test_calibration_live_button.\
-            grid(sticky="nw", row=0, column=0, columnspan=1, padx=0, pady=0)
-        
         self.reprojection_check = IntVar(value=0)
-        self.reprojection_checkbutton = Checkbutton(test_calibration_frame, text="Reproject", variable=self.reprojection_check,
-                                                onvalue=1, offvalue=0, width=8)
-        self.reprojection_checkbutton.grid(sticky="nw", row=0, column=1, padx=0, pady=0)
+        self.reprojection_checkbutton = Checkbutton(calibration_frame, text="Reproject", variable=self.reprojection_check,
+                                                onvalue=1, offvalue=0, width=0)
+        self.reprojection_checkbutton.grid(sticky="nw", row=1, column=3, padx=2, pady=3)
         
-        test_calibration_frame.grid(row=1, column=4, padx=5, pady=3, sticky="nsew")
+        # test_calibration_frame.grid(row=1, column=4, padx=5, pady=3, sticky="nsew")
         
         calibration_frame.grid(row=cur_row, column=0, columnspan=2, padx=2, pady=3, sticky="nsew")
         calibration_frame.pack_propagate(False)
