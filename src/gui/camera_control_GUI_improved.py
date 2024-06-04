@@ -1842,10 +1842,10 @@ class CamGUI(object):
             # Add exposure and gain current settings
             current_capture_settings_frame = Frame(self.window)
             self.exposure_current_label.append(Label(current_capture_settings_frame, text=f"Current exposure: {self.exposure[i].get()} (-{str(round(math.log2(1/float((self.exposure[i].get())))))}) s", width=22, justify="left", anchor="w"))
-            self.exposure_current_label[i].grid(sticky="nw", row=0, column=0, columnspan=2, padx=4, pady=3)
+            self.exposure_current_label[i].grid(sticky="nw", row=0, column=0, columnspan=2, padx=4, pady=0)
             
             self.gain_current_label.append(Label(current_capture_settings_frame, text=f"Current gain: {self.gain[i].get()} db", width=15, justify="left", anchor="w"))
-            self.gain_current_label[i].grid(sticky="nw", row=1, column=0, padx=4, pady=3)
+            self.gain_current_label[i].grid(sticky="nw", row=1, column=0, padx=4, pady=0)
             
             current_capture_settings_frame.grid(row=cur_row-1, column=1, padx=1, pady=1, sticky="w")
             current_capture_settings_frame.pack_propagate(False)
