@@ -2120,23 +2120,23 @@ class CamGUI(object):
         # set recording properties
         self.force_frame_sync = IntVar(value=0)
         self.force_frame_sync_button = Checkbutton(record_video_frame, text="Force Frame Sync", variable=self.force_frame_sync,
-                                                   onvalue=1, offvalue=0, width=10)
+                                                   onvalue=1, offvalue=0, width=14)
         self.force_frame_sync_button.grid(sticky="nsew", row=1, column=0, padx=4, pady=3)
         Hovertip(self.force_frame_sync_button, "Force frame sync for camera captured on threads")
 
         self.toggle_continuous_mode = IntVar(value=1)
         self.toggle_continuous_mode_button = Checkbutton(record_video_frame, text="Continuous Mode", variable=self.toggle_continuous_mode,
-                                                         onvalue=1, offvalue=0, width=10)
+                                                         onvalue=1, offvalue=0, width=14)
         self.toggle_continuous_mode_button.grid(sticky="nsew", row=2, column=0, padx=4, pady=3)
         Hovertip(self.toggle_continuous_mode_button, "Toggle continuous mode during video recording")
         
         # save videos
         self.release_vid0 = Button(record_video_frame, text="Save Video",
-                                   command=lambda: save_vid(self, compress=False), width=10).\
+                                   command=lambda: save_vid(self, compress=False), width=14).\
             grid(sticky="nsew", row=0, column=2, padx=4, pady=3)
 
         self.release_vid2 = Button(record_video_frame, text="Delete Video",
-                                   command=lambda: save_vid(self, delete=True), width=10)
+                                   command=lambda: save_vid(self, delete=True), width=14)
         self.release_vid2.grid(sticky="nsew", row=1, column=2, padx=4, pady=3)
         Hovertip(self.release_vid2, "Delete video if not needed")
     
