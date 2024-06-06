@@ -125,6 +125,7 @@ class CamGUI(object):
         self.test_calibration_live_toggle_status = []
         self.calibration_toggle_status = False
         self.calibrating_thread = None
+        self.rows_fname = None  # file name for the calibration detections
         # Initialize GUI
         self.running_config = {'debug_mode': debug_mode, 'init_cam_bool': init_cam_bool}
         if self.running_config['init_cam_bool']:
@@ -1021,8 +1022,8 @@ class CamGUI(object):
             None
         """
         if self.calibration_toggle_status is False:
-            self.update_calibration_status = True
             self.recalibrate_status = False
+            self.update_calibration_status = True
             self.calibration_toggle_status = True
            
             if self.calibrating_thread is not None and self.calibrating_thread.is_alive():
@@ -1050,9 +1051,16 @@ class CamGUI(object):
                 self.calibration_process_stats.set('Calibrating...')
                 print(f'Current error: {self.calibration_error}')
                 if self.recalibrate_status:
-                    with open(self.rows_fname, 'rb') as f:
-                        all_rows = pickle.load(f)
-                    print('Loaded rows from detections.pickle with size: ', len(all_rows))
+                    if self.rows_fname is not None and os.path.exists(self.rows_fname):
+                        with open(self.rows_fname, 'rb') as f:
+                            all_rows = pickle.load(f)
+                        print('Using current pickle to load rows from detections.pickle with size: ', len(all_rows))
+                    elif self.rows_fname is None:
+                        self.rows_fname = os.path.join(self.dir_output.get(), 'detections.pickle')
+                        if os.path.exists(self.rows_fname):
+                            with open(self.rows_fname, 'rb') as f:
+                                all_rows = pickle.load(f)
+                            print('Attempting to calibrate. Found detection file. Loaded rows from detections.pickle with size: ', len(all_rows))
                 
                 if self.update_calibration_status:
                     all_rows = copy.deepcopy(self.current_all_rows)
