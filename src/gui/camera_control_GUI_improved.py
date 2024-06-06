@@ -1592,7 +1592,7 @@ class CamGUI(object):
                     fps = int(self.fps.get())
                     check_frame_text = check_frame(cam0_times, cam1_times, fps, names=[self.cam_name[0], self.cam_name[1]])
                     for texty in check_frame_text:
-                    self.save_msg += texty + '\n'
+                        self.save_msg += texty + '\n'
                 else:
                     fps = int(self.fps.get())
                     for i in range(len(self.vid_out) - 1):
