@@ -20,13 +20,13 @@ board_marker_bits = 4
 board_marker_dict_number = 50
 
 # length of marker side
-board_marker_length = 18.75 # mm
+board_marker_length = 5.95 # mm
 
 # If aruco, length of marker separation
 # board_marker_separation_length = 1 # mm
 
 # If charuco or checkerboard, square side length
-board_square_side_length = 25 # mm
+board_square_side_length = 7.81 # mm
 
 animal_calibration = false
 
