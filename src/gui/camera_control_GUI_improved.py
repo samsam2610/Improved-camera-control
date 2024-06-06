@@ -608,94 +608,94 @@ class CamGUI(object):
         """
         self.calibration_process_stats.set('Initializing calibration process...')
         from src.gui.utils import load_config, get_calibration_board
-        if self.running_config['debug_mode']:
-            config_anipose = self.load_calibration_settings()
+        # if self.running_config['debug_mode']:
+        config_anipose = self.load_calibration_settings()
+        
+        self.calibration_process_stats.set('Initializing camera calibration objects ...')
+        from src.aniposelib.cameras import CameraGroup
+        import re
+        
+        # Get cam names from the config file
+        cam_regex = config_anipose['triangulation']['cam_regex']
+        cam_names = []
+        for name in self.cam_names:
+            match = re.match(cam_regex, name)
+            if match:
+                cam_names.append(match.groups()[0])
+        
+        self.cgroup = CameraGroup.from_names(cam_names)
+        self.calibration_process_stats.set('Initialized camera object.')
+        self.frame_count = []
+        self.all_rows = []
+
+        self.calibration_process_stats.set('Cameras found. Recording the frame sizes')
+        self.set_calibration_buttons_group(state='normal')
+        
+        self.calibration_capture_toggle_status = False
+        self.calibration_toggle_status = False
+        
+        frame_sizes = []
+        self.frame_times = []
+        self.previous_frame_count = []
+        self.current_frame_count = []
+        self.frame_process_threshold = 2
+        self.queue_frame_threshold = 1000
+        
+        if override:
+            # Check available detection file, if file available will delete it (for now)
+            self.clear_calibration_file(self.rows_fname)
+            self.clear_calibration_file(self.calibration_out)
+            self.rows_fname_available = False
+        else:
+            self.rows_fname_available = os.path.exists(self.rows_fname)
             
-            self.calibration_process_stats.set('Initializing camera calibration objects ...')
-            from src.aniposelib.cameras import CameraGroup
-            import re
-            
-            # Get cam names from the config file
-            cam_regex = config_anipose['triangulation']['cam_regex']
-            cam_names = []
-            for name in self.cam_names:
-                match = re.match(cam_regex, name)
-                if match:
-                    cam_names.append(match.groups()[0])
-            
-            self.cgroup = CameraGroup.from_names(cam_names)
-            self.calibration_process_stats.set('Initialized camera object.')
-            self.frame_count = []
-            self.all_rows = []
+        # Set calibration parameter
+        result = self.set_calibration_duration()
+        if result == 0:
+            return
+        
+        self.error_list = []
+        # Create a shared queue to store frames
+        self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
 
-            self.calibration_process_stats.set('Cameras found. Recording the frame sizes')
-            self.set_calibration_buttons_group(state='normal')
-            
-            self.calibration_capture_toggle_status = False
-            self.calibration_toggle_status = False
-            
-            frame_sizes = []
-            self.frame_times = []
-            self.previous_frame_count = []
-            self.current_frame_count = []
-            self.frame_process_threshold = 2
-            self.queue_frame_threshold = 1000
-            
-            if override:
-                # Check available detection file, if file available will delete it (for now)
-                self.clear_calibration_file(self.rows_fname)
-                self.clear_calibration_file(self.calibration_out)
-                self.rows_fname_available = False
-            else:
-                self.rows_fname_available = os.path.exists(self.rows_fname)
-                
-            # Set calibration parameter
-            result = self.set_calibration_duration()
-            if result == 0:
-                return
-            
-            self.error_list = []
-            # Create a shared queue to store frames
-            self.frame_queue = queue.Queue(maxsize=self.queue_frame_threshold)
+        # Boolean for detections.pickle is updated
+        self.detection_update = False
 
-            # Boolean for detections.pickle is updated
-            self.detection_update = False
+        # create output file names
+        self.vid_file = []
+        self.base_name = []
+        self.cam_name_no_space = []
 
-            # create output file names
-            self.vid_file = []
-            self.base_name = []
-            self.cam_name_no_space = []
+        for i in range(len(self.cam)):
+            # write code to create a list of base names for the videos
+            self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
+            self.base_name.append(self.cam_name_no_space[i] + '_' + 'calibration_' + self.setup_name.get() + '_')
+            self.vid_file.append(os.path.normpath(self.dir_output.get() +
+                                                  '/' +
+                                                  self.base_name[i] +
+                                                  self.attempt.get() +
+                                                  '.avi'))
 
-            for i in range(len(self.cam)):
-                # write code to create a list of base names for the videos
-                self.cam_name_no_space.append(self.cam_name[i].replace(' ', ''))
-                self.base_name.append(self.cam_name_no_space[i] + '_' + 'calibration_' + self.setup_name.get() + '_')
-                self.vid_file.append(os.path.normpath(self.dir_output.get() +
-                                                      '/' +
-                                                      self.base_name[i] +
-                                                      self.attempt.get() +
-                                                      '.avi'))
+            frame_sizes.append(self.cam[i].get_image_dimensions())
+            self.frame_count.append(1)
+            self.all_rows.append([])
+            self.previous_frame_count.append(0)
+            self.current_frame_count.append(0)
+            self.frame_times.append([])
 
-                frame_sizes.append(self.cam[i].get_image_dimensions())
-                self.frame_count.append(1)
-                self.all_rows.append([])
-                self.previous_frame_count.append(0)
-                self.current_frame_count.append(0)
-                self.frame_times.append([])
+        # check if file exists, ask to overwrite or change attempt number if it does
+        create_video_files(self, overwrite=override)
+        create_output_files(self, subject_name='Sam')
 
-            # check if file exists, ask to overwrite or change attempt number if it does
-            create_video_files(self, overwrite=override)
-            create_output_files(self, subject_name='Sam')
+        self.calibration_process_stats.set('Setting the frame sizes...')
+        self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
+        self.calibration_process_stats.set('Prepping done. Ready to capture calibration frames...')
+        self.calibration_status_label['bg'] = 'yellow'
 
-            self.calibration_process_stats.set('Setting the frame sizes...')
-            self.cgroup.set_camera_sizes_images(frame_sizes=frame_sizes)
-            self.calibration_process_stats.set('Prepping done. Ready to capture calibration frames...')
-            self.calibration_status_label['bg'] = 'yellow'
-
-            self.vid_start_time = time.perf_counter()
-           
-            self.recording_threads = []
-            self.calibrating_thread = None
+        self.vid_start_time = time.perf_counter()
+       
+        self.recording_threads = []
+        self.calibrating_thread = None
 
     def toggle_calibration_capture(self, termination=False):
         """
