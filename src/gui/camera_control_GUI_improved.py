@@ -1586,12 +1586,23 @@ class CamGUI(object):
         
         if len(saved_files) > 0:
             if len(frame_times) > 1:
-                cam0_times = np.array(frame_time_list[0])
-                cam1_times = np.array(frame_time_list[1])
-                fps = int(self.fps.get())
-                check_frame_text = check_frame(cam0_times, cam1_times, fps)
-                for texty in check_frame_text:
+                if len(self.vid_out) <= 2:
+                    cam0_times = np.array(frame_time_list[0])
+                    cam1_times = np.array(frame_time_list[1])
+                    fps = int(self.fps.get())
+                    check_frame_text = check_frame(cam0_times, cam1_times, fps, names=[self.cam_name[0], self.cam_name[1]])
+                    for texty in check_frame_text:
                     self.save_msg += texty + '\n'
+                else:
+                    fps = int(self.fps.get())
+                    for i in range(len(self.vid_out) - 1):
+                        for j in range(i + 1, len(self.vid_out)):
+                            cam_i_times = np.array(frame_time_list[i])
+                            cam_j_times = np.array(frame_time_list[j])
+                            check_frame_text = check_frame(cam_i_times, cam_j_times, fps, names=[self.cam_name[i], self.cam_name[j]])
+                            for texty in check_frame_text:
+                                self.save_msg += texty + '\n'
+                                
             self.save_msg += "The following files have been saved:"
             for i in saved_files:
                 self.save_msg += "\n" + i

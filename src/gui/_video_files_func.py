@@ -155,7 +155,7 @@ def display_recorded_stats(self):
     save_window.destroy()
 
 
-def check_frame(timeStampFile1, timeStampFile2, frameRate):
+def check_frame(timeStampFile1, timeStampFile2, frameRate, names=["Cam 1", "Cam 2"]):
     # Timestamps should be in seconds
     return_text = []
     frameRate = float(frameRate)
@@ -217,10 +217,10 @@ def check_frame(timeStampFile1, timeStampFile2, frameRate):
     outliers_jitter2 = np.where(
         np.logical_or(jitter2 < mean_jitter2 - 2 * std_jitter2, jitter2 > mean_jitter2 + 2 * std_jitter2))
     
-    temp_text = "Cam 1: Mean={:.6f}s, Median={:.6f}s, Std={:.6f}s".format(mean_jitter1, median_jitter1, std_jitter1)
+    temp_text = f"{names[0]}: Mean={mean_jitter1:.6f}s, Median={median_jitter1:.6f}s, Std={std_jitter1:.6f}s"
     return_text.append(temp_text)
     
-    temp_text = "Cam 2: Mean={:.6f}s, Median={:.6f}s, Std={:.6f}s".format(mean_jitter2, median_jitter2, std_jitter2)
+    temp_text = f"{names[1]}: Mean={mean_jitter2:.6f}s, Median={median_jitter2:.6f}s, Std={std_jitter2:.6f}s"
     return_text.append(temp_text)
     
     # Calculate differences between cam_time_1 and cam_time_2
